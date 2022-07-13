@@ -7,12 +7,24 @@ variables::variables(int N, int dim) : N{N}, dim{dim}
     mem_ptr = (double*)(calloc(N_max,sizeof(double)));
 
     rho = mem_ptr;
-    u = rho + N;
-    v = u + N;
-    e = v + N;
+    rhou = rho + N;
+    rhov = rhou + N;
+    e = rhov + N;
     p = e + N;
     T = p + N;
     wall_flux = T + N;
+}
+
+variables::variables(int N, int dim, double* U) : variables(N, dim)
+{
+
+    for(uint i = 0; i < N; i++)
+    {
+        rho[i] = U[0];
+        rhou[i] = U[1];
+        rhov[i] = U[2];
+        e[i] = U[3];
+    }
 }
 
 variables::~variables()
