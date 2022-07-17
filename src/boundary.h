@@ -12,6 +12,9 @@ class boundary
 
     mesh const& msh;
 
+    double bc_val[20];
+
+    void apply(variables& var); 
     void apply(variables& var, double* bc_val); 
 
     static void wall(int idx, variables& var, mesh const& msh, double*); //0

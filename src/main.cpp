@@ -3,6 +3,9 @@
 #include "mesh.h"
 #include "data_structures.h"
 #include "boundary.h"
+#include "vtk_export.h"
+#include "solver.h"
+
 
 int main(int argc, char** argv)
 {
@@ -10,7 +13,7 @@ int main(int argc, char** argv)
 
     double U[4] = {0.1,1,2,5.5};
 
-    variables var(msh.N,4,U);
+    variables var(msh.N,msh.N_walls,4,U);
     parameters par;
     boundary bdr(msh);
 
@@ -24,8 +27,16 @@ int main(int argc, char** argv)
     
     for(uint i = 0; i < var.N; i++)
     {
-        std::cout << var.rho[i] << " " << var.rhou[i] << " " << var.rhov[i]
-                  << " " << var.e[i] << "\n";
+        for(uint k = 0; k < var.dim; k++)
+        {
+            std::cout << var.W(i,k) << " ";
+        }
+        std::cout << "\n";
     }
+
+    solve(var,msh,bdr,par,P);
+
+
+    export_vtk(var,msh,"exp.vtk");
 
 }
