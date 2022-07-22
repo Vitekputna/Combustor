@@ -29,7 +29,8 @@ struct variables
 
 struct parameters
 {
-    double gamma, r;
+    double gamma = 1.4;
+    double r = 287;
 };
 
 struct config

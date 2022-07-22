@@ -56,10 +56,10 @@ void boundary::supersonic_outlet(int idx, variables& var, mesh const& msh, doubl
 
 void boundary::subsonic_inlet(int idx, variables& var, mesh const& msh, double* P)
 {
-    std::cout << "sub inlet : " << idx << "\n";
+    //std::cout << "sub inlet : " << idx << "\n";
 }
 
 void boundary::subsonic_outlet(int idx, variables& var, mesh const& msh, double* P)
 {
-    std::cout << "sub outlet : " << idx << "\n";
+    //std::cout << "sub outlet : " << idx << "\n";
 }

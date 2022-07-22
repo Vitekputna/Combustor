@@ -1,10 +1,7 @@
 #include "data_structures.h"
 #include <stdlib.h>
 
-array::array()
-{
-}
-
+array::array(){}
 
 array::array(int N, int k) : k{k}
 {
