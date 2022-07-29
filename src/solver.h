@@ -8,7 +8,7 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
 {
     int n,o;
 
-    for(uint t = 0; t < 20000; t++)
+    for(uint t = 0; t < 100000; t++)
     {
         for(uint w = 0; w < msh.N_walls;w++)
         {
