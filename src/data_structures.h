@@ -13,12 +13,9 @@ struct array
 
 struct variables
 {
-    int N, dim, N_max;
+    int N, N_walls, dim;
 
     double *p, *T;
-
-    //double* mem_ptr;
-    //double* wall_flux_ptr;
 
     array W,wall_flux;
 
@@ -36,4 +33,6 @@ struct parameters
 struct config
 {
     double dt, CFL;
+    unsigned int iter,n_t;
+    
 };

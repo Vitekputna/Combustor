@@ -1,14 +1,14 @@
-#include <iostream>
 #include "data_structures.h"
 #include "boundary.h"
 #include "mesh.h"
 #include "numerical_flux.h"
+#include "time_step.h"
 
 void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cfg,double* bc_val)
 {
     int n,o;
 
-    for(uint t = 0; t < 100000; t++)
+    for(uint t = 0; t < cfg.iter; t++)
     {
         for(uint w = 0; w < msh.N_walls;w++)
         {
@@ -32,5 +32,11 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
         }
 
         bdr.apply(var,bc_val);
+
+        if(!(t % cfg.n_t))
+        {
+            cfg.dt = time_step(var);
+        }
+
     }
 }

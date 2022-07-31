@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <limits>
 
 typedef std::vector<std::vector<double>> vec2d;
 typedef std::vector<std::vector<unsigned int>> vec2ui;
@@ -49,6 +50,7 @@ class mesh
     vec1i ghost_cell_val;
 
     unsigned int N_cells, N_walls, N_ghosts, N;
+    double min_V = std::numeric_limits<double>::max();
     
     mesh(int i);
     mesh(std::string path);

@@ -24,7 +24,7 @@ double& array::operator()(int i, int j)
     return arr[i*k + j];
 }
 
-variables::variables(int N, int N_walls, int dim) : N{N}, dim{dim}
+variables::variables(int N, int N_walls, int dim) : N{N}, dim{dim}, N_walls{N_walls}
 {
     W.allocate(N*dim,dim);
     wall_flux.allocate(N_walls*dim,dim);

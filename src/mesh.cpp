@@ -6,6 +6,7 @@
 #include "math.h"
 #include <threads.h>
 
+
 face::face(vec1d const& a, vec1d const& b)
 {
     double sx,sy;
@@ -70,6 +71,9 @@ mesh::mesh(std::string path)
     N_cells = quads.size();
     construct_ghost_cells();
     N_ghosts = quads.size() - N_cells;
+
+    cells.resize(N_cells+N_ghosts);
+
     construct_cells();
     sort_mesh();
     set_owner_idx();
@@ -346,9 +350,16 @@ void mesh::set_owner_idx()
 
 void mesh::construct_cells()
 {
-    for(auto const& quad : quads)
+    for(uint k = 0; k < quads.size();k++)
     {
-        cells.push_back(cell(quad, nodes));
+        //cells.push_back(cell(quads[k], nodes));
+        cells[k] = cell(quads[k],nodes);
+
+        if(cells[k].V > 0)
+        {
+            min_V = std::min(min_V,cells[k].V);
+        }
+        
     }
 }
 
