@@ -15,8 +15,8 @@ void HLL_flux(int w, int n, int o, variables & var,parameters const& par, face c
 
     //std::cout << "wall: " << w << " o: " << o << " n: " << n << "\n";
 
-    po = pressure(par.gamma,&var.W(o,0));
-    pn = pressure(par.gamma,&var.W(n,0));
+    po = pressure(par,&var.W(o,0));
+    pn = pressure(par,&var.W(n,0));
 
     //std::cout << po << " " << pn << "\n";
 

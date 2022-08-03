@@ -7,12 +7,12 @@
 #include "solver.h"
 #include "initial_cond.h"
 
+#include "thermodynamics.h"
+
 int main(int argc, char** argv)
 {
     mesh msh("mesh/" + std::string(argv[1]));
     //msh.export_mesh();
-
-    std::cout << msh.min_V << "\n";
 
     parameters par;
     boundary bdr(msh);
@@ -23,9 +23,9 @@ int main(int argc, char** argv)
 
     //initial
     double U[4];
-    no_move_flow(U,0.1e5,300,par);
+    no_move_flow(U,1e5,300,par);
     variables var(msh.N,msh.N_walls,4,U);
-    
+
     //boundary
     double P[20];
     supersonic_inlet(P,1e5,300,1.5,0,par);

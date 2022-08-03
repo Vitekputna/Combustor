@@ -9,6 +9,7 @@ struct array
     array(int N,int k);
     ~array();
     double& operator()(int i,int j);
+    double* operator()(int i);
 };
 
 struct variables
@@ -22,6 +23,9 @@ struct variables
     variables(int N, int N_walls, int dim);
     variables(int N, int N_walls, int dim, double* U);
     ~variables();
+
+    void pressure(parameters const& par);
+    void temperature(parameters const& par);
 };
 
 struct parameters
