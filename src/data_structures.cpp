@@ -34,6 +34,9 @@ variables::variables(int N, int N_walls, int dim) : N{N}, dim{dim}, N_walls{N_wa
 {
     W.allocate(N*dim,dim);
     wall_flux.allocate(N_walls*dim,dim);
+
+    p = (double*)(malloc(N*sizeof(double)));
+    T = (double*)(malloc(N*sizeof(double)));
 }
 
 variables::variables(int N, int N_walls, int dim, double* U) : variables(N, N_walls, dim)
@@ -57,6 +60,14 @@ void variables::pressure(parameters const& par)
 {
     for(uint i = 0; i < N; i++)
     {
-        //p[i] = pressure(par,W(i));
+        p[i] = thermo::pressure(par,W(i));
+    }
+}
+
+void variables::temperature(parameters const& par)
+{
+    for(uint i = 0; i < N; i++)
+    {
+        T[i] = thermo::temperature(par,W(i));
     }
 }

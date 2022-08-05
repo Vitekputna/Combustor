@@ -61,13 +61,13 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 	}
 	f << std::endl;
 
-	// f << "SCALARS " << "p" << " float 1" << std::endl;
-	// f << "LOOKUP_TABLE default" << std::endl;
-	// for (unsigned int j = 0; j < MESH.N_cells; j++)
-	// {
-	// 	f << var.p[j] << std::endl;
-	// }
-	// f << std::endl;
+	f << "SCALARS " << "p" << " float 1" << std::endl;
+	f << "LOOKUP_TABLE default" << std::endl;
+	for (unsigned int j = 0; j < MESH.N_cells; j++)
+	{
+		f << var.p[j] << std::endl;
+	}
+	f << std::endl;
 
 	// //f << "SCALARS " << "M" << " float 1" << std::endl;
 	// //f << "LOOKUP_TABLE default" << std::endl;
@@ -76,14 +76,14 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 	// 	//f << var. << std::endl;
 	// //}
 	// //f << std::endl;
-
-	// f << "SCALARS " << "T" << " float 1" << std::endl;
-	// f << "LOOKUP_TABLE default" << std::endl;
-	// for (unsigned int j = 0; j < MESH.N_cells; j++)
-	// {
-	// 	f << var.T[j] << std::endl;
-	// }
-	// f << std::endl;
+ 
+	f << "SCALARS " << "T" << " float 1" << std::endl;
+	f << "LOOKUP_TABLE default" << std::endl;
+	for (unsigned int j = 0; j < MESH.N_cells; j++)
+	{
+		f << var.T[j] << std::endl;
+	}
+	f << std::endl;
 
 	f << "VECTORS " << "velocity" << " float" << std::endl;
 	for (unsigned int j = 0; j < MESH.N_cells; j++)

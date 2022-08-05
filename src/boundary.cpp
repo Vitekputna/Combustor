@@ -1,15 +1,20 @@
 #include <iostream>
+#include <cmath>
+#include "thermodynamics.h"
 #include "boundary.h"
 #include "mesh.h"
 
-boundary::boundary(mesh const& msh) : msh{msh} {}
+boundary::boundary(mesh const& msh, parameters const& par) : msh{msh}, par{par} {}
 
 void boundary::apply(variables& var)
 {
     for(uint i = 0; i < msh.ghost_cell_idx.size(); i++)
     {
-        BC_funcs[msh.ghost_cell_val[i]](msh.ghost_cell_idx[i],var,
-                                        msh,bc_val + msh.ghost_cell_val[i]*4);
+        (this->*BC_funcs[msh.ghost_cell_val[i]])(msh.ghost_cell_idx[i],var,
+                                                 msh,bc_val + msh.ghost_cell_val[i]*4);
+
+        // BC_funcs[msh.ghost_cell_val[i]](msh.ghost_cell_idx[i],var,
+        //                                 msh,bc_val + msh.ghost_cell_val[i]*4);
     }
 }
 
@@ -17,8 +22,8 @@ void boundary::apply(variables& var, double* bc_val)
 {
     for(uint i = 0; i < msh.ghost_cell_idx.size(); i++)
     {
-        BC_funcs[msh.ghost_cell_val[i]](msh.ghost_cell_idx[i],var,
-                                        msh,bc_val + msh.ghost_cell_val[i]*4);
+        (this->*BC_funcs[msh.ghost_cell_val[i]])(msh.ghost_cell_idx[i],var,
+                                                 msh,bc_val + msh.ghost_cell_val[i]*4);
     }
 }
 
@@ -54,12 +59,52 @@ void boundary::supersonic_outlet(int idx, variables& var, mesh const& msh, doubl
     }
 }
 
+inline double boundary::M_iter_func(double M, double e, double* P)
+{
+    return (P[0]/(par.gamma-1) + par.gamma*P[0]/2*M*M) * pow(1+(par.gamma-1)/2*M*M,par.gamma/(1-par.gamma))-e;
+}
+
 void boundary::subsonic_inlet(int idx, variables& var, mesh const& msh, double* P)
 {
-    //std::cout << "sub inlet : " << idx << "\n";
+
+    std::cout << "called\n";
+
+    int cell_idx = msh.walls[msh.cells[idx].cell_walls[0]].owner_cell_index;
+
+    double e = var.W(cell_idx,3);
+
+    //compute inlet mach number
+    double M1 = 0;
+    double dM = 0.01;
+    double M2 = M1 + dM;
+
+    double Min;
+
+    while (M2 <= 1+dM)
+    {
+        if(M_iter_func(M1,e,P)*M_iter_func(M2,e,P) <= 0)
+        {
+            std::cout << M1 << " " << M2 << "\n";
+
+            Min = 0.5*(M1+M2);
+
+            break;
+        }
+
+        M1 += dM;
+        M2 += dM;
+    }
+
+    var.W(idx,0) = thermo::isoentropic_density(par,par.r*P[1]/P[0],Min); //density
+
+    double c = sqrt(par.gamma*par.r*thermo::isoentropic_temperature(par,P[1],Min));
+
+    var.W(idx,1) = var.W(idx,0)*c*Min*cos(P[2]);
+    var.W(idx,2) = var.W(idx,0)*c*Min*sin(P[2]);
+    var.W(idx,3) = e;
 }
 
 void boundary::subsonic_outlet(int idx, variables& var, mesh const& msh, double* P)
 {
-    //std::cout << "sub outlet : " << idx << "\n";
+    
 }

@@ -35,8 +35,11 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
 
         if(!(t % cfg.n_t))
         {
-            cfg.dt = time_step(var);
+            cfg.dt = cfg.CFL*time_step(msh,par,var);
         }
 
     }
+
+    var.pressure(par);
+    var.temperature(par);
 }

@@ -12,6 +12,21 @@ struct array
     double* operator()(int i);
 };
 
+struct parameters
+{
+    double gamma = 1.4;
+    double r = 287;
+};
+
+struct config
+{
+    double dt = 1e-50;
+
+    double CFL = 1;
+    unsigned int iter,n_t;
+    
+};
+
 struct variables
 {
     int N, N_walls, dim;
@@ -26,17 +41,4 @@ struct variables
 
     void pressure(parameters const& par);
     void temperature(parameters const& par);
-};
-
-struct parameters
-{
-    double gamma = 1.4;
-    double r = 287;
-};
-
-struct config
-{
-    double dt, CFL;
-    unsigned int iter,n_t;
-    
 };
