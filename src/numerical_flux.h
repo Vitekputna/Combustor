@@ -52,5 +52,5 @@ void HLL_flux(int w, int n, int o, variables & var,parameters const& par, face c
         {
             var.wall_flux(w,k) = phi[k]*f.S;
         }
-    }
+    } 
 }

@@ -15,6 +15,12 @@ namespace thermo
         return p/U[0]/par.r;
     }
 
+    inline double mach_number(parameters const& par, double* U)
+    {
+        double T = temperature(par,U);
+        return sqrt((U[1]*U[1] + U[2]*U[2])/U[0]/U[0])/sqrt(par.gamma*par.r*T);
+    }
+
     inline double isoentropic_pressure(parameters const& par, double p_0, double M)
     {
         return pow(1+(par.gamma-1)/2*M*M,par.gamma/(1-par.gamma))*p_0;
@@ -29,5 +35,7 @@ namespace thermo
     {
         return pow(1+(par.gamma-1)/2*M*M,-1)*T_0;
     }
+
+    
 }
 

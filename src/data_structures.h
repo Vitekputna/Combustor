@@ -21,17 +21,21 @@ struct parameters
 struct config
 {
     double dt = 1e-50;
-
     double CFL = 1;
-    unsigned int iter,n_t;
-    
+
+    unsigned int iter,n_t,n_r;
+
+    int res_idx = 3;
+    double max_res = 1e-3; 
+    int min_iter = 1e3;
+    int max_iter = 1e9;
 };
 
 struct variables
 {
     int N, N_walls, dim;
 
-    double *p, *T;
+    double *p, *T, *M;
 
     array W,wall_flux;
 
@@ -41,4 +45,5 @@ struct variables
 
     void pressure(parameters const& par);
     void temperature(parameters const& par);
+    void mach_number(parameters const& par);
 };

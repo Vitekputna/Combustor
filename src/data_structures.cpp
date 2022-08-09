@@ -1,6 +1,9 @@
 #include "data_structures.h"
 #include "thermodynamics.h"
+#include "mesh.h"
 #include <stdlib.h>
+#include <limits>
+#include <algorithm>
 
 array::array(){}
 
@@ -37,6 +40,7 @@ variables::variables(int N, int N_walls, int dim) : N{N}, dim{dim}, N_walls{N_wa
 
     p = (double*)(malloc(N*sizeof(double)));
     T = (double*)(malloc(N*sizeof(double)));
+    M = (double*)(malloc(N*sizeof(double)));
 }
 
 variables::variables(int N, int N_walls, int dim, double* U) : variables(N, N_walls, dim)
@@ -54,6 +58,7 @@ variables::~variables()
 {
     free(p);
     free(T);
+    free(M);
 }
 
 void variables::pressure(parameters const& par)
@@ -69,5 +74,13 @@ void variables::temperature(parameters const& par)
     for(uint i = 0; i < N; i++)
     {
         T[i] = thermo::temperature(par,W(i));
+    }
+}
+
+void variables::mach_number(parameters const& par)
+{
+    for(uint i = 0; i < N; i++)
+    {
+        M[i] = thermo::mach_number(par,W(i));
     }
 }

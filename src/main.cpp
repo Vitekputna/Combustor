@@ -15,20 +15,22 @@ int main(int argc, char** argv)
     parameters par;
     boundary bdr(msh,par);
     config cfg;
-    cfg.iter = 1e5;
+
     cfg.n_t = 100;
-    cfg.CFL = 1;
+    cfg.n_r = 100;
+    cfg.max_res = 0.5;
 
     //initial
     double U[4];
-    //no_move_flow(U,1e3,300,par);
-    move_flow(U,1e5,300,0.43,0,par);
+    no_move_flow(U,1e5,300,par);
+    //move_flow(U,1e5,300,0.43,0,par);
     variables var(msh.N,msh.N_walls,4,U);
 
     //boundary
     double P[20];
-    supersonic_inlet(P,1e5,300,0.22,0,par);
-    P[12] = 1e5;
+    //supersonic_inlet(P,1e5,300,0.5,0,par);
+    subsonic_inlet(P,1e5,300,0,par);
+    subsonic_outlet(P,7.5e4,par);
     bdr.apply(var,P);
 
     solve(var,msh,bdr,par,cfg,P);

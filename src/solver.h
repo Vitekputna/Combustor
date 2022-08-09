@@ -4,11 +4,21 @@
 #include "numerical_flux.h"
 #include "time_step.h"
 
+#include <limits>
+#include <algorithm>
+
+
+
 void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cfg,double* bc_val)
 {
     int n,o;
+    int f;
+    int t = 1;
+    double delta;
+    double res;
 
-    for(uint t = 0; t < cfg.iter; t++)
+    //for(uint t = 1; t < cfg.iter; t++) 
+    do
     {
         for(uint w = 0; w < msh.N_walls;w++)
         {
@@ -22,7 +32,7 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
         {
             for(uint k = 0; k < var.dim; k++)
             {
-                int f = 0;
+                f = 0;
                 for(auto const& wall : msh.cells[c].cell_walls)
                 {
                     var.W(c,k) -= cfg.dt/msh.cells[c].V*var.wall_flux(wall,k)*msh.cells[c].owner_idx[f];
@@ -38,8 +48,29 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
             cfg.dt = cfg.CFL*time_step(msh,par,var);
         }
 
-    }
+        if(!(t % cfg.n_r))
+        {
+            res = 0;
+            for(uint c = 0; c < msh.N_cells; c++)
+            {
+                f = 0,delta = 0;
+                for(auto const& wall : msh.cells[c].cell_walls)
+                {
+                    delta += var.wall_flux(wall,cfg.res_idx)*msh.cells[c].owner_idx[f];
+                    f++;
+                }
+                
+                res = std::max(res,abs(delta));
+            }
 
-    var.pressure(par);
+            std::cout << t << "\t" << res << "\n";
+        }
+
+        t++;
+        
+    } while(res > cfg.max_res || t < cfg.min_iter);
+
+    var.pressure(par); 
     var.temperature(par);
+    var.mach_number(par);
 }

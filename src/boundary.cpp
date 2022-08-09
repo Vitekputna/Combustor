@@ -66,16 +66,13 @@ inline double boundary::M_iter_func(double M, double e, double* P)
 
 void boundary::subsonic_inlet(int idx, variables& var, mesh const& msh, double* P)
 {
-
-    std::cout << "called\n";
-
     int cell_idx = msh.walls[msh.cells[idx].cell_walls[0]].owner_cell_index;
 
     double e = var.W(cell_idx,3);
 
     //compute inlet mach number
     double M1 = 0;
-    double dM = 0.01;
+    double dM = 0.0005;
     double M2 = M1 + dM;
 
     double Min;
@@ -84,10 +81,7 @@ void boundary::subsonic_inlet(int idx, variables& var, mesh const& msh, double* 
     {
         if(M_iter_func(M1,e,P)*M_iter_func(M2,e,P) <= 0)
         {
-            std::cout << M1 << " " << M2 << "\n";
-
             Min = 0.5*(M1+M2);
-
             break;
         }
 
@@ -106,5 +100,12 @@ void boundary::subsonic_inlet(int idx, variables& var, mesh const& msh, double* 
 
 void boundary::subsonic_outlet(int idx, variables& var, mesh const& msh, double* P)
 {
+    int cell_idx = msh.walls[msh.cells[idx].cell_walls[0]].owner_cell_index;
+
+    var.W(idx,0) = var.W(cell_idx,0);
+    var.W(idx,1) = var.W(cell_idx,1);
+    var.W(idx,2) = var.W(cell_idx,2);
+
+    var.W(idx,3) = P[0]/(par.gamma-1) + 0.5*(var.W(idx,1)+var.W(idx,2))/var.W(idx,0);
     
 }
