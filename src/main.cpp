@@ -17,8 +17,8 @@ int main(int argc, char** argv)
     config cfg;
 
     cfg.n_t = 100;
-    cfg.n_r = 100;
-    cfg.max_res = 0.5;
+    cfg.n_r = 1000;
+    cfg.max_res = 1;
 
     //initial
     double U[4];
@@ -35,4 +35,4 @@ int main(int argc, char** argv)
 
     solve(var,msh,bdr,par,cfg,P);
     export_vtk(var,msh,"exp.vtk");
-}
+}   

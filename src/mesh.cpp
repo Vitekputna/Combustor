@@ -4,8 +4,8 @@
 #include <string>
 #include "mesh.h"
 #include "math.h"
-#include <threads.h>
 
+typedef unsigned int uint;
 
 face::face(vec1d const& a, vec1d const& b)
 {
@@ -88,7 +88,7 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
 {
     std::ifstream file(path);
     std::cout << "Warning: This reader takes in gmsh format, counting from 1 not zero!!!\n";
-	
+
 	if(file.fail())
 	{
 		std::cout << "//////////////////////////////////// \n";

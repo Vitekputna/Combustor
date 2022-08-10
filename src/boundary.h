@@ -7,8 +7,7 @@ class boundary
 {
     typedef void (boundary::*func)(int,variables&,mesh const&,double*);
 
-    private:
-    inline double M_iter_func(double M, double e, double* P);
+    
 
     public:
     boundary(mesh const& msh,parameters const& par);
@@ -32,4 +31,7 @@ class boundary
     std::vector<func> BC_funcs = {&boundary::wall,&boundary::supersonic_inlet
                                  ,&boundary::supersonic_outlet,&boundary::subsonic_inlet
                                  ,&boundary::subsonic_outlet};
+
+    friend inline double M_iter_func(boundary const& B, double M, double* P);                                 
 };
+

@@ -7,7 +7,7 @@
 #include <limits>
 #include <algorithm>
 
-
+typedef unsigned int uint;
 
 void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cfg,double* bc_val)
 {
@@ -15,7 +15,7 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
     int f;
     int t = 1;
     double delta;
-    double res;
+    double res = cfg.max_res*2;
 
     //for(uint t = 1; t < cfg.iter; t++) 
     do
@@ -63,6 +63,8 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
                 res = std::max(res,abs(delta));
             }
 
+            
+            //std::cout << t << "\t" << res << "\t\r" << std::flush;
             std::cout << t << "\t" << res << "\n";
         }
 

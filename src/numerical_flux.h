@@ -3,6 +3,8 @@
 #include "thermodynamics.h"
 #include "math.h"
 
+typedef unsigned int uint;
+
 void HLL_flux(int w, int n, int o, variables & var,parameters const& par, face const& f)
 {
     double So,Sn;

@@ -47,7 +47,7 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 	f << "CELL_DATA " << MESH.N_cells << std::endl;
 	f << "SCALARS " << "rho" << " float 1" << std::endl;
 	f << "LOOKUP_TABLE default" << std::endl;
-	for (uint j = 0; j < MESH.N_cells; j++)
+	for (unsigned int j = 0; j < MESH.N_cells; j++)
 	{
 		f << var.W(j,0) << std::endl;
 	}

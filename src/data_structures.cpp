@@ -5,6 +5,8 @@
 #include <limits>
 #include <algorithm>
 
+typedef unsigned int uint;
+
 array::array(){}
 
 array::array(int N, int k) : k{k}
