@@ -79,6 +79,8 @@ mesh::mesh(std::string path)
     set_owner_idx();
     N_walls = walls.size();
     N = quads.size();
+
+    group_inlets();
     
     std::cout << "Mesh loaded, number of walls: " << N_walls << " , number of cells: " 
               << N_cells << " number of ghosts: " << N_ghosts << "\n\n";
@@ -361,6 +363,11 @@ void mesh::construct_cells()
         }
         
     }
+}
+
+void mesh::group_inlets();
+{
+    
 }
 
 void mesh::export_mesh()

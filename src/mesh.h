@@ -63,6 +63,8 @@ class mesh
     void construct_ghost_cells();
     void construct_cells();
     void set_owner_idx();
+
+    void group_inlets();
  
     std::vector<double> extract(std::string& text);
 

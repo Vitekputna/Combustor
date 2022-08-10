@@ -7,7 +7,7 @@
 
 typedef unsigned int uint;
 
-boundary::boundary(mesh const& msh, parameters const& par) : msh{msh}, par{par} {}
+boundary::boundary(mesh const& msh, parameters const& par, config& cfg) : msh{msh}, par{par}, cfg{cfg} {}
 
 void boundary::apply(variables& var)
 {
@@ -15,9 +15,6 @@ void boundary::apply(variables& var)
     {
         (this->*BC_funcs[msh.ghost_cell_val[i]])(msh.ghost_cell_idx[i],var,
                                                  msh,bc_val + msh.ghost_cell_val[i]*4);
-
-        // BC_funcs[msh.ghost_cell_val[i]](msh.ghost_cell_idx[i],var,
-        //                                 msh,bc_val + msh.ghost_cell_val[i]*4);
     }
 }
 
@@ -62,11 +59,6 @@ void boundary::supersonic_outlet(int idx, variables& var, mesh const& msh, doubl
     }
 }
 
-// inline double boundary::M_iter_func(double M, double e, double* P)
-// {
-//     return (P[0]/(par.gamma-1) + par.gamma*P[0]/2*M*M) * pow(1+(par.gamma-1)/2*M*M,par.gamma/(1-par.gamma))-e;
-// }
-
 inline double M_iter_func(boundary const& B,double M, double* P)
 {
     return (P[1]/(B.par.gamma-1) + B.par.gamma*P[1]/2*M*M) * pow(1+(B.par.gamma-1)/2*M*M,B.par.gamma/(1-B.par.gamma))-P[0];
@@ -79,7 +71,7 @@ void boundary::subsonic_inlet(int idx, variables& var, mesh const& msh, double* 
     double e = var.W(cell_idx,3);
 
     //compute inlet mach number
-    double params[5] = {0,1,3,e,P[0]};
+    double params[5] = {0,1,cfg.bisec_iter*1.0,e,P[0]};
     double Min = bisection_method(M_iter_func, *this, params, 2);
 
     var.W(idx,0) = thermo::isoentropic_density(par,par.r*P[1]/P[0],Min); //density

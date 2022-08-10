@@ -10,10 +10,11 @@ class boundary
     
 
     public:
-    boundary(mesh const& msh,parameters const& par);
+    boundary(mesh const& msh,parameters const& par, config& cfg);
 
     mesh const& msh;
     parameters const& par;
+    config& cfg;
 
     double bc_val[20];
 

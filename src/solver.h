@@ -11,6 +11,9 @@ typedef unsigned int uint;
 
 void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cfg,double* bc_val)
 {
+    std::cout << "////////////////////////////////////////////////////\n";
+    std::cout << "Computation running...\n\n";
+
     int n,o;
     int f;
     int t = 1;
@@ -41,8 +44,11 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
             }
         }
 
-        bdr.apply(var,bc_val);
-
+        if(!(t % cfg.n_b))
+        {
+            bdr.apply(var,bc_val);
+        }
+        
         if(!(t % cfg.n_t))
         {
             cfg.dt = cfg.CFL*time_step(msh,par,var);
@@ -63,14 +69,15 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
                 res = std::max(res,abs(delta));
             }
 
-            
-            //std::cout << t << "\t" << res << "\t\r" << std::flush;
-            std::cout << t << "\t" << res << "\n";
+            std::cout << "                                       \r"; 
+            std::cout << "Time iteration: " <<  t << "\t"
+                      << "Residual: " <<  res << "\t\r" << std::flush;
         }
-
         t++;
         
     } while(res > cfg.max_res || t < cfg.min_iter);
+    
+    std::cout << "\n";
 
     var.pressure(par); 
     var.temperature(par);

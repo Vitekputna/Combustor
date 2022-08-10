@@ -13,12 +13,14 @@ int main(int argc, char** argv)
     //msh.export_mesh();
 
     parameters par;
-    boundary bdr(msh,par);
     config cfg;
+    boundary bdr(msh,par,cfg);
 
     cfg.n_t = 100;
-    cfg.n_r = 1000;
+    cfg.n_r = 3000;
     cfg.max_res = 1;
+    cfg.CFL = 0.5;
+    cfg.bisec_iter = 5;
 
     //initial
     double U[4];
