@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include "mesh.h"
 #include "math.h"
 
@@ -365,9 +366,46 @@ void mesh::construct_cells()
     }
 }
 
-void mesh::group_inlets();
+void mesh::group_inlets()
 {
-    
+    std::vector<int> group_idx;
+    std::vector<int> group_size;
+
+    int max_group_size = 0;
+
+    for(auto const& edge : edges)
+    {
+        if(edge.back() != -1 && 
+           !std::count(group_idx.begin(),group_idx.end(),edge.back()))
+        {
+            group_idx.push_back(edge.back());
+            std::cout << "added: " << edge.back() << "\n";
+
+            max_group_size = std::max(max_group_size,(int)edge.back()+1); 
+
+            
+            if(max_group_size == (int)edge.back()+1)
+            {
+                group_size.resize(max_group_size);
+            }
+        }
+        if(edge.back() != -1)
+        {
+            group_size[edge.back()]++;            
+        }
+    }
+
+    for(auto const& size : group_size)
+    {
+        std::cout << size << " ";
+    }
+    std::cout << "\n";
+
+    for(uint i = 0; i < group_size.size(); i++)
+    {
+        malloc(group_size[i]*sizeof(int));
+    }
+
 }
 
 void mesh::export_mesh()
