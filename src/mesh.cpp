@@ -370,6 +370,7 @@ void mesh::group_inlets()
 {
     std::vector<int> group_idx;
     std::vector<int> group_size;
+    std::vector<int> mask_idx;
 
     int max_group_size = 0;
 
@@ -379,19 +380,23 @@ void mesh::group_inlets()
            !std::count(group_idx.begin(),group_idx.end(),edge.back()))
         {
             group_idx.push_back(edge.back());
+            mask_idx.push_back(group_idx.size() - edge.back() - 1);
+
             std::cout << "added: " << edge.back() << "\n";
 
-            max_group_size = std::max(max_group_size,(int)edge.back()+1); 
+            group_size.push_back(0);
+
+            //max_group_size = std::max(max_group_size,(int)edge.back()+1); 
 
             
-            if(max_group_size == (int)edge.back()+1)
-            {
-                group_size.resize(max_group_size);
-            }
+            // if(max_group_size == (int)edge.back()+1)
+            // {
+            //     group_size.resize(max_group_size);
+            // }
         }
         if(edge.back() != -1)
         {
-            group_size[edge.back()]++;            
+            group_size[edge.back() + mask_idx[edge.back()]];// sracka            
         }
     }
 

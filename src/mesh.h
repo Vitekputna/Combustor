@@ -42,12 +42,15 @@ class mesh
     std::string name;
     vec2d nodes;
     vec2ui edges,quads;
+
     cell_vec cells;
     face_vec walls;
 
     int quads_offset;
     vec1i ghost_cell_idx;
     vec1i ghost_cell_val;
+
+    
 
     unsigned int N_cells, N_walls, N_ghosts, N;
     double min_V = std::numeric_limits<double>::max();
