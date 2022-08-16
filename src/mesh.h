@@ -50,7 +50,7 @@ class mesh
     vec1i ghost_cell_idx;
     vec1i ghost_cell_val;
 
-    
+    vec2ui boundary_groups;
 
     unsigned int N_cells, N_walls, N_ghosts, N;
     double min_V = std::numeric_limits<double>::max();
