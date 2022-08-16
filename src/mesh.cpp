@@ -370,7 +370,7 @@ void mesh::group_inlets()
 {
     std::vector<int> group_idx;
     std::vector<int> group_size;
-    std::vector<int> mask_idx;
+    std::vector<int> mask_idx; 
 
     int max_group_size = 0;
 
@@ -385,31 +385,30 @@ void mesh::group_inlets()
             std::cout << "added: " << edge.back() << "\n";
 
             group_size.push_back(0);
-
-            //max_group_size = std::max(max_group_size,(int)edge.back()+1); 
-
-            
-            // if(max_group_size == (int)edge.back()+1)
-            // {
-            //     group_size.resize(max_group_size);
-            // }
         }
+
         if(edge.back() != -1)
         {
-            group_size[edge.back() + mask_idx[edge.back()]];// sracka            
+            for(uint i = 0; i < group_idx.size();i++)
+            {
+                if(edge.back() == group_idx[i])
+                {
+                    group_size[i]++;
+                }
+            }
         }
     }
 
-    for(auto const& size : group_size)
+    for(auto const& size : group_size) 
     {
         std::cout << size << " ";
     }
     std::cout << "\n";
 
-    for(uint i = 0; i < group_size.size(); i++)
-    {
-        malloc(group_size[i]*sizeof(int));
-    }
+    // for(uint i = 0; i < group_size.size(); i++)
+    // {
+    //     malloc(group_size[i]*sizeof(int));
+    // }
 
 }
 
