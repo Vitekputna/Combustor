@@ -5,7 +5,7 @@
 
 class boundary
 {
-    typedef void (boundary::*func)(int,variables&,mesh const&,double*);
+    typedef void (boundary::*func)(std::vector<uint>,variables&,mesh const&,double*);
 
     
 
@@ -21,11 +21,11 @@ class boundary
     void apply(variables& var); 
     void apply(variables& var, double* bc_val); 
 
-    void wall(int idx, variables& var, mesh const& msh, double* P); //0
-    void supersonic_inlet(int idx, variables& var, mesh const& msh, double* P); //1
-    void supersonic_outlet(int idx, variables& var, mesh const& msh, double* P); //2
-    void subsonic_inlet(int idx, variables& var, mesh const& msh, double* P); //3
-    void subsonic_outlet(int idx, variables& var, mesh const& msh, double* P); //4
+    void wall(std::vector<uint> group_idx, variables& var, mesh const& msh, double* P); //0
+    void supersonic_inlet(std::vector<uint> group_idx, variables& var, mesh const& msh, double* P); //1
+    void supersonic_outlet(std::vector<uint> group_idx, variables& var, mesh const& msh, double* P); //2
+    void subsonic_inlet(std::vector<uint> group_idx, variables& var, mesh const& msh, double* P); //3
+    void subsonic_outlet(std::vector<uint> group_idx, variables& var, mesh const& msh, double* P); //4
 
     // std::vector<func> BC_funcs = {&boundary::wall};
 

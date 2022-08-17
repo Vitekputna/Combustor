@@ -43,6 +43,7 @@ variables::variables(int N, int N_walls, int dim) : N{N}, dim{dim}, N_walls{N_wa
     p = (double*)(malloc(N*sizeof(double)));
     T = (double*)(malloc(N*sizeof(double)));
     M = (double*)(malloc(N*sizeof(double)));
+    res = (double*)(calloc((int)(1e6/1000+100),sizeof(double)));
 }
 
 variables::variables(int N, int N_walls, int dim, double* U) : variables(N, N_walls, dim)
@@ -61,6 +62,7 @@ variables::~variables()
     free(p);
     free(T);
     free(M);
+    free(res);
 }
 
 void variables::pressure(parameters const& par)

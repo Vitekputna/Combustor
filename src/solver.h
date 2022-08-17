@@ -17,6 +17,7 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
     int n,o;
     int f;
     int t = 1;
+    int r = 0;
     double delta;
     double res = cfg.max_res*2;
 
@@ -72,10 +73,13 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
             std::cout << "                                       \r"; 
             std::cout << "Time iteration: " <<  t << "\t"
                       << "Residual: " <<  res << "\t\r" << std::flush;
+
+            var.res[r] = res;
+            r++;
         }
         t++;
         
-    } while(res > cfg.max_res || t < cfg.min_iter);
+    } while((res > cfg.max_res || t < cfg.min_iter) && t < cfg.max_iter);
     
     std::cout << "\n";
 

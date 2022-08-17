@@ -92,3 +92,13 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 	}
 	f << std::endl;
 }
+
+void export_res(variables& var, std::string name)
+{
+	std::ofstream f(name);
+
+	for(uint i = 0; i < (uint)(1e6/3000+100); i++)
+	{
+		f << var.res[i] << "\n";
+	}
+}

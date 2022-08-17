@@ -33,6 +33,13 @@ class cell
     void add_cell_wall(unsigned int wall_idx);
 };
 
+struct group
+{
+    group();
+    uint group_value;
+    std::vector<uint> member_idx;
+};
+
 typedef std::vector<cell> cell_vec;
 typedef std::vector<face> face_vec;
 
@@ -50,7 +57,7 @@ class mesh
     vec1i ghost_cell_idx;
     vec1i ghost_cell_val;
 
-    vec2ui boundary_groups;
+    std::vector<group> boundary_groups;
 
     unsigned int N_cells, N_walls, N_ghosts, N;
     double min_V = std::numeric_limits<double>::max();

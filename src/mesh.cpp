@@ -58,6 +58,11 @@ void cell::add_cell_wall(unsigned int wall_idx)
     free_wall_slot_idx++;
 }
 
+group::group()
+{
+    member_idx = std::vector<uint>{};
+}
+
 mesh::mesh(int i)
 {
     name = "";
@@ -373,39 +378,55 @@ void mesh::group_inlets()
 
     int max_group_size = 0;
 
-    for(auto const& val : ghost_cell_val)
+    for(uint c = 0; c < ghost_cell_val.size(); c++)
     {
+        auto val = ghost_cell_val[c];
+
         if(val != -1 && 
            !std::count(group_idx.begin(),group_idx.end(),val))
         {
             group_idx.push_back(val);
-            std::cout << "added: " << val << "\n";
+            //std::cout << "added: " << val << "\n";
             group_size.push_back(0);
+            boundary_groups.push_back(group());
         }
 
         if(val != -1)
         {
-            for(uint i = 0; i < group_idx.size();i++)
+            for(uint i = 0; i < group_idx.size(); i++)
             {
                 if(val == group_idx[i])
                 {
                     group_size[i]++;
+                    boundary_groups[i].member_idx.push_back(ghost_cell_idx[c]);
+                    boundary_groups[i].group_value = val;
                 }
             }
         }
     }
 
-    for(auto const& size : group_size) 
+    int g = 0;
+    std::cout << "Boundary groups: \n";
+    for(auto const& group : boundary_groups)
     {
-        std::cout << size << " ";
+        std::cout << "group: " << g << " ,value: " << group.group_value
+                  << " ,size: " << group.member_idx.size() << "\n";
+        g++;
     }
-    std::cout << "\n";
 
-    // for(uint i = 0; i < group_size.size(); i++)
+    // int g = 0;
+    // for(auto const& group : boundary_groups) 
     // {
-    //     malloc(group_size[i]*sizeof(int));
-    // }
+    //     std::cout << "Group: " << g << "\n"; 
 
+    //     for(auto const& item : group.member_idx)
+    //     {
+    //         std::cout << item << " : " << group.group_value << "\n";
+    //     }
+
+    //     g++;
+    // }
+    // std::cout << "\n";
 }
 
 void mesh::export_mesh()
