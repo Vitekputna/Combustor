@@ -50,7 +50,7 @@ void boundary::apply(variables& var, double* bc_val)
     }
 }
 
-void boundary::wall(std::vector<uint> group_idx, variables& var,mesh const& msh, double* P) //wall symmetry
+void boundary::wall(std::vector<uint> const& group_idx, variables& var,mesh const& msh, double* P) //wall symmetry
 {
     int cell_idx;
     double nx, ny;
@@ -70,7 +70,7 @@ void boundary::wall(std::vector<uint> group_idx, variables& var,mesh const& msh,
     }
 }
 
-void boundary::supersonic_inlet(std::vector<uint> group_idx, variables& var, mesh const& msh, double* P) // set p0,T0, u magintude, u direction
+void boundary::supersonic_inlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, double* P) // set p0,T0, u magintude, u direction
 {
     for(auto const& idx : group_idx)
     {
@@ -81,7 +81,7 @@ void boundary::supersonic_inlet(std::vector<uint> group_idx, variables& var, mes
     }
 }
 
-void boundary::supersonic_outlet(std::vector<uint> group_idx, variables& var, mesh const& msh, double* P) // copy all
+void boundary::supersonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, double* P) // copy all
 {
     int cell_idx;
     for(auto const& idx : group_idx)
@@ -100,7 +100,7 @@ inline double M_iter_func(boundary const& B,double M, double* P)
     return (P[1]/(B.par.gamma-1) + B.par.gamma*P[1]/2*M*M) * pow(1+(B.par.gamma-1)/2*M*M,B.par.gamma/(1-B.par.gamma))-P[0];
 }
 
-void boundary::subsonic_inlet(std::vector<uint> group_idx, variables& var, mesh const& msh, double* P)
+void boundary::subsonic_inlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, double* P)
 {
     int cell_idx;
     double e = 0 ,Min,c;
@@ -132,7 +132,7 @@ void boundary::subsonic_inlet(std::vector<uint> group_idx, variables& var, mesh 
     }
 }
 
-void boundary::subsonic_outlet(std::vector<uint> group_idx, variables& var, mesh const& msh, double* P)
+void boundary::subsonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, double* P)
 {
     int cell_idx;
 

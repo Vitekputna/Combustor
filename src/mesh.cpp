@@ -431,7 +431,7 @@ void mesh::group_inlets()
 
 void mesh::export_mesh()
 {
-    std::ofstream f("mesh/" + name + "_walls.txt");
+    std::ofstream f(name + "_walls.txt");
     f << N_walls << "\n";
     for(auto const& wall : walls)
     {
@@ -442,7 +442,7 @@ void mesh::export_mesh()
     }
     f.close();
 
-    std::ofstream ff("mesh/" + name + "_cells.txt");
+    std::ofstream ff(name + "_cells.txt");
     ff << N_cells << " " << N_ghosts << "\n";
     for(auto const& cell : cells)
     {

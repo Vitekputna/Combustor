@@ -21,6 +21,14 @@ namespace thermo
         return sqrt((U[1]*U[1] + U[2]*U[2])/U[0]/U[0])/sqrt(par.gamma*par.r*T);
     }
 
+    inline double mach_number_stagnate(parameters const& par, double* U)
+    {
+        double T = temperature(par,U);
+        double M = sqrt((U[1]*U[1] + U[2]*U[2])/U[0]/U[0])/sqrt(par.gamma*par.r*T);
+
+        return sqrt((-1+sqrt(1+2*(par.gamma-1)*M*M))/(par.gamma-1));
+    }
+
     inline double isoentropic_pressure(parameters const& par, double p_0, double M)
     {
         return pow(1+(par.gamma-1)/2*M*M,par.gamma/(1-par.gamma))*p_0;
@@ -35,7 +43,5 @@ namespace thermo
     {
         return pow(1+(par.gamma-1)/2*M*M,-1)*T_0;
     }
-
-    
 }
 

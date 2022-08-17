@@ -23,13 +23,13 @@ struct config
     double dt = 1e-50;
     double CFL = 1;
 
-    unsigned int iter,n_t = 100,n_r = 1000,n_b = 200;
+    unsigned int iter,n_t = 50,n_r = 1000,n_b = 100;
 
     int res_idx = 3;
     double max_res = 1e-3; 
-    int min_iter = 1e3;
-    int max_iter = 5e5;
-    int bisec_iter = 3;
+    int min_iter = 100;
+    int max_iter = 1e6;
+    int bisec_iter = 5;
 };
 
 struct variables
