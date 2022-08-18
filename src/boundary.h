@@ -3,11 +3,11 @@
 #include "data_structures.h"
 #include <vector>
 
+typedef unsigned int uint;
+
 class boundary
 {
     typedef void (boundary::*func)(std::vector<uint>,variables&,mesh const&,double*);
-
-    
 
     public:
     boundary(mesh const& msh,parameters const& par, config& cfg);

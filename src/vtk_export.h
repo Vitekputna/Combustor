@@ -3,6 +3,8 @@
 #include "data_structures.h"
 #include "mesh.h"
 
+typedef unsigned int uint;
+
 void export_vtk(variables& var,mesh const& MESH, std::string name)
 {
 	std::ofstream f(name);
