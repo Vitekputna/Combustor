@@ -31,7 +31,7 @@ class cell
     int owner_idx[4] = {-1,-1,-1,-1};
 
     cell();
-    cell(vec1ui nodes,vec2d const& all_nodes);
+    cell(int N_walls, vec1ui nodes,vec2d const& all_nodes);
     void add_cell_wall(unsigned int wall_idx);
 };
 
@@ -70,7 +70,7 @@ class mesh
     void load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quads);
 
     template<typename T>
-    std::vector<std::vector<T>> read_segment(std::vector<std::string>& text,int from,int offset);
+    std::vector<std::vector<T>> read_segment(std::vector<std::string>& text,int from,int offset, int length);
 
     void print_mesh();
     void sort_mesh();

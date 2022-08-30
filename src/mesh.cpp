@@ -33,25 +33,33 @@ cell::cell()
     x = 0, y = 0;
 }
 
-cell::cell(vec1ui nodes, vec2d const& all_nodes)
+cell::cell(int N_walls, vec1ui nodes, vec2d const& all_nodes)
 {
     N_faces = nodes.size();
 
     std::vector<double> X,Y;
-    X.reserve(4);
-    Y.reserve(4);
+    X.reserve(N_walls);
+    Y.reserve(N_walls);
 
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < N_walls; i++)
     {
         X[i] = all_nodes[nodes[i]][0];
         Y[i] = all_nodes[nodes[i]][1];
 
-        x += 0.25*X[i];
-        y += 0.25*Y[i];
+        x += 1/N_walls*X[i];
+        y += 1/N_walls*Y[i];
     }
 
-    V = 0.5*abs( (X[1] - X[0]) * (Y[2] - Y[1]) - (Y[1] - Y[0]) * (X[2] - X[1]) )
-      + 0.5*abs( (X[3] - X[2]) * (Y[0] - Y[3]) - (X[0] - X[3]) * (Y[3] - Y[2]) ); 
+    if(N_walls == 4)
+    {
+        V = 0.5*abs( (X[1] - X[0]) * (Y[2] - Y[1]) - (Y[1] - Y[0]) * (X[2] - X[1]) )
+            + 0.5*abs( (X[3] - X[2]) * (Y[0] - Y[3]) - (X[0] - X[3]) * (Y[3] - Y[2]) ); 
+    }
+    else
+    {
+        V = 0.5*abs( (X[1] - X[0]) * (Y[2] - Y[1]) - (Y[1] - Y[0]) * (X[2] - X[1]) );
+    }
+    
 }
 
 void cell::add_cell_wall(unsigned int wall_idx)
@@ -82,9 +90,9 @@ mesh::mesh(std::string path)
     construct_ghost_cells();
     N_ghosts = ghosts.size();
 
-    N_cells = N_quads+N_trigs+N_ghosts;
+    N_cells = N_quads+N_trigs;
 
-    cells.resize(N_cells);
+    cells.resize(N_cells+N_ghosts);
 
     construct_cells();
     sort_mesh();
@@ -99,7 +107,7 @@ mesh::mesh(std::string path)
 }
 
 template<typename T>
-std::vector<std::vector<T>> mesh::read_segment(std::vector<std::string>& text,int from,int offset)
+std::vector<std::vector<T>> mesh::read_segment(std::vector<std::string>& text,int from,int offset, int length)
 {
     char k;
     double number;
@@ -112,7 +120,10 @@ std::vector<std::vector<T>> mesh::read_segment(std::vector<std::string>& text,in
 
     for (unsigned int i = from; i < from + N; i++)
 	{
-		for (unsigned int j = 0; j < text[i].length(); j++)
+		//for (unsigned int j = 0; j < text[i].length(); j++)
+        int n = 0;
+        unsigned int j = 0;
+        while(j < text[i].length() && n < length)
 		{
 			if (text[i][j] != 32)
 			{
@@ -123,11 +134,13 @@ std::vector<std::vector<T>> mesh::read_segment(std::vector<std::string>& text,in
 					j++;
 				}
 
+                n++;
 				number = (T)(std::stod(word));
 				row.push_back(number+offset);
 				std::cout << row.back() << " ";
 				word = "";
 			}
+        j++;
 		}
 		res.push_back(row);
 		row.clear();
@@ -169,25 +182,25 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
         if(text_vec[i].find(s1) != std::string::npos)
         {
             std::cout << "reading Vertices...\n";
-            nodes = read_segment<double>(text_vec,i+1,0);
+            nodes = read_segment<double>(text_vec,i+1,0,3);
             std::cout << nodes.size() << "\n";
         }
         else if(text_vec[i].find(s2) != std::string::npos)
         {
             std::cout << "reading Edges...\n";
-            edges = read_segment<uint>(text_vec,i+1,-1);
+            edges = read_segment<uint>(text_vec,i+1,-1,3);
             std::cout << edges.size() << "\n";
         }
         else if(text_vec[i].find(s3) != std::string::npos)
         {
             std::cout << "reading Quadrilaterals...\n";
-            quads = read_segment<uint>(text_vec,i+1,-1);
+            quads = read_segment<uint>(text_vec,i+1,-1,4);
             std::cout << quads.size() << "\n";
         }
         else if(text_vec[i].find(s4) != std::string::npos)
         {
             std::cout << "reading Triangles...\n";
-            trigs = read_segment<uint>(text_vec,i+1,-1);
+            trigs = read_segment<uint>(text_vec,i+1,-1,3);
             std::cout << trigs.size() << "\n";
         }
     }
@@ -230,6 +243,8 @@ void mesh::print_mesh()
 int mesh::find_neigbour_cell(vec1i common_nodes_idx, int owner_idx)
 {
     bool found_1 = false, found_2 = false;
+
+    // Přidat mapu pro odlišení buněk které už mají všechny sousedy nalezené... možná optimalizace
 
     unsigned int quad;
     for(quad = 0; quad < quads.size(); quad++)
@@ -285,6 +300,8 @@ void mesh::construct_ghost_cells()
             i++;     
        }
     }
+
+
 }
 
 void mesh::sort_mesh()
@@ -341,14 +358,29 @@ void mesh::set_owner_idx()
 
 void mesh::construct_cells()
 {
-    for(uint k = 0; k < quads.size();k++)
+    for(uint k = 0; k < N_quads;k++)
     {
-        cells[k] = cell(quads[k],nodes);
+        cells[k] = cell(4,quads[k],nodes);
 
         if(cells[k].V > 0)
         {
             min_V = std::min(min_V,cells[k].V);
         }
+    }
+
+    for(uint k = 0; k < N_trigs;k++)
+    {
+        cells[k+N_quads] = cell(3,trigs[k],nodes);
+
+        if(cells[k].V > 0)
+        {
+            min_V = std::min(min_V,cells[k].V);
+        }
+    }
+
+    for(uint k = 0; k < N_ghosts;k++)
+    {
+        cells[k+N_quads+N_trigs] = cell(4,ghosts[k],nodes);
     }
 }
 

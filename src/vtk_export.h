@@ -18,7 +18,7 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 
 	for (unsigned int i = 0; i < MESH.nodes.size(); i++)
 	{
-		for (unsigned int j = 0; j < MESH.nodes[0].size()-1; j++)
+		for (unsigned int j = 0; j < MESH.nodes[0].size(); j++)
 		{
 			f << MESH.nodes[i][j] << " ";
 		}
@@ -26,23 +26,37 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 	}
 
 	f << std::endl;
-	f << "CELLS " << MESH.quads.size()-MESH.N_ghosts << " " << (MESH.quads.size()-MESH.N_ghosts) * 5 << std::endl;
+	f << "CELLS " << MESH.N_cells << " " << MESH.N_quads * 5 + MESH.N_trigs * 4 << std::endl;
 	
-    for (unsigned int i = 0; i < MESH.quads.size()-MESH.N_ghosts; i++)	
+    for (unsigned int i = 0; i < MESH.N_quads; i++)	
     {
         f << "4 ";
-        for(unsigned int k = 0; k < MESH.quads[0].size()-1;k++)
+        for(unsigned int k = 0; k < MESH.quads[0].size();k++)
         {
             f << MESH.quads[i][k] << " ";
         }
         f << "\n";
     }
+	for (unsigned int i = 0; i < MESH.N_trigs; i++)	
+    {
+        f << "3 ";
+        for(unsigned int k = 0; k < MESH.trigs[0].size();k++)
+        {
+            f << MESH.trigs[i][k] << " ";
+        }
+        f << "\n";
+    }
+
 
 	f << std::endl;
-	f << "CELL_TYPES " << MESH.quads.size()-MESH.N_ghosts << std::endl;
-	for (unsigned int i = 0; i < MESH.quads.size()-MESH.N_ghosts; i++)
+	f << "CELL_TYPES " << MESH.N_cells << std::endl;
+	for (unsigned int i = 0; i < MESH.N_quads; i++)
 	{
 		f << "9" << std::endl;
+	}
+	for (unsigned int i = 0; i < MESH.N_trigs; i++)
+	{
+		f << "5" << std::endl;
 	}
 	f << std::endl;
 
