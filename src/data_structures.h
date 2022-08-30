@@ -23,12 +23,7 @@ struct config
     double dt = 1e-50;
     double CFL = 1;
 
-<<<<<<< HEAD
     unsigned int iter,n_t = 50,n_r = 1000,n_b = 100;
-=======
-    unsigned int iter,n_t = 100,n_r = 1000,n_b = 100;
->>>>>>> 2aa42f5a4cf211ee82c62dc741fb2c058266c72a
-
     int res_idx = 3;
     double max_res = 1e-3; 
     int min_iter = 100;
