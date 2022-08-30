@@ -35,6 +35,8 @@ cell::cell()
 
 cell::cell(vec1ui nodes, vec2d const& all_nodes)
 {
+    N_faces = nodes.size();
+
     std::vector<double> X,Y;
     X.reserve(4);
     Y.reserve(4);
@@ -74,22 +76,65 @@ mesh::mesh(std::string path)
     std::cout << "Loading mesh: " << name << "\n";
 
     load_mesh(path,nodes,edges,quads);
-    N_cells = quads.size();
-    construct_ghost_cells();
-    N_ghosts = quads.size() - N_cells;
+    N_quads = quads.size();
+    N_trigs = trigs.size();
 
-    cells.resize(N_cells+N_ghosts);
+    construct_ghost_cells();
+    N_ghosts = ghosts.size();
+
+    N_cells = N_quads+N_trigs+N_ghosts;
+
+    cells.resize(N_cells);
 
     construct_cells();
     sort_mesh();
-    set_owner_idx();
-    N_walls = walls.size();
-    N = quads.size();
+    // set_owner_idx();
+    // N_walls = walls.size();
+    // N = quads.size();
 
-    group_inlets();
+    // group_inlets();
     
-    std::cout << "Mesh loaded, number of walls: " << N_walls << " , number of cells: " 
-              << N_cells << " number of ghosts: " << N_ghosts << "\n\n";
+    // std::cout << "Mesh loaded, number of walls: " << N_walls << " , number of cells: " 
+    //           << N_cells << " number of ghosts: " << N_ghosts << "\n\n";
+}
+
+template<typename T>
+std::vector<std::vector<T>> mesh::read_segment(std::vector<std::string>& text,int from,int offset)
+{
+    char k;
+    double number;
+    std::string word = "";
+    std::vector<T> row;
+    std::vector<std::vector<T>> res;
+
+    int N = std::stoi(text[from]);
+    from++;
+
+    for (unsigned int i = from; i < from + N; i++)
+	{
+		for (unsigned int j = 0; j < text[i].length(); j++)
+		{
+			if (text[i][j] != 32)
+			{
+				while (text[i][j] != 32 && j < text[i].length())
+				{
+					k = text[i][j];
+					word.push_back(k);
+					j++;
+				}
+
+				number = (T)(std::stod(word));
+				row.push_back(number+offset);
+				std::cout << row.back() << " ";
+				word = "";
+			}
+		}
+		res.push_back(row);
+		row.clear();
+		std::cout << "\n";
+	}
+
+    return res;
 }
 
 void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quads)
@@ -108,105 +153,44 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
 	std::vector<std::string> text_vec;
 	std::string text;
 
-	// Reading as text file
+	// Reading as text file na picu predelat na cteni a formatovani primo ze souboru
 	while (std::getline(file, text))
 	{
 		text_vec.push_back(text);
 	}
 
-	int num_nodes = stoi(text_vec[4]);
+    std::string s1 = "Vertices";
+    std::string s2 = "Edges";
+    std::string s3 = "Quadrilaterals";
+    std::string s4 = "Triangles";
 
-	// Reading nodes
-	std::string word = "";
-	double number;
-    int integer;
-	char k;
-	std::vector<double> row;
-    std::vector<unsigned int> rowi;
-
-	//std::cout << "NODES" << std::endl;
-	for (unsigned int i = 5; i < num_nodes+5; i++)
-	{
-		for (unsigned int j = 0; j < text_vec[i].length(); j++)
-		{
-			if (text_vec[i][j] != 32)
-			{
-				while (text_vec[i][j] != 32 && j < text_vec[i].length())
-				{
-					k = text_vec[i][j];
-					word.push_back(k);
-					j++;
-				}
-				number = (std::stod(word));
-				row.push_back(number);
-				//std::cout << row.back() << " ";
-				word = "";
-			}
-		}
-		nodes.push_back(row);
-		row.clear();
-		//std::cout << "\n";
-	}
-
-	// reading edge 
-	//std::cout << "EDGES" << std::endl;
-	int edge_start = num_nodes + 6;
-	int num_edges = stoi(text_vec[edge_start]);
-
-	//std::cout << num_edges << "\n";
-
-	for (unsigned int i = edge_start+1; i < num_edges + edge_start+1; i++)
-	{
-		for (unsigned int j = 0; j < text_vec[i].length(); j++)
-		{
-			if (text_vec[i][j] != 32)
-			{
-				while (text_vec[i][j] != 32 && j < text_vec[i].length())
-				{
-					k = text_vec[i][j];
-					word.push_back(k);
-					j++;
-				}
-				integer = std::stoi(word);
-				rowi.push_back(integer-1);
-				//std::cout << row.back() << " ";
-				word = "";
-			}
-		}
-		edges.push_back(rowi);
-		rowi.clear();
-		//std::cout << "\n";
-	}
-
-	// reading quads
-	//std::cout << "QUADS" << std::endl;
-	int quads_start = num_edges + edge_start + 2;
-	int num_quads = stoi(text_vec[quads_start]);
-
-	//std::cout << num_quads << "\n";
-
-	for (unsigned int i = quads_start+1; i < quads_start + num_quads +1; i++)
-	{
-		for (unsigned int j = 0; j < text_vec[i].length(); j++)
-		{
-			if (text_vec[i][j] != 32)
-			{
-				while (text_vec[i][j] != 32 && j < text_vec[i].length())
-				{
-					k = text_vec[i][j];
-					word.push_back(k);
-					j++;
-				}
-				integer = std::stoi(word);
-				rowi.push_back(integer-1);
-				//std::cout << row.back() << " ";
-				word = "";
-			}
-		}
-		quads.push_back(rowi);
-		rowi.clear();
-		//std::cout << "\n";
-	}
+    for(int i = 0; i < text_vec.size(); i++)
+    {
+        if(text_vec[i].find(s1) != std::string::npos)
+        {
+            std::cout << "reading Vertices...\n";
+            nodes = read_segment<double>(text_vec,i+1,0);
+            std::cout << nodes.size() << "\n";
+        }
+        else if(text_vec[i].find(s2) != std::string::npos)
+        {
+            std::cout << "reading Edges...\n";
+            edges = read_segment<uint>(text_vec,i+1,-1);
+            std::cout << edges.size() << "\n";
+        }
+        else if(text_vec[i].find(s3) != std::string::npos)
+        {
+            std::cout << "reading Quadrilaterals...\n";
+            quads = read_segment<uint>(text_vec,i+1,-1);
+            std::cout << quads.size() << "\n";
+        }
+        else if(text_vec[i].find(s4) != std::string::npos)
+        {
+            std::cout << "reading Triangles...\n";
+            trigs = read_segment<uint>(text_vec,i+1,-1);
+            std::cout << trigs.size() << "\n";
+        }
+    }
 }
 
 void mesh::print_mesh()
@@ -285,23 +269,22 @@ bool mesh::wall_uniqueness(face const& new_wall)
 
 void mesh::construct_ghost_cells()
 {
-     vec2ui ghost_quads;
-     quads_offset = quads.size();
-    
-     int i = 0;
-     for(auto const& edge : edges)
-     {  
-        if(edge.back() != -1)
-        {
-            ghost_quads.push_back(std::vector<unsigned int>{edge[0],edge[1],edge[0],edge[1]});
-            ghost_cell_idx.push_back(i+quads_offset);
-            ghost_cell_val.push_back(edge.back());
-            i++;
-        }
-         
-     }
+    std::cout << "constructing ghosts...\n";
 
-     quads.insert(quads.end(),ghost_quads.begin(),ghost_quads.end());
+    N_ghosts = edges.size();
+    ghosts.resize(N_ghosts,std::vector<uint>(4));
+    ghost_cell_val.resize(N_ghosts);
+
+    int i = 0;
+    for(auto const& edge : edges)
+    {  
+       if(edge.back() != std::numeric_limits<uint>::max())
+       {
+            ghost_cell_val[i] = edge.back();
+            ghosts[i] = (std::vector<unsigned int>{edge[0],edge[1],edge[0],edge[1]});
+            i++;     
+       }
+    }
 }
 
 void mesh::sort_mesh()
@@ -360,14 +343,12 @@ void mesh::construct_cells()
 {
     for(uint k = 0; k < quads.size();k++)
     {
-        //cells.push_back(cell(quads[k], nodes));
         cells[k] = cell(quads[k],nodes);
 
         if(cells[k].V > 0)
         {
             min_V = std::min(min_V,cells[k].V);
         }
-        
     }
 }
 
@@ -398,7 +379,7 @@ void mesh::group_inlets()
                 if(val == group_idx[i])
                 {
                     group_size[i]++;
-                    boundary_groups[i].member_idx.push_back(ghost_cell_idx[c]);
+                    //boundary_groups[i].member_idx.push_back(ghost_cell_idx[c]);
                     boundary_groups[i].group_value = val;
                 }
             }

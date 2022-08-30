@@ -9,6 +9,7 @@ typedef std::vector<double> vec1d;
 typedef std::vector<int> vec1i;
 typedef std::vector<unsigned int> vec1ui;
 
+typedef unsigned int uint;
 
 class face
 {
@@ -23,6 +24,7 @@ class face
 class cell
 {
     public:
+    char N_faces;
     double x = 0, y = 0, V;
     unsigned int cell_walls[4];
     unsigned char free_wall_slot_idx = 0;
@@ -48,23 +50,28 @@ class mesh
     public:
     std::string name;
     vec2d nodes;
-    vec2ui edges,quads;
+    vec2ui edges,quads,trigs;
 
     cell_vec cells;
     face_vec walls;
 
     int quads_offset;
-    vec1i ghost_cell_idx;
+    //vec1i ghost_cell_idx;
+    vec2ui ghosts;
     vec1i ghost_cell_val;
 
     std::vector<group> boundary_groups;
 
-    unsigned int N_cells, N_walls, N_ghosts, N;
+    unsigned int N_cells, N_walls, N_ghosts, N_trigs, N_quads, N;
     double min_V = std::numeric_limits<double>::max();
     
     mesh(int i);
     mesh(std::string path);
     void load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quads);
+
+    template<typename T>
+    std::vector<std::vector<T>> read_segment(std::vector<std::string>& text,int from,int offset);
+
     void print_mesh();
     void sort_mesh();
 
