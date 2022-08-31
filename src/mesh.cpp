@@ -37,7 +37,7 @@ cell::cell(int N_walls, vec1ui nodes, vec2d const& all_nodes)
 {
 
     N_faces = N_walls;
-
+    this->cell_walls.resize(N_walls);
     std::vector<double> X,Y;
     X.reserve(N_walls);
     Y.reserve(N_walls);
@@ -187,27 +187,27 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
     {
         if(text_vec[i].find(s1) != std::string::npos)
         {
-            std::cout << "reading Vertices...\n";
+            //std::cout << "reading Vertices...\n";
             nodes = read_segment<double>(text_vec,i+1,0,3);
-            std::cout << nodes.size() << "\n";
+            //std::cout << nodes.size() << "\n";
         }
         else if(text_vec[i].find(s2) != std::string::npos)
         {
-            std::cout << "reading Edges...\n";
+            //std::cout << "reading Edges...\n";
             edges = read_segment<uint>(text_vec,i+1,-1,3);
-            std::cout << edges.size() << "\n";
+            //std::cout << edges.size() << "\n";
         }
         else if(text_vec[i].find(s3) != std::string::npos)
         {
-            std::cout << "reading Quadrilaterals...\n";
+            //std::cout << "reading Quadrilaterals...\n";
             quads = read_segment<uint>(text_vec,i+1,-1,4);
-            std::cout << quads.size() << "\n";
+            //std::cout << quads.size() << "\n";
         }
         else if(text_vec[i].find(s4) != std::string::npos)
         {
-            std::cout << "reading Triangles...\n";
+            //std::cout << "reading Triangles...\n";
             trigs = read_segment<uint>(text_vec,i+1,-1,3);
-            std::cout << trigs.size() << "\n";
+            //std::cout << trigs.size() << "\n";
         }
     }
 }
@@ -290,9 +290,11 @@ bool mesh::wall_uniqueness(face const& new_wall)
 
 void mesh::construct_ghost_cells()
 {
-    std::cout << "constructing ghosts...\n";
+    //std::cout << "constructing ghosts...\n";
 
     N_ghosts = edges.size();
+
+    //std::cout << N_ghosts << "\n";
 
     for(auto const& edge : edges)
     {
@@ -302,7 +304,7 @@ void mesh::construct_ghost_cells()
         }
     }
 
-    std::cout << N_ghosts << "\n";
+    //std::cout << N_ghosts << "\n";
 
     
     ghosts.resize(N_ghosts,std::vector<uint>(2));
@@ -328,7 +330,7 @@ void mesh::construct_ghost_cells()
 
 void mesh::sort_mesh()
 {
-    std::cout << "Sorting mesh...\n";
+    //std::cout << "Sorting mesh...\n";
     std::vector<std::vector<std::vector<int>>> mask =  {{{0,1}},
                                                         {{0,1},{1,0}},
                                                         {{0,1},{1,2},{2,0}},
@@ -375,7 +377,7 @@ void mesh::sort_mesh()
         c_idx++;
     }
 
-    std::cout << "Mesh sorted...\n\n";
+    //std::cout << "Mesh sorted...\n\n";
 }
 
 void mesh::set_owner_idx()
@@ -399,7 +401,7 @@ void mesh::set_owner_idx()
 
 void mesh::construct_cells()
 {
-    std::cout << "Constructing cells...\n";
+    //std::cout << "Constructing cells...\n";
     for(uint k = 0; k < N_quads;k++)
     {
         cells[k] = cell(4,quads[k],nodes);
@@ -425,7 +427,7 @@ void mesh::construct_cells()
         cells[k+N_quads+N_trigs] = cell(1,ghosts[k],nodes);
     }
 
-    std::cout << "Done!\n\n";
+    //std::cout << "Done!\n\n";
 }
 
 void mesh::group_inlets()
@@ -439,29 +441,24 @@ void mesh::group_inlets()
     {
         auto val = ghost_cell_val[c];
 
-        std::cout << val << "\n";
-
-        if(val != -1 && 
-           !std::count(group_idx.begin(),group_idx.end(),val))
+        if(!std::count(group_idx.begin(),group_idx.end(),val))
         {
             group_idx.push_back(val);
-            //std::cout << "added: " << val << "\n";
             group_size.push_back(0);
             boundary_groups.push_back(group());
         }
 
-        if(val != -1)
+        
+        for(uint i = 0; i < group_idx.size(); i++)
         {
-            for(uint i = 0; i < group_idx.size(); i++)
+            if(val == group_idx[i])
             {
-                if(val == group_idx[i])
-                {
-                    group_size[i]++;
-                    //boundary_groups[i].member_idx.push_back(ghost_cell_idx[c]);
-                    boundary_groups[i].group_value = val;
-                }
+                group_size[i]++;
+                boundary_groups[i].member_idx.push_back(c + N_cells);
+                boundary_groups[i].group_value = val;
             }
         }
+        
     }
 
     int g = 0;
@@ -473,7 +470,7 @@ void mesh::group_inlets()
         g++;
     }
 
-    // int g = 0;
+    // g = 0;
     // for(auto const& group : boundary_groups) 
     // {
     //     std::cout << "Group: " << g << "\n"; 
@@ -514,26 +511,37 @@ void mesh::export_mesh()
     {
         ff << c_idx << "\n";
         ff << cells[c_idx].x << " " << cells[c_idx].y << " " << cells[c_idx].V << "\n";
-        
-        if(cells[c_idx].N_faces > 1)
+
+        ff << cells[c_idx].owner_idx[0] << " "
+           << cells[c_idx].owner_idx[1] << " "
+           << cells[c_idx].owner_idx[2] << " "
+           << cells[c_idx].owner_idx[3] << "\n";
+
+        for(auto const& wall : cells[c_idx].cell_walls)
         {
-            for(unsigned int k = 0; k < cells[c_idx].N_faces; k++)
-            {
-                if(walls[cells[c_idx].cell_walls[k]].neigbour_cell_index == c_idx)
-                {
-                    ff << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
-                }
-                else
-                {
-                    ff << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
-                }
-                ff << " ";
-            }
+            ff << wall << " ";
         }
-        else
-        {
-            ff << walls[cells[c_idx].cell_walls[0]].owner_cell_index;
-        }
+        ff << "\n";
+
+        // if(cells[c_idx].N_faces > 1)
+        // {
+        //     for(unsigned int k = 0; k < cells[c_idx].N_faces; k++)
+        //     {
+        //         if(walls[cells[c_idx].cell_walls[k]].neigbour_cell_index == c_idx)
+        //         {
+        //             ff << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
+        //         }
+        //         else
+        //         {
+        //             ff << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
+        //         }
+        //         ff << " ";
+        //     }
+        // }
+        // else
+        // {
+        //     ff << walls[cells[c_idx].cell_walls[0]].owner_cell_index;
+        // }
 
         ff << "\n\n";
     }

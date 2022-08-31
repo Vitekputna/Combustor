@@ -21,28 +21,37 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
     double delta;
     double res = cfg.max_res*2;
 
-    //for(uint t = 1; t < cfg.iter; t++) 
-    do
+    for(uint t = 1; t < 3; t++) 
+    //do
     {
+        std::cout << "wall flux\n";
         for(uint w = 0; w < msh.N_walls;w++)
         {
             n = msh.walls[w].neigbour_cell_index;
             o = msh.walls[w].owner_cell_index;
 
             HLL_flux(w,n,o,var,par,msh.walls[w]);
+
+            std::cout << w << "  " << var.wall_flux(w,1) << "\n";
         }
 
+        std::cout << "cell change\n";
+        double old;
         for(uint c = 0; c < msh.N_cells; c++)
         {
+            std::cout << c << "   ";
             for(uint k = 0; k < var.dim; k++)
             {
                 f = 0;
+                old = var.W(c,k);
                 for(auto const& wall : msh.cells[c].cell_walls)
                 {
                     var.W(c,k) -= cfg.dt/msh.cells[c].V*var.wall_flux(wall,k)*msh.cells[c].owner_idx[f];
                     f++;
                 }
+                std::cout << (var.W(c,k) - old) << " ";
             }
+            std::cout << "\n";
         }
 
         if(!(t % cfg.n_b))
@@ -79,7 +88,8 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
         }
         t++;
         
-    } while((res > cfg.max_res || t < cfg.min_iter) && t < cfg.max_iter);
+    //} while((res > cfg.max_res || t < cfg.min_iter) && t < cfg.max_iter);
+    }
     
     std::cout << "\n";
 

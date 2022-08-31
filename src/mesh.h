@@ -26,7 +26,8 @@ class cell
     public:
     char N_faces;
     double x = 0, y = 0, V;
-    unsigned int cell_walls[4];
+    //unsigned int cell_walls[4];
+    std::vector<unsigned int> cell_walls;
     unsigned char free_wall_slot_idx = 0;
     int owner_idx[4] = {-1,-1,-1,-1};
 
@@ -56,7 +57,6 @@ class mesh
     face_vec walls;
 
     int quads_offset;
-    //vec1i ghost_cell_idx;
     vec2ui ghosts;
     vec1i ghost_cell_val;
 

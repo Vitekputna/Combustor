@@ -20,7 +20,8 @@ struct parameters
 
 struct config
 {
-    double dt = 1e-50;
+    //double dt = 1e-50;
+    double dt = 1e-6;
     double CFL = 1;
 
     unsigned int iter,n_t = 50,n_r = 1000,n_b = 100;
