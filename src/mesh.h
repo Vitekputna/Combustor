@@ -75,7 +75,7 @@ class mesh
     void print_mesh();
     void sort_mesh();
 
-    int find_neigbour_cell(vec1i common_nodes_idx,int owner_idx);
+    int find_neigbour_cell(vec2ui const& polygons, vec1i common_nodes_idx,int owner_idx);
     bool wall_uniqueness(face const& new_wall);
     void construct_ghost_cells();
     void construct_cells();

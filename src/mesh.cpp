@@ -46,8 +46,8 @@ cell::cell(int N_walls, vec1ui nodes, vec2d const& all_nodes)
         X[i] = all_nodes[nodes[i]][0];
         Y[i] = all_nodes[nodes[i]][1];
 
-        x += 1/N_walls*X[i];
-        y += 1/N_walls*Y[i];
+        x += X[i]/N_walls;
+        y += Y[i]/N_walls;
     }
 
     if(N_walls == 4)
@@ -84,11 +84,12 @@ mesh::mesh(std::string path)
     std::cout << "Loading mesh: " << name << "\n";
 
     load_mesh(path,nodes,edges,quads);
+
     N_quads = quads.size();
     N_trigs = trigs.size();
+    N_ghosts = edges.size();
 
     construct_ghost_cells();
-    N_ghosts = ghosts.size();
 
     N_cells = N_quads+N_trigs;
 
@@ -240,28 +241,28 @@ void mesh::print_mesh()
     std::cout << "\n";
 }
 
-int mesh::find_neigbour_cell(vec1i common_nodes_idx, int owner_idx)
+int mesh::find_neigbour_cell(vec2ui const& polygons, vec1i common_nodes_idx, int owner_idx)
 {
     bool found_1 = false, found_2 = false;
 
     // Přidat mapu pro odlišení buněk které už mají všechny sousedy nalezené... možná optimalizace
 
-    unsigned int quad;
-    for(quad = 0; quad < quads.size(); quad++)
+    unsigned int pgon;
+    for(pgon = 0; pgon < polygons.size(); pgon++)
     {
-        for(auto const& q : quads[quad])
+        for(auto const& p : polygons[pgon])
         {
-            if(q == common_nodes_idx[0])
+            if(p == common_nodes_idx[0])
             {
                 found_1 = true;
             }
-            else if (q == common_nodes_idx[1])
+            else if (p == common_nodes_idx[1])
             {
                 found_2 = true;
             }
         }
 
-        if(found_1 && found_2 && quad != owner_idx){return quad;}
+        if(found_1 && found_2 && pgon != owner_idx){return pgon;}
 
         found_1 = false;
         found_2 = false;
@@ -287,6 +288,16 @@ void mesh::construct_ghost_cells()
     std::cout << "constructing ghosts...\n";
 
     N_ghosts = edges.size();
+
+    for(auto const& edge : edges)
+    {
+        if(edge.back() == std::numeric_limits<uint>::max())
+        {
+            N_ghosts--;
+        }
+    }
+
+    
     ghosts.resize(N_ghosts,std::vector<uint>(4));
     ghost_cell_val.resize(N_ghosts);
 
@@ -295,47 +306,80 @@ void mesh::construct_ghost_cells()
     {  
        if(edge.back() != std::numeric_limits<uint>::max())
        {
+            //std::cout << "ghost n: " << i << "\n";
             ghost_cell_val[i] = edge.back();
             ghosts[i] = (std::vector<unsigned int>{edge[0],edge[1],edge[0],edge[1]});
             i++;     
        }
     }
 
+    //std::cout << "N ghosts: " << N_ghosts << "\n";
+
 
 }
 
 void mesh::sort_mesh()
 {
-    int neighbour;
-
-    std::vector<std::vector<int>> node_idx = {{0,1},{1,2},{2,3},{3,0}};
+    std::vector<std::vector<std::vector<int>>> mask = {{{0,1},{1,2},{2,0}},{{0,1},{1,2},{2,3},{3,0}}}; // quad,trig
     std::vector<int> node_vec;
 
-    unsigned int wall_idx = 0;
-    for(unsigned int c_idx = 0; c_idx < quads.size(); c_idx++)
-    {
-        for(unsigned int w = 0; w < 4; w++)
-        {
-            node_vec = {int(quads[c_idx][node_idx[w][0]]),int(quads[c_idx][node_idx[w][1]])};
-            neighbour = find_neigbour_cell(node_vec,c_idx);
+    vec2ui polygons = quads;
 
-            face wall(nodes[node_vec[0]],nodes[node_vec[1]]);
-            wall.owner_cell_index = c_idx;
-            wall.neigbour_cell_index = neighbour;
+    polygons.insert(polygons.end(),trigs.begin(),trigs.end());
+    polygons.insert(polygons.end(),ghosts.begin(),ghosts.end());
+
+    int neighbour;
+
+    int mask_i;
+    int c_idx = 0;
+    for(auto const& cell : cells)
+    {
+        mask_i = cell.N_faces-3;
+
+        for(int w = 0; w < cell.N_faces; w++)
+        {
+            node_vec = {int(polygons[c_idx][mask[mask_i][w][0]]),
+                        int(polygons[c_idx][mask[mask_i][w][1]])};
+
+            neighbour = find_neigbour_cell(polygons, node_vec, c_idx);
+
+            std::cout << "cell n: " << c_idx << " has neighbour n: " << neighbour << "\n";
+        }
+
+        c_idx++;
+    }
+
+
+    // int neighbour;
+
+    // std::vector<std::vector<int>> node_idx = {{0,1},{1,2},{2,3},{3,0}};
+    // std::vector<int> node_vec;
+
+    // unsigned int wall_idx = 0;
+    // for(unsigned int c_idx = 0; c_idx < quads.size(); c_idx++)
+    // {
+    //     for(unsigned int w = 0; w < 4; w++)
+    //     {
+    //         node_vec = {int(quads[c_idx][node_idx[w][0]]),int(quads[c_idx][node_idx[w][1]])};
+    //         neighbour = find_neigbour_cell(node_vec,c_idx);
+
+    //         face wall(nodes[node_vec[0]],nodes[node_vec[1]]);
+    //         wall.owner_cell_index = c_idx;
+    //         wall.neigbour_cell_index = neighbour;
 
             
 
-            if(wall_uniqueness(wall) && neighbour != -1)
-            {
-                walls.push_back(wall);
-                //cells[c_idx].owner_idx[cells[c_idx].free_wall_slot_idx] = 1;    
-                cells[c_idx].add_cell_wall(wall_idx);
+    //         if(wall_uniqueness(wall) && neighbour != -1)
+    //         {
+    //             walls.push_back(wall);
+    //             //cells[c_idx].owner_idx[cells[c_idx].free_wall_slot_idx] = 1;    
+    //             cells[c_idx].add_cell_wall(wall_idx);
                 
-                cells[neighbour].add_cell_wall(wall_idx);
-                wall_idx++;
-            }
-        }
-    }
+    //             cells[neighbour].add_cell_wall(wall_idx);
+    //             wall_idx++;
+    //         }
+    //     }
+    // }
 }
 
 void mesh::set_owner_idx()
@@ -444,26 +488,59 @@ void mesh::group_inlets()
 
 void mesh::export_mesh()
 {
-    std::ofstream f(name + "_walls.txt");
-    f << N_walls << "\n";
-    for(auto const& wall : walls)
-    {
-        f << wall.xf << " " << wall.yf << " " << wall.S << "\n";
-        f << wall.n[0] << " " << wall.n[1] << "\n";
-        f << wall.s[0] << " " << wall.s[1] << "\n";
-        f << wall.owner_cell_index << " " << wall.neigbour_cell_index << "\n";
-    }
-    f.close();
+    // std::ofstream f(name + "_walls.txt");
+    // f << N_walls << "\n";
+    // for(auto const& wall : walls)
+    // {
+    //     f << wall.xf << " " << wall.yf << " " << wall.S << "\n";
+    //     f << wall.n[0] << " " << wall.n[1] << "\n";
+    //     f << wall.s[0] << " " << wall.s[1] << "\n";
+    //     f << wall.owner_cell_index << " " << wall.neigbour_cell_index << "\n";
+    // }
+    // f.close();
 
     std::ofstream ff(name + "_cells.txt");
     ff << N_cells << " " << N_ghosts << "\n";
+    int c_idx = 0;
     for(auto const& cell : cells)
     {
+        ff << c_idx << "\n";
         ff << cell.x << " " << cell.y << " " << cell.V << "\n";
-        ff << cell.cell_walls[0] << " " << cell.cell_walls[1] 
-           << " " << cell.cell_walls[2] << " " << cell.cell_walls[3] << "\n";
-        ff << cell.owner_idx[0] << " " << cell.owner_idx[1] << " "
-           << cell.owner_idx[2] << " " << cell.owner_idx[3] << "\n";
+        // ff << cell.cell_walls[0] << " " << cell.cell_walls[1] 
+        //    << " " << cell.cell_walls[2] << " " << cell.cell_walls[3] << "\n";
+        // ff << cell.owner_idx[0] << " " << cell.owner_idx[1] << " "
+        //    << cell.owner_idx[2] << " " << cell.owner_idx[3] << "\n";
+        
+        // for(unsigned int k = 0; k < cell.N_faces; k++)
+        // {
+        //     if(walls[cells[c_idx].cell_walls[k]].neigbour_cell_index == c_idx)
+        //     {
+        //         f << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
+        //     }
+        //     else
+        //     {
+        //         f << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
+        //     }
+        //     ff << " ";
+        // }
+
+        //int k = 0;
+
+        // if(walls[cells[c_idx].cell_walls[k]].neigbour_cell_index == c_idx)
+        // {
+        //     f << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
+        // }
+        // else
+        // {
+        //     f << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
+        // }
+
+        // ff << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
+        // ff << " ";
+        // ff << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
+
+        // ff << "\n\n";
+        c_idx++;
     }
     ff.close();
 }

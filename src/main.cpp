@@ -10,7 +10,7 @@
 int main(int argc, char** argv)
 {
     mesh msh("mesh/" + std::string(argv[1]));
-    //msh.export_mesh();
+    msh.export_mesh();
 
     parameters par;
     config cfg;
