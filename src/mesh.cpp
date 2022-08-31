@@ -35,7 +35,8 @@ cell::cell()
 
 cell::cell(int N_walls, vec1ui nodes, vec2d const& all_nodes)
 {
-    N_faces = nodes.size();
+
+    N_faces = N_walls;
 
     std::vector<double> X,Y;
     X.reserve(N_walls);
@@ -55,9 +56,13 @@ cell::cell(int N_walls, vec1ui nodes, vec2d const& all_nodes)
         V = 0.5*abs( (X[1] - X[0]) * (Y[2] - Y[1]) - (Y[1] - Y[0]) * (X[2] - X[1]) )
             + 0.5*abs( (X[3] - X[2]) * (Y[0] - Y[3]) - (X[0] - X[3]) * (Y[3] - Y[2]) ); 
     }
-    else
+    else if(N_walls == 3)
     {
         V = 0.5*abs( (X[1] - X[0]) * (Y[2] - Y[1]) - (Y[1] - Y[0]) * (X[2] - X[1]) );
+    }
+    else
+    {
+        V = 0;
     }
     
 }
@@ -92,19 +97,19 @@ mesh::mesh(std::string path)
     construct_ghost_cells();
 
     N_cells = N_quads+N_trigs;
+    N = N_quads+N_trigs+N_ghosts;
 
     cells.resize(N_cells+N_ghosts);
 
     construct_cells();
     sort_mesh();
-    // set_owner_idx();
-    // N_walls = walls.size();
-    // N = quads.size();
-
-    // group_inlets();
+    set_owner_idx();
+    N_walls = walls.size();
     
-    // std::cout << "Mesh loaded, number of walls: " << N_walls << " , number of cells: " 
-    //           << N_cells << " number of ghosts: " << N_ghosts << "\n\n";
+    group_inlets();
+    
+    std::cout << "Mesh loaded, number of walls: " << N_walls << " , number of cells: " 
+              << N_cells << " number of ghosts: " << N_ghosts << "\n\n";
 }
 
 template<typename T>
@@ -138,14 +143,14 @@ std::vector<std::vector<T>> mesh::read_segment(std::vector<std::string>& text,in
                 n++;
 				number = (T)(std::stod(word));
 				row.push_back(number+offset);
-				std::cout << row.back() << " ";
+				//std::cout << row.back() << " ";
 				word = "";
 			}
         j++;
 		}
 		res.push_back(row);
 		row.clear();
-		std::cout << "\n";
+		//std::cout << "\n";
 	}
 
     return res;
@@ -297,8 +302,10 @@ void mesh::construct_ghost_cells()
         }
     }
 
+    std::cout << N_ghosts << "\n";
+
     
-    ghosts.resize(N_ghosts,std::vector<uint>(4));
+    ghosts.resize(N_ghosts,std::vector<uint>(2));
     ghost_cell_val.resize(N_ghosts);
 
     int i = 0;
@@ -308,7 +315,8 @@ void mesh::construct_ghost_cells()
        {
             //std::cout << "ghost n: " << i << "\n";
             ghost_cell_val[i] = edge.back();
-            ghosts[i] = (std::vector<unsigned int>{edge[0],edge[1],edge[0],edge[1]});
+            //ghosts[i] = (std::vector<unsigned int>{edge[0],edge[1],edge[0],edge[1]});
+            ghosts[i] = (std::vector<unsigned int>{edge[0],edge[1]});
             i++;     
        }
     }
@@ -320,7 +328,11 @@ void mesh::construct_ghost_cells()
 
 void mesh::sort_mesh()
 {
-    std::vector<std::vector<std::vector<int>>> mask = {{{0,1},{1,2},{2,0}},{{0,1},{1,2},{2,3},{3,0}}}; // quad,trig
+    std::cout << "Sorting mesh...\n";
+    std::vector<std::vector<std::vector<int>>> mask =  {{{0,1}},
+                                                        {{0,1},{1,0}},
+                                                        {{0,1},{1,2},{2,0}},
+                                                        {{0,1},{1,2},{2,3},{3,0}}}; // quad,trig
     std::vector<int> node_vec;
 
     vec2ui polygons = quads;
@@ -335,12 +347,13 @@ void mesh::sort_mesh()
     unsigned int wall_idx = 0;
     for(auto const& cell : cells)
     {
-        mask_i = cell.N_faces-3;
-
+        mask_i = cell.N_faces-1;
+        
         for(int w = 0; w < cell.N_faces; w++)
         {
             node_vec = {int(polygons[c_idx][mask[mask_i][w][0]]),
                         int(polygons[c_idx][mask[mask_i][w][1]])};
+
 
             neighbour = find_neigbour_cell(polygons, node_vec, c_idx);
 
@@ -357,42 +370,12 @@ void mesh::sort_mesh()
                 wall_idx++;
             }
 
-            std::cout << "cell n: " << c_idx << " has neighbour n: " << neighbour << "\n";
+            //std::cout << "cell n: " << c_idx << " has neighbour n: " << neighbour << "\n";
         }
         c_idx++;
     }
 
-
-    // int neighbour;
-
-    // std::vector<std::vector<int>> node_idx = {{0,1},{1,2},{2,3},{3,0}};
-    // std::vector<int> node_vec;
-
-    // unsigned int wall_idx = 0;
-    // for(unsigned int c_idx = 0; c_idx < quads.size(); c_idx++)
-    // {
-    //     for(unsigned int w = 0; w < 4; w++)
-    //     {
-    //         node_vec = {int(quads[c_idx][node_idx[w][0]]),int(quads[c_idx][node_idx[w][1]])};
-    //         neighbour = find_neigbour_cell(node_vec,c_idx);
-
-    //         face wall(nodes[node_vec[0]],nodes[node_vec[1]]);
-    //         wall.owner_cell_index = c_idx;
-    //         wall.neigbour_cell_index = neighbour;
-
-            
-
-    //         if(wall_uniqueness(wall) && neighbour != -1)
-    //         {
-    //             walls.push_back(wall);
-    //             //cells[c_idx].owner_idx[cells[c_idx].free_wall_slot_idx] = 1;    
-    //             cells[c_idx].add_cell_wall(wall_idx);
-                
-    //             cells[neighbour].add_cell_wall(wall_idx);
-    //             wall_idx++;
-    //         }
-    //     }
-    // }
+    std::cout << "Mesh sorted...\n\n";
 }
 
 void mesh::set_owner_idx()
@@ -401,9 +384,10 @@ void mesh::set_owner_idx()
     for(auto& cell : cells)
     {
         int j = 0;
-        for(auto const& w : cell.cell_walls)
+        //for(auto const& w : cell.cell_walls)
+        for(int w = 0; w < cell.N_faces; w++)
         {
-            if(walls[w].owner_cell_index == i)
+            if(walls[cell.cell_walls[w]].owner_cell_index == i)
             {
                 cell.owner_idx[j] = 1;
             }
@@ -415,6 +399,7 @@ void mesh::set_owner_idx()
 
 void mesh::construct_cells()
 {
+    std::cout << "Constructing cells...\n";
     for(uint k = 0; k < N_quads;k++)
     {
         cells[k] = cell(4,quads[k],nodes);
@@ -437,8 +422,10 @@ void mesh::construct_cells()
 
     for(uint k = 0; k < N_ghosts;k++)
     {
-        cells[k+N_quads+N_trigs] = cell(4,ghosts[k],nodes);
+        cells[k+N_quads+N_trigs] = cell(1,ghosts[k],nodes);
     }
+
+    std::cout << "Done!\n\n";
 }
 
 void mesh::group_inlets()
@@ -451,6 +438,8 @@ void mesh::group_inlets()
     for(uint c = 0; c < ghost_cell_val.size(); c++)
     {
         auto val = ghost_cell_val[c];
+
+        std::cout << val << "\n";
 
         if(val != -1 && 
            !std::count(group_idx.begin(),group_idx.end(),val))
@@ -501,45 +490,52 @@ void mesh::group_inlets()
 
 void mesh::export_mesh()
 {
-    // std::ofstream f(name + "_walls.txt");
-    // f << N_walls << "\n";
-    // for(auto const& wall : walls)
-    // {
-    //     f << wall.xf << " " << wall.yf << " " << wall.S << "\n";
-    //     f << wall.n[0] << " " << wall.n[1] << "\n";
-    //     f << wall.s[0] << " " << wall.s[1] << "\n";
-    //     f << wall.owner_cell_index << " " << wall.neigbour_cell_index << "\n";
-    // }
-    // f.close();
+    std::ofstream f(name + "_walls.txt");
+    f << N_walls << "\n";
+
+    int w_idx = 0;
+    for(auto const& wall : walls)
+    {
+        f << w_idx << "\n";
+        f << wall.xf << " " << wall.yf << " " << wall.S << "\n";
+        f << wall.n[0] << " " << wall.n[1] << "\n";
+        //f << wall.s[0] << " " << wall.s[1] << "\n";
+        f << wall.owner_cell_index << " " << wall.neigbour_cell_index << "\n";
+        f << "\n";
+        w_idx++;
+    }
+    f.close();
 
     std::ofstream ff(name + "_cells.txt");
     ff << N_cells << " " << N_ghosts << "\n";
     int c_idx = 0;
-    for(c_idx = 0; c_idx < N_cells; c_idx++)
+    for(c_idx = 0; c_idx < N; c_idx++)
     //for(auto const& cell : cells)
     {
         ff << c_idx << "\n";
         ff << cells[c_idx].x << " " << cells[c_idx].y << " " << cells[c_idx].V << "\n";
-        // ff << cell.cell_walls[0] << " " << cell.cell_walls[1] 
-        //    << " " << cell.cell_walls[2] << " " << cell.cell_walls[3] << "\n";
-        // ff << cell.owner_idx[0] << " " << cell.owner_idx[1] << " "
-        //    << cell.owner_idx[2] << " " << cell.owner_idx[3] << "\n";
         
-        for(unsigned int k = 0; k < cells[c_idx].N_faces; k++)
+        if(cells[c_idx].N_faces > 1)
         {
-            if(walls[cells[c_idx].cell_walls[k]].neigbour_cell_index == c_idx)
+            for(unsigned int k = 0; k < cells[c_idx].N_faces; k++)
             {
-                ff << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
+                if(walls[cells[c_idx].cell_walls[k]].neigbour_cell_index == c_idx)
+                {
+                    ff << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
+                }
+                else
+                {
+                    ff << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
+                }
+                ff << " ";
             }
-            else
-            {
-                ff << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
-            }
-            ff << " ";
         }
-        
+        else
+        {
+            ff << walls[cells[c_idx].cell_walls[0]].owner_cell_index;
+        }
+
         ff << "\n\n";
-        c_idx++;
     }
     ff.close();
 }

@@ -34,7 +34,7 @@ int main(int argc, char** argv)
     //subsonic_outlet(P,7.5e4,par);
     bdr.apply(var,P);
 
-    // solve(var,msh,bdr,par,cfg,P);
+    //solve(var,msh,bdr,par,cfg,P);
     export_vtk(var,msh,"exp.vtk");
     // export_res(var, "res.txt");
 }   
