@@ -332,6 +332,7 @@ void mesh::sort_mesh()
 
     int mask_i;
     int c_idx = 0;
+    unsigned int wall_idx = 0;
     for(auto const& cell : cells)
     {
         mask_i = cell.N_faces-3;
@@ -343,9 +344,21 @@ void mesh::sort_mesh()
 
             neighbour = find_neigbour_cell(polygons, node_vec, c_idx);
 
+            face wall(nodes[node_vec[0]],nodes[node_vec[1]]);
+            wall.owner_cell_index = c_idx;
+            wall.neigbour_cell_index = neighbour;
+
+            if(wall_uniqueness(wall) && neighbour != -1)
+            {
+                walls.push_back(wall);   
+                cells[c_idx].add_cell_wall(wall_idx);
+                
+                cells[neighbour].add_cell_wall(wall_idx);
+                wall_idx++;
+            }
+
             std::cout << "cell n: " << c_idx << " has neighbour n: " << neighbour << "\n";
         }
-
         c_idx++;
     }
 
@@ -502,44 +515,30 @@ void mesh::export_mesh()
     std::ofstream ff(name + "_cells.txt");
     ff << N_cells << " " << N_ghosts << "\n";
     int c_idx = 0;
-    for(auto const& cell : cells)
+    for(c_idx = 0; c_idx < N_cells; c_idx++)
+    //for(auto const& cell : cells)
     {
         ff << c_idx << "\n";
-        ff << cell.x << " " << cell.y << " " << cell.V << "\n";
+        ff << cells[c_idx].x << " " << cells[c_idx].y << " " << cells[c_idx].V << "\n";
         // ff << cell.cell_walls[0] << " " << cell.cell_walls[1] 
         //    << " " << cell.cell_walls[2] << " " << cell.cell_walls[3] << "\n";
         // ff << cell.owner_idx[0] << " " << cell.owner_idx[1] << " "
         //    << cell.owner_idx[2] << " " << cell.owner_idx[3] << "\n";
         
-        // for(unsigned int k = 0; k < cell.N_faces; k++)
-        // {
-        //     if(walls[cells[c_idx].cell_walls[k]].neigbour_cell_index == c_idx)
-        //     {
-        //         f << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
-        //     }
-        //     else
-        //     {
-        //         f << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
-        //     }
-        //     ff << " ";
-        // }
-
-        //int k = 0;
-
-        // if(walls[cells[c_idx].cell_walls[k]].neigbour_cell_index == c_idx)
-        // {
-        //     f << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
-        // }
-        // else
-        // {
-        //     f << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
-        // }
-
-        // ff << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
-        // ff << " ";
-        // ff << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
-
-        // ff << "\n\n";
+        for(unsigned int k = 0; k < cells[c_idx].N_faces; k++)
+        {
+            if(walls[cells[c_idx].cell_walls[k]].neigbour_cell_index == c_idx)
+            {
+                ff << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
+            }
+            else
+            {
+                ff << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
+            }
+            ff << " ";
+        }
+        
+        ff << "\n\n";
         c_idx++;
     }
     ff.close();
