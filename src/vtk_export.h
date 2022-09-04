@@ -117,7 +117,7 @@ void export_res(variables& var, std::string name)
 {
 	std::ofstream f(name);
 
-	for(uint i = 0; i < (uint)(1e6/3000+100); i++)
+	for(uint i = 0; i < (uint)(var.N_res); i++)
 	{
 		f << var.res[i] << "\n";
 	}

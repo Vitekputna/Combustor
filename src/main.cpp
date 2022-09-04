@@ -7,9 +7,13 @@
 #include "solver.h"
 #include "initial_cond.h"
 
+int N_threads;
+
 int main(int argc, char** argv)
 {
     mesh msh("mesh/" + std::string(argv[1]));
+    N_threads = std::stoi(argv[2]);
+
     msh.export_mesh();
 
     parameters par;
@@ -20,12 +24,14 @@ int main(int argc, char** argv)
     cfg.max_res = 1;
     cfg.CFL = 1;
     cfg.bisec_iter = 15;
+    cfg.n_r = 5000;
+    cfg.max_iter = 3e6;
 
     //initial
     double U[4];
     //no_move_flow(U,1e4,300,par);
     move_flow(U,1e4,300,0.2,0,par);
-    variables var(msh.N,msh.N_walls,4,U);
+    variables var(msh.N,msh.N_walls,4,cfg.max_iter/cfg.n_r,U);
 
     //boundary
     double P[20];
@@ -36,7 +42,7 @@ int main(int argc, char** argv)
 
     solve(var,msh,bdr,par,cfg,P);
     export_vtk(var,msh,"exp.vtk");
-    //export_res(var, "res.txt");
+    export_res(var, "res.txt");
 
 
 

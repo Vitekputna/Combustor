@@ -35,7 +35,7 @@ double* array::operator()(int i)
     return arr + i*k;
 }
 
-variables::variables(int N, int N_walls, int dim) : N{N}, dim{dim}, N_walls{N_walls}
+variables::variables(int N, int N_walls, int dim, int N_res) : N{N}, dim{dim}, N_walls{N_walls}, N_res{N_res}
 {
     W.allocate(N*dim,dim);
     wall_flux.allocate(N_walls*dim,dim);
@@ -43,10 +43,10 @@ variables::variables(int N, int N_walls, int dim) : N{N}, dim{dim}, N_walls{N_wa
     p = (double*)(malloc(N*sizeof(double)));
     T = (double*)(malloc(N*sizeof(double)));
     M = (double*)(malloc(N*sizeof(double)));
-    res = (double*)(calloc((int)(1e6/1000+100),sizeof(double)));
+    res = (double*)(calloc((int)(N_res),sizeof(double)));
 }
 
-variables::variables(int N, int N_walls, int dim, double* U) : variables(N, N_walls, dim)
+variables::variables(int N, int N_walls, int dim, int N_res, double* U) : variables(N, N_walls, dim, N_res)
 {
     for(uint n = 0; n < N; n++)  
     {  
