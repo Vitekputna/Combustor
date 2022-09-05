@@ -28,11 +28,6 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
     double delta;
     double res = cfg.max_res*2;
 
-    // #pragma omp parallel
-    // {
-    //     std::cout << "Running on: " << omp_get_thread_num() << " threads\n";
-    // }
-
     do 
     {
         #pragma omp parallel for private(o,n) shared(msh,var,par)
@@ -42,13 +37,6 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
             o = msh.walls[w].owner_cell_index;
 
             HLL_flux(w,n,o,var,par,msh.walls[w]);
-
-            // #pragma omp critical
-            // {
-            //     std::cout << "Thread: " << omp_get_thread_num() << " ,wall: " << w 
-            //               << " ,val: " << var.wall_flux(w,3) << "\n";
-            // }
-
         }
 
         #pragma omp parallel for private(f) shared(var,cfg,msh)
