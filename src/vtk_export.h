@@ -9,7 +9,7 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 {
 	std::ofstream f(name);
 
-	std::cout << "Exporting to paraview format...\n";
+	//std::cout << "Exporting to paraview format...\n";
 
 	f << "# vtk DataFile Version 2.0" << std::endl;
 	f << "Unstructured Grid Example" << std::endl;
@@ -110,7 +110,7 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 	}
 	f << std::endl;
 
-	std::cout << "Done! \n\n";
+	//std::cout << "Done! \n\n";
 }
 
 void export_res(variables& var, std::string name)

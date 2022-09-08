@@ -33,6 +33,8 @@ class boundary
                                  ,&boundary::supersonic_outlet,&boundary::subsonic_inlet
                                  ,&boundary::subsonic_outlet};
 
+    std::vector<int> boundary_func_mask;
+
     friend inline double M_iter_func(boundary const& B, double M, double* P);                                 
 };
 

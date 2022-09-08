@@ -11,16 +11,13 @@ boundary::boundary(mesh const& msh, parameters const& par, config& cfg) : msh{ms
 
 void boundary::apply(variables& var)
 {
-    // for(uint i = 0; i < msh.ghost_cell_idx.size(); i++)
-    // {
-    //     (this->*BC_funcs[msh.ghost_cell_val[i]])(msh.ghost_cell_idx[i],var,
-    //                                              msh,bc_val + msh.ghost_cell_val[i]*4);
-    // }
-
+    int g = 0;
     for(auto const& group : msh.boundary_groups)
     {
-        (this->*BC_funcs[group.group_value])(group.member_idx,var,
-                                                msh,bc_val + group.group_value*4);   
+        //std::cout << boundary_func_mask[g] << "\n";
+        (this->*BC_funcs[(group.group_value + boundary_func_mask[g])])(group.member_idx,var,
+                                                msh,bc_val + (group.group_value + boundary_func_mask[g])*4);
+        g++;
     }
 }
 
@@ -28,25 +25,13 @@ void boundary::apply(variables& var)
 
 void boundary::apply(variables& var, double* bc_val)
 {
-    // for(uint i = 0; i < msh.ghost_cell_idx.size(); i++)
-    // {
-    //     (this->*BC_funcs[msh.ghost_cell_val[i]])(msh.ghost_cell_idx[i],var,
-    //                                              msh,bc_val + msh.ghost_cell_val[i]*4);
-    // }
-
-    // for(auto const& group : msh.boundary_groups)
-    // {
-    //     for(uint i = 0; i < group.member_idx.size(); i++)
-    //     {
-    //         (this->*BC_funcs[group.group_value])(group.member_idx[i],var,
-    //                                              msh,bc_val + group.group_value*4);
-    //     }
-    // }
-
+    int g = 0;
     for(auto const& group : msh.boundary_groups)
-    {   
-        (this->*BC_funcs[group.group_value])(group.member_idx,var,
-                                                msh,bc_val + group.group_value*4);
+    {
+        //std::cout << group.group_value << " " <<  boundary_func_mask[g] << "\n";
+        (this->*BC_funcs[(group.group_value + boundary_func_mask[g])])(group.member_idx,var,
+                                                msh,bc_val + (group.group_value + boundary_func_mask[g])*4);
+        g++;
     }
 }
 

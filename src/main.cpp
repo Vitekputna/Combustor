@@ -8,38 +8,45 @@
 #include "vtk_export.h"
 #include "solver.h"
 #include "initial_cond.h"
+#include "file_input.h"
 
 int N_threads;
 
 int main(int argc, char** argv)
 {
-    mesh msh("mesh/" + std::string(argv[1]));
     N_threads = std::stoi(argv[2]);
 
-    msh.export_mesh();
-
     parameters par;
-
     config cfg;
+    initial_conditions IC;
+
+    mesh msh("mesh/" + std::string(argv[1]));
+
+    //msh.export_mesh();
+
     cfg.n_t = 100;
-    cfg.n_r = 1000;
     cfg.max_res = 1;
     cfg.CFL = 1;
     cfg.bisec_iter = 15;
     cfg.n_r = 5000;
-    cfg.max_iter = 3e6;
+    cfg.max_iter = 1e7;
+    cfg.n_b = 100;
+    cfg.n_exp = 20000;
 
     boundary bdr(msh,par,cfg);
 
-    initial_conditions IC;
-    IC.alfa = 0;
-    IC.Min = 1.5;
-    IC.M_start = 1.5;
-    IC.p_0 = 1e5;
-    IC.p_start = 1e5;
-    IC.p_stat =7.5e4;
-    IC.T_0 = 300;
-    IC.par = par;
+    read_config_files(bdr, cfg, par, IC);
+
+    //IC.alfa = 0;
+    //IC.Min = 1.5;
+    //IC.M_start = 0.2;
+    //IC.p_0 = 1e5;
+    //IC.p_start = 7.5e4;
+    //IC.p_stat =7.5e4;
+    //IC.T_0 = 300;
+    //IC.par = par;
+    //IC.T_start = 300;
+    //IC.alfa_start = 0;
 
     no_move_flow(IC);
 
@@ -47,8 +54,8 @@ int main(int argc, char** argv)
     
     supersonic_inlet(IC);
     supersonic_outlet(IC);
-    //subsonic_inlet(P,1e5,300,0,par);
-    //subsonic_outlet(P,7.5e4,par);
+    subsonic_inlet(IC);
+    subsonic_outlet(IC);
 
     bdr.apply(var,IC.B);
 
