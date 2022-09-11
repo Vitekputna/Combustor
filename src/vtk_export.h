@@ -7,7 +7,7 @@ typedef unsigned int uint;
 
 void export_vtk(variables& var,mesh const& MESH, std::string name)
 {
-	std::ofstream f(name);
+	std::ofstream f("out/" + name);
 
 	//std::cout << "Exporting to paraview format...\n";
 
@@ -115,7 +115,7 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 
 void export_res(variables& var, std::string name)
 {
-	std::ofstream f(name);
+	std::ofstream f("out/" + name);
 
 	for(uint i = 0; i < (uint)(var.N_res); i++)
 	{

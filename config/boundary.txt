@@ -1,0 +1,6 @@
+//boundary configuration file
+
+boundary{0} = supersonic_inlet(100000,300,1.4,0);
+boundary{1} = supersonic_outlet;
+boundary{2} = wall;
+boundary{3} = wall;

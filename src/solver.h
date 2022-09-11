@@ -91,13 +91,15 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
             var.pressure(par); 
             var.temperature(par);
             var.mach_number(par);
-            export_vtk(var,msh,"out/" + msh.name + "_" + std::to_string(t) + ".vtk");
+
+            //std::cout << "out/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(t) + ".vtk" << "\n";
+            
+            export_vtk(var,msh,"timesteps/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(t) + ".vtk");
         }
 
         t++;
         
    } while((res > cfg.max_res || t < cfg.min_iter) && t < cfg.max_iter);
-    ///} while(true);
     
     std::cout << "\n";
 

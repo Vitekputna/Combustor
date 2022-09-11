@@ -1,0 +1,12 @@
+// Program controll file
+
+min_iterations {100};
+max_iterations {70000000};
+max_residue {1};
+residue_idx {3};
+bisection_iterations {15};
+timestep_freq {100};
+residue_freq {5000};
+boundary_freq {100};
+export_freq {20000};
+CFL {1};

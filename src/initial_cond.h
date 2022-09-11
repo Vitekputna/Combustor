@@ -20,17 +20,12 @@ void no_move_flow(initial_conditions& IC)
 
 void move_flow(initial_conditions& IC)
 {
-    std::cout << IC.M_start << "\n";
-
     IC.U[0] = pow(1+(IC.par.gamma-1)/2*IC.M_start*IC.M_start,1/(1-IC.par.gamma))*IC.p_start/IC.par.r/IC.T_start;
     double p = pow(1+(IC.par.gamma-1)/2*IC.M_start*IC.M_start,IC.par.gamma/(1-IC.par.gamma))*IC.p_start;
     double c = sqrt(IC.par.gamma*p/IC.U[0]);
     IC.U[1] = c*IC.M_start*cos(IC.alfa_start)*IC.U[0];
     IC.U[2] = c*IC.M_start*sin(IC.alfa_start)*IC.U[0];
     IC.U[3] = p/(IC.par.gamma-1) + 0.5*(IC.U[1]*IC.U[1] + IC.U[2]*IC.U[2])/IC.U[0];
-
-    std::cout << IC.U[0] << " " << IC.U[1] << " " << IC.U[2] << " " << IC.U[3] << "\n";
-    std::cout << c << " " << p << "\n";
 }
 
 void supersonic_inlet(initial_conditions& IC)

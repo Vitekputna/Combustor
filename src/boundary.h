@@ -11,6 +11,7 @@ class boundary
 
     public:
     boundary(mesh const& msh,parameters const& par, config& cfg);
+    boundary();
 
     mesh const& msh;
     parameters const& par;
@@ -27,11 +28,11 @@ class boundary
     void subsonic_inlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, double* P); //3
     void subsonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, double* P); //4
 
-    // std::vector<func> BC_funcs = {&boundary::wall};
-
-    std::vector<func> BC_funcs = {&boundary::wall,&boundary::supersonic_inlet
-                                 ,&boundary::supersonic_outlet,&boundary::subsonic_inlet
-                                 ,&boundary::subsonic_outlet};
+    std::vector<func> BC_funcs = {&boundary::wall,
+                                  &boundary::supersonic_inlet,
+                                  &boundary::supersonic_outlet,
+                                  &boundary::subsonic_inlet,
+                                  &boundary::subsonic_outlet};
 
     std::vector<int> boundary_func_mask;
 
