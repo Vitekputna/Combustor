@@ -1,5 +1,6 @@
 #pragma once
 #include "data_structures.h"
+#include "boundary.h"
 #include "cmath"
 
 struct initial_conditions
@@ -28,30 +29,29 @@ void move_flow(initial_conditions& IC)
     IC.U[3] = p/(IC.par.gamma-1) + 0.5*(IC.U[1]*IC.U[1] + IC.U[2]*IC.U[2])/IC.U[0];
 }
 
-void supersonic_inlet(initial_conditions& IC)
+void supersonic_inlet(parameters& par, boundary_group& bdr)
 {
-    IC.B[4] = pow(1+(IC.par.gamma-1)/2*IC.Min*IC.Min,1/(1-IC.par.gamma))*IC.p_0/IC.par.r/IC.T_0;
-    double p = pow(1+(IC.par.gamma-1)/2*IC.Min*IC.Min,IC.par.gamma/(1-IC.par.gamma))*IC.p_0;
-    double c = sqrt(IC.par.gamma*IC.par.r*IC.T_0);
-    IC.B[5] = c*IC.Min*cos(IC.alfa)*IC.B[4];
-    IC.B[6] = c*IC.Min*sin(IC.alfa)*IC.B[4];
-    IC.B[7] = p/(IC.par.gamma-1) + 0.5*(IC.B[5]*IC.B[5] + IC.B[6]*IC.B[6])/IC.B[4];   
+    bdr.bc_val.push_back(pow(1+(par.gamma-1)/2*bdr.Min*bdr.Min,1/(1-par.gamma))*bdr.p_0/par.r/bdr.T_0);
+    double p = pow(1+(par.gamma-1)/2*bdr.Min*bdr.Min,par.gamma/(1-par.gamma))*bdr.p_0;
+    double c = sqrt(par.gamma*par.r*bdr.T_0);
+    bdr.bc_val.push_back(c*bdr.Min*cos(bdr.alfa)*bdr.bc_val[0]);
+    bdr.bc_val.push_back(c*bdr.Min*sin(bdr.alfa)*bdr.bc_val[0]);
+    bdr.bc_val.push_back(p/(par.gamma-1) + 0.5*(bdr.bc_val[1]*bdr.bc_val[1] + bdr.bc_val[2]*bdr.bc_val[2])/bdr.bc_val[0]);   
 }
 
-void supersonic_outlet(initial_conditions& IC)
+void supersonic_outlet(parameters& par, boundary_group& bdr)
 {
     //nothing to do here
 }
 
-void subsonic_inlet(initial_conditions& IC)
+void subsonic_inlet(parameters& par, boundary_group& bdr)
 {
-    IC.B[12] = IC.p_0;
-    IC.B[13] = IC.T_0;
-    IC.B[14] = IC.alfa;
-    IC.B[15] = 0;
+    bdr.bc_val.push_back(bdr.p_0);
+    bdr.bc_val.push_back(bdr.T_0);
+    bdr.bc_val.push_back(bdr.alfa);
 }
 
-void subsonic_outlet(initial_conditions& IC)
+void subsonic_outlet(parameters& par, boundary_group& bdr)
 {
-   IC.B[16] = IC.p_stat;
+    bdr.bc_val.push_back(bdr.p_stat);
 }

@@ -87,6 +87,4 @@ class mesh
 
     void export_mesh();
     void import_mesh(std::string path);
-
-    
 };

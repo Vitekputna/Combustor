@@ -37,7 +37,7 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
 
         if(!(t % cfg.n_b))
         {
-            bdr.apply(var,bc_val);
+            bdr.apply(var);
         }
         
         if(!(t % cfg.n_t))

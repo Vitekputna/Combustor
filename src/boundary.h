@@ -5,9 +5,20 @@
 
 typedef unsigned int uint;
 
+struct boundary_group
+{   
+    boundary_group();
+    boundary_group(int i);
+    boundary_group(int i, const std::vector<unsigned int> idxs);
+    std::vector<unsigned int> member_idx;
+    int bc_func_idx;
+    double p_0, T_0, Min, alfa, p_stat;
+    std::vector<double> bc_val;
+};
+
 class boundary
 {
-    typedef void (boundary::*func)(std::vector<uint> const&,variables&,mesh const&,double*);
+    typedef void (boundary::*func)(std::vector<uint> const&,variables&,mesh const&,std::vector<double> const&);
 
     public:
     boundary(mesh const& msh,parameters const& par, config& cfg);
@@ -20,13 +31,12 @@ class boundary
     double bc_val[20];
 
     void apply(variables& var); 
-    void apply(variables& var, double* bc_val); 
 
-    void wall(std::vector<uint> const& group_idx, variables& var, mesh const& msh, double* P); //0
-    void supersonic_inlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, double* P); //1
-    void supersonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, double* P); //2
-    void subsonic_inlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, double* P); //3
-    void subsonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, double* P); //4
+    void wall(std::vector<uint> const& group_idx, variables& var, mesh const& msh, std::vector<double> const& P); //0
+    void supersonic_inlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, std::vector<double> const& P); //1
+    void supersonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, std::vector<double> const& P); //2
+    void subsonic_inlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, std::vector<double> const& P); //3
+    void subsonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, std::vector<double> const& P); //4
 
     std::vector<func> BC_funcs = {&boundary::wall,
                                   &boundary::supersonic_inlet,
@@ -35,6 +45,8 @@ class boundary
                                   &boundary::subsonic_outlet};
 
     std::vector<int> boundary_func_mask;
+
+    std::vector<boundary_group> boundary_groups;
 
     friend inline double M_iter_func(boundary const& B, double M, double* P);                                 
 };

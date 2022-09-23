@@ -10,6 +10,8 @@
 #include "initial_cond.h"
 #include "file_input.h"
 
+#include "startup.h"
+
 int N_threads;
 
 int main(int argc, char** argv)
@@ -21,21 +23,17 @@ int main(int argc, char** argv)
     initial_conditions IC;
 
     mesh msh("mesh/" + std::string(argv[1]));
-
+    
     boundary bdr(msh,par,cfg);
-
-    read_config_files(bdr, cfg, par, IC);
+    
+    read_config_files(msh, bdr, cfg, par, IC);
 
     no_move_flow(IC);
-    supersonic_inlet(IC);
-    supersonic_outlet(IC);
-    subsonic_inlet(IC);
-    subsonic_outlet(IC);
-
+    
     variables var(msh.N,msh.N_walls,4,cfg.max_iter/cfg.n_r,IC.U);
 
-    bdr.apply(var,IC.B);
-
+    bdr.apply(var);
+    
     solve(var,msh,bdr,par,cfg,IC.B);
 
     var.pressure(par);

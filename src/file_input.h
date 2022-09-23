@@ -99,7 +99,23 @@ std::string read_first_word(std::string str)
     return "";
 }
 
-void read_config_files(boundary& bdr, config& cfg, parameters& par, initial_conditions& IC)
+int find_boundaryGroup(int bdr_val, boundary const& bdr, mesh const& msh)
+{
+    int i = 0;
+    for(auto const& group : msh.boundary_groups)
+    {
+        if(bdr_val == group.group_value)
+        {
+            return i;
+        }
+        i++;
+    }
+
+    std::cout << "error: boundary with value: " << bdr_val << " not found\n";
+    return -1;
+}
+
+void read_config_files(mesh const& msh, boundary& bdr, config& cfg, parameters& par, initial_conditions& IC)
 {
     std::string str, keyword;
     double value;
@@ -136,6 +152,7 @@ void read_config_files(boundary& bdr, config& cfg, parameters& par, initial_cond
     //boundary data
     int g_idx;
     int bdrf_val;
+    int mshGidx;
     std::vector<double> g_val;
     std::ifstream stream2("config/boundary.txt");
 
@@ -149,51 +166,55 @@ void read_config_files(boundary& bdr, config& cfg, parameters& par, initial_cond
             if(str.find("wall") != std::string::npos)
             {
                 bdrf_val = 0;
-                bdr.boundary_func_mask.push_back(bdrf_val - g_idx);
+                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
+                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));
 
                 //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
             }
             else if(str.find("supersonic_inlet") != std::string::npos)
             {
-                IC.p_0 = g_val[0];
-                IC.T_0 = g_val[1];
-                IC.Min = g_val[2];
-                IC.alfa = g_val[3];
-
                 bdrf_val = 1;
+                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
+                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));
+                bdr.boundary_groups.back().p_0 = g_val[0];
+                bdr.boundary_groups.back().T_0 = g_val[1];
+                bdr.boundary_groups.back().Min = g_val[2];
+                bdr.boundary_groups.back().alfa = g_val[3];
 
-                bdr.boundary_func_mask.push_back(bdrf_val - g_idx);
+                supersonic_inlet(par,bdr.boundary_groups.back());
 
                 //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
             }
             else if(str.find("supersonic_outlet") != std::string::npos)
             {
                 bdrf_val = 2;
-
-                bdr.boundary_func_mask.push_back(bdrf_val - g_idx);
+                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
+                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));
 
                 //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
             }
             else if(str.find("subsonic_inlet") != std::string::npos)
             {
-                IC.p_0 = g_val[0];
-                IC.T_0 = g_val[1];
-                IC.alfa = g_val[2];
-
                 bdrf_val = 3;
+                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
+                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));                
+                bdr.boundary_groups.back().p_0 = g_val[0];
+                bdr.boundary_groups.back().T_0 = g_val[1];
+                bdr.boundary_groups.back().alfa = g_val[2];
 
-                bdr.boundary_func_mask.push_back(bdrf_val - g_idx);
+                subsonic_inlet(par,bdr.boundary_groups.back());
 
                 //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
             }
             else if(str.find("subsonic_outlet") != std::string::npos)
             {
-                IC.p_stat = g_val[0];
-
                 bdrf_val = 4;
+                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
+                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));   
+                bdr.boundary_groups.back().p_stat = g_val[0];
 
-                bdr.boundary_func_mask.push_back(bdrf_val - g_idx);
-
+                subsonic_outlet(par,bdr.boundary_groups.back());
+                
                 //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
             }
         }
