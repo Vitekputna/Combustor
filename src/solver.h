@@ -27,10 +27,13 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
     int t = 1;
     int r = 0;
     double delta;
+    double time = 0;
+    double last_time = 0;
     double res = cfg.max_res*2;
 
     do 
     {
+        compute_cell_gradient(var,msh);
         compute_wall_flux(var,msh,par,HLL_flux);
         compute_cell_res(var,msh,cfg);
         
@@ -61,27 +64,29 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
             }
 
             std::cout << "                                                                         \r"; 
-            std::cout << "Time iteration: " <<  t << "\t"
+            std::cout << "Time : " <<  time << " s\t"
                       << "Residual: " <<  res << "\t\r" << std::flush;
 
             var.res[r] = res;
             r++;
         }
 
-        if(!(t % cfg.n_exp))
+        if(time - last_time >= cfg.export_interval)
         {
+            last_time = time;
             var.pressure(par); 
             var.temperature(par);
             var.mach_number(par);
 
             //std::cout << "out/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(t) + ".vtk" << "\n";
             
-            export_vtk(var,msh,"timesteps/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(t) + ".vtk");
+            export_vtk(var,msh,"timesteps/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(time) + ".vtk");
         }
 
         t++;
+        time += cfg.dt;
         
-   } while((res > cfg.max_res || t < cfg.min_iter) && t < cfg.max_iter);
+   } while((res > cfg.max_res || t < cfg.min_iter) && t < cfg.max_iter && time < cfg.max_time);
     
     std::cout << "\n";
 

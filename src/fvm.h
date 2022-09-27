@@ -36,3 +36,8 @@ void compute_cell_res(variables& var, mesh const& msh, config const& cfg)
         }
     }
 }
+
+void compute_cell_gradient(variables& var, mesh const& msh)
+{
+    
+}

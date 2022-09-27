@@ -275,6 +275,14 @@ void read_config_files(mesh const& msh, boundary& bdr, config& cfg, parameters& 
             {
                 cfg.dt = value;
             }
+            else if(keyword == "max_time")
+            {
+                cfg.max_time = value;
+            }
+            else if(keyword == "export_interval")
+            {
+                cfg.export_interval = value;
+            }
         }
     }
 }

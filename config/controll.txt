@@ -2,6 +2,7 @@
 
 min_iterations {100};
 max_iterations {70000000};
+max_time {0.5};
 max_residue {1000};
 residue_idx {3};
 bisection_iterations {15};
@@ -9,4 +10,5 @@ timestep_freq {100};
 residue_freq {5000};
 boundary_freq {100};
 export_freq {10000};
-CFL {0.8};
+export_interval {0.001};
+CFL {1};

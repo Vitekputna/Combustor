@@ -30,6 +30,9 @@ struct config
     int min_iter = 100;
     int max_iter = 3e6;
     int bisec_iter = 5;
+
+    double export_interval = 0.1;
+    double max_time = 1;
 };
 
 struct variables
