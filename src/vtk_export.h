@@ -110,6 +110,34 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 	}
 	f << std::endl;
 
+	f << "VECTORS " << "rho_grad" << " float" << std::endl;
+	for (unsigned int j = 0; j < MESH.N_cells; j++)
+	{
+		f << var.grad(j,0) << " " << var.grad(j,1) << " 0" << std::endl;
+	}
+	f << std::endl;
+
+	f << "VECTORS " << "u_grad" << " float" << std::endl;
+	for (unsigned int j = 0; j < MESH.N_cells; j++)
+	{
+		f << var.grad(j,2) << " " << var.grad(j,3) << " 0" << std::endl;
+	}
+	f << std::endl;
+
+	f << "VECTORS " << "v_grad" << " float" << std::endl;
+	for (unsigned int j = 0; j < MESH.N_cells; j++)
+	{
+		f << var.grad(j,4) << " " << var.grad(j,5) << " 0" << std::endl;
+	}
+	f << std::endl;
+
+	f << "VECTORS " << "e_grad" << " float" << std::endl;
+	for (unsigned int j = 0; j < MESH.N_cells; j++)
+	{
+		f << var.grad(j,6) << " " << var.grad(j,7) << " 0" << std::endl;
+	}
+	f << std::endl;
+
 	//std::cout << "Done! \n\n";
 }
 

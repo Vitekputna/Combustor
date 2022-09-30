@@ -22,7 +22,6 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
     omp_set_num_threads(N_threads);
     std::cout << "Running on: " << omp_get_max_threads() << " threads\n";
 
-    int n,o;
     int f;
     int t = 1;
     int r = 0;
@@ -34,6 +33,7 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
     do 
     {
         compute_cell_gradient(var,msh);
+        //grad_limiting(var,msh);
         compute_wall_flux(var,msh,par,HLL_flux);
         compute_cell_res(var,msh,cfg);
         

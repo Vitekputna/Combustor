@@ -17,7 +17,7 @@ array::array(int N, int k) : k{k}
 void array::allocate(int N, int m_k)
 {
     k = m_k;
-    arr = (double*)(malloc(N*sizeof(double)));
+    arr = (double*)(calloc(N,sizeof(double)));
 }
 
 array::~array()
@@ -39,6 +39,7 @@ variables::variables(int N, int N_walls, int dim, int N_res) : N{N}, dim{dim}, N
 {
     W.allocate(N*dim,dim);
     wall_flux.allocate(N_walls*dim,dim);
+    grad.allocate(2*N*dim,2*dim);
 
     p = (double*)(malloc(N*sizeof(double)));
     T = (double*)(malloc(N*sizeof(double)));

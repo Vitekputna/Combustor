@@ -26,7 +26,7 @@ struct config
 
     unsigned int iter,n_t = 50,n_r = 1000,n_b = 100, n_exp = 100000;
     int res_idx = 3;
-    double max_res = 1e-3; 
+    double max_res = 1e-3;
     int min_iter = 100;
     int max_iter = 3e6;
     int bisec_iter = 5;
@@ -41,7 +41,7 @@ struct variables
 
     double *p, *T, *M, *res;
 
-    array W,wall_flux;
+    array W,wall_flux,grad;
 
     variables(int N, int N_walls, int dim, int N_res);
     variables(int N, int N_walls, int dim, int N_res, double* U);
