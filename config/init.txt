@@ -1,6 +1,6 @@
 // Initia condition file
 
-p_init {10000};
+p_init {100000};
 T_init {300};
 M_init {0};
 alfa_init {0};

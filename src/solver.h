@@ -32,7 +32,7 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
 
     do 
     {
-        compute_cell_gradient(var,msh);
+        //compute_cell_gradient(var,msh);
         //grad_limiting(var,msh);
         compute_wall_flux(var,msh,par,HLL_flux);
         compute_cell_res(var,msh,cfg);

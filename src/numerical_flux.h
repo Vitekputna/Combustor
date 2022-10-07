@@ -15,24 +15,16 @@ void HLL_flux(int dim, double* w, double* n, double* o, parameters const& par, f
 
     double phi[4], phi_o[4], phi_n[4];
 
-    // po = thermo::pressure(par,&var.W(o,0));
     po = thermo::pressure(par,o);
-    // pn = thermo::pressure(par,&var.W(n,0));
     pn = thermo::pressure(par,n);
 
-    // co = sqrt(par.gamma*po/var.W(o,0));    
     co = sqrt(par.gamma*po/ o[0]);
-    // cn = sqrt(par.gamma*pn/var.W(n,0));
     cn = sqrt(par.gamma*pn/ n[0]);
 
-    // uo = var.W(o,1)/var.W(o,0);
     uo = o[1]/o[0];
-    // un = var.W(n,1)/var.W(n,0);
     un = n[1]/n[0];
 
-    // vo = var.W(o,2)/var.W(o,0);
     vo = o[2]/o[0];
-    // vn = var.W(n,2)/var.W(n,0);
     vn = n[2]/n[0];
 
     Sn = std::max(un*f.n[0]+vn*f.n[1] + cn,
@@ -46,26 +38,20 @@ void HLL_flux(int dim, double* w, double* n, double* o, parameters const& par, f
 
     for(uint k = 0; k < dim; k++)
     {
-        // phi_n[k] = (un*f.n[0]+vn*f.n[1])*var.W(n,k)+pn*Xn[k];
         phi_n[k] = (un*f.n[0]+vn*f.n[1])*n[k]+pn*Xn[k];
-        // phi_o[k] = (uo*f.n[0]+vo*f.n[1])*var.W(o,k)+po*Xo[k];
         phi_o[k] = (uo*f.n[0]+vo*f.n[1])*o[k]+po*Xo[k];
-        // phi[k] = (Sn*phi_o[k]-So*phi_n[k]+So*Sn*(var.W(n,k)-var.W(o,k)))/(Sn-So);
         phi[k] = (Sn*phi_o[k]-So*phi_n[k]+So*Sn*(n[k]-o[k]))/(Sn-So);
 
         if(Sn <= 0)
         {
-            // var.wall_flux(w,k) = phi_n[k]*f.S;
             w[k] = phi_n[k]*f.S;
         }
         else if(So >= 0)
         {
-            // var.wall_flux(w,k) = phi_o[k]*f.S;
             w[k] = phi_o[k]*f.S;
         }
         else
         {
-            // var.wall_flux(w,k) = phi[k]*f.S;
             w[k] = phi[k]*f.S;
         }
     } 

@@ -1,9 +1,10 @@
 // Program controll file
 
+axisymetric{10,1};
 min_iterations {100};
 max_iterations {70000000};
 max_time {0.5};
-max_residue {1000};
+max_residue {100};
 residue_idx {3};
 bisection_iterations {15};
 timestep_freq {100};

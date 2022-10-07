@@ -283,6 +283,12 @@ void read_config_files(mesh const& msh, boundary& bdr, config& cfg, parameters& 
             {
                 cfg.export_interval = value;
             }
+            else if(keyword == "axisymetric")
+            {
+                std::vector<double> vals = read_multiple_between(str,'(',',',')');
+                
+            }
+
         }
     }
 }

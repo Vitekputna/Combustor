@@ -35,10 +35,9 @@ cell::cell()
 
 cell::cell(int N_walls, vec1ui nodes, vec2d const& all_nodes)
 {
-
     N_faces = N_walls;
     this->cell_walls.resize(N_walls);
-    std::vector<double> X,Y;
+    
     X.reserve(N_walls);
     Y.reserve(N_walls);
 

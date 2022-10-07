@@ -40,6 +40,7 @@ variables::variables(int N, int N_walls, int dim, int N_res) : N{N}, dim{dim}, N
     W.allocate(N*dim,dim);
     wall_flux.allocate(N_walls*dim,dim);
     grad.allocate(2*N*dim,2*dim);
+    alfa.allocate(N*dim,dim);
 
     p = (double*)(malloc(N*sizeof(double)));
     T = (double*)(malloc(N*sizeof(double)));

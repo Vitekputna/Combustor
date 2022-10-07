@@ -41,7 +41,7 @@ struct variables
 
     double *p, *T, *M, *res;
 
-    array W,wall_flux,grad;
+    array W,wall_flux,grad,alfa;
 
     variables(int N, int N_walls, int dim, int N_res);
     variables(int N, int N_walls, int dim, int N_res, double* U);

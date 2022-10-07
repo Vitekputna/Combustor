@@ -52,6 +52,8 @@ void compute_cell_res(variables& var, mesh const& msh, config const& cfg)
                 var.W(c,k) -= cfg.dt/msh.cells[c].V*var.wall_flux(wall,k)*msh.cells[c].owner_idx[f];
                 f++;
             }
+
+            
         }
     }
 }
@@ -103,8 +105,8 @@ void grad_limiting(variables& var, mesh const& msh)
                 double dx = msh.walls[c].xf - msh.cells[w].x;
                 double dy = msh.walls[c].yf - msh.cells[w].y;
 
-                d_max = std::max(d_max,var.grad(c,2*k) + var.grad(c,2*k+1)*dy);
-                d_min = std::min(d_min,var.grad(c,2*k) + var.grad(c,2*k+1)*dy);
+                d_max = std::max(d_max,var.grad(c,2*k)*dx + var.grad(c,2*k+1)*dy);
+                d_min = std::min(d_min,var.grad(c,2*k)*dx + var.grad(c,2*k+1)*dy);
             }
 
 
@@ -119,8 +121,9 @@ void grad_limiting(variables& var, mesh const& msh)
                                                abs((var.W(n,k)-var.W(c,k))/(d_min))));
             }
 
-            var.grad(c,2*k) *= alfa;
-            var.grad(c,2*k+1) *= alfa;
+            var.grad(c,2*k) *= 0.5*alfa;
+            var.grad(c,2*k+1) *= 0.5*alfa;
+            var.alfa(c,k) = 0.5*alfa;
         }
     }
 }

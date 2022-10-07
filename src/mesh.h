@@ -26,8 +26,10 @@ class cell
     public:
     char N_faces;
     double x = 0, y = 0, V;
-    //unsigned int cell_walls[4];
+    std::vector<double> X,Y;
     std::vector<unsigned int> cell_walls;
+    std::vector<unsigned int> cell_node_x;
+    std::vector<unsigned int> cell_node_y;
     unsigned char free_wall_slot_idx = 0;
     int owner_idx[4] = {-1,-1,-1,-1};
 
