@@ -17,7 +17,7 @@ int N_threads;
 int main(int argc, char** argv)
 {
     N_threads = std::stoi(argv[2]);
-
+    std::cout << message;
     parameters par;
     config cfg;
     initial_conditions IC;
@@ -27,14 +27,12 @@ int main(int argc, char** argv)
     boundary bdr(msh,par,cfg);
     
     read_config_files(msh, bdr, cfg, par, IC);
-
-    no_move_flow(IC);
     
-    variables var(msh.N,msh.N_walls,4,cfg.max_iter/cfg.n_r,IC.U);
+    variables var(msh.N,msh.N_walls,cfg.dim,cfg.max_iter/cfg.n_r,IC.U);
 
     bdr.apply(var);
     
-    solve(var,msh,bdr,par,cfg,IC.B);
+    solve(var,msh,bdr,par,cfg);
 
     var.pressure(par);
     var.mach_number(par);

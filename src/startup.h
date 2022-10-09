@@ -1,20 +1,6 @@
 #include <string>
-                                                                                                                                                                   
-std::string message = "                                       bbbbbbbb                                                                                                                                                   "
-"         CCCCCCCCCCCCC                                       b::::::b                                                        tttt                                               \n"      
-"      CCC::::::::::::C                                       b::::::b                                                     ttt:::t                                               \n"     
-"    CC:::::::::::::::C                                       b::::::b                                                     t:::::t                                               \n"    
-"  C:::::CCCCCCCC::::C                                         b:::::b                                                     t:::::t                                               \n"   
-" C:::::C       CCCCCC   ooooooooooo      mmmmmmm    mmmmmmm    b:::::bbbbbbbbb    uuuuuu    uuuuuu      ssssssssss   ttttttt:::::ttttttt       ooooooooooo   rrrrr   rrrrrrrrr   \n"
-"C:::::C               oo:::::::::::oo  mm:::::::m  m:::::::mm  b::::::::::::::bb  u::::u    u::::u    ss::::::::::s  t:::::::::::::::::t     oo:::::::::::oo r::::rrr:::::::::r  \n"
-"C:::::C              o:::::::::::::::om::::::::::mm::::::::::m b::::::::::::::::b u::::u    u::::u  ss:::::::::::::s t:::::::::::::::::t    o:::::::::::::::or:::::::::::::::::r \n"
-"C:::::C              o:::::ooooo:::::om::::::::::::::::::::::m b:::::bbbbb:::::::bu::::u    u::::u  s::::::ssss:::::stttttt:::::::tttttt    o:::::ooooo:::::orr::::::rrrrr::::::r\n"
-"C:::::C              o::::o     o::::om:::::mmm::::::mmm:::::m b:::::b    b::::::bu::::u    u::::u   s:::::s  ssssss       t:::::t          o::::o     o::::o r:::::r     r:::::r\n"
-"C:::::C              o::::o     o::::om::::m   m::::m   m::::m b:::::b     b:::::bu::::u    u::::u     s::::::s            t:::::t          o::::o     o::::o r:::::r     rrrrrrr\n"
-"C:::::C              o::::o     o::::om::::m   m::::m   m::::m b:::::b     b:::::bu::::u    u::::u        s::::::s         t:::::t          o::::o     o::::o r:::::r            \n"
-" C:::::C       CCCCCCo::::o     o::::om::::m   m::::m   m::::m b:::::b     b:::::bu:::::uuuu:::::u  ssssss   s:::::s       t:::::t    tttttto::::o     o::::o r:::::r            \n"
-"  C:::::CCCCCCCC::::Co:::::ooooo:::::om::::m   m::::m   m::::m b:::::bbbbbb::::::bu:::::::::::::::uus:::::ssss::::::s      t::::::tttt:::::to:::::ooooo:::::o r:::::r            \n"
-"   CC:::::::::::::::Co:::::::::::::::om::::m   m::::m   m::::m b::::::::::::::::b  u:::::::::::::::us::::::::::::::s       tt::::::::::::::to:::::::::::::::o r:::::r            \n"
-"     CCC::::::::::::C oo:::::::::::oo m::::m   m::::m   m::::m b:::::::::::::::b    uu::::::::uu:::u s:::::::::::ss          tt:::::::::::tt oo:::::::::::oo  r:::::r            \n"
-"        CCCCCCCCCCCCC   ooooooooooo   mmmmmm   mmmmmm   mmmmmm bbbbbbbbbbbbbbbb       uuuuuuuu  uuuu  sssssssssss              ttttttttttt     ooooooooooo    rrrrrrr            \n"
-"                                                                                                                                                                                 \n";
+                                                                                                                                             
+std::string message =
+"/////////////////////////////////////////////////\n"
+"COMBUSTOR v:0.1\n\n"
+"/////////////////////////////////////////////////\n\n";

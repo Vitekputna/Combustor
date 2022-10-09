@@ -20,6 +20,9 @@ struct parameters
 
 struct config
 {
+    //dimenze ulohy
+    int dim = 4;
+
     double dt = 1e-50;
     //double dt = 1e-6;
     double CFL = 1;
@@ -33,6 +36,11 @@ struct config
 
     double export_interval = 0.1;
     double max_time = 1;
+
+    //axisymetric stuff
+    double b = 5;
+    int r_variable_idx = 1;
+
 };
 
 struct variables

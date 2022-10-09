@@ -6,6 +6,8 @@
 #include "initial_cond.h"
 #include "boundary.h"
 
+// predělat tohle na volání konfiguračních funkcí a ne if elseif špagetu
+
 
 std::string read_between(std::string str, char from, char to)
 {
@@ -149,6 +151,8 @@ void read_config_files(mesh const& msh, boundary& bdr, config& cfg, parameters& 
         }
     }
 
+    move_flow(IC);
+
     //boundary data
     int g_idx;
     int bdrf_val;
@@ -229,65 +233,86 @@ void read_config_files(mesh const& msh, boundary& bdr, config& cfg, parameters& 
         if((str[0] != '/' && str[1] != '/') && !str.empty())
         {
             keyword = read_first_word(str);
-            value = std::stod(read_between(str,'{','}'));
+            
 
             if(keyword == "min_iterations")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.min_iter = value;
             }
             else if(keyword == "max_iterations")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.max_iter = value;
             }
             else if(keyword == "max_residue")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.max_res = value;
             }
             else if(keyword == "residue_idx")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.res_idx = value;
             }
             else if(keyword == "bisection_iterations")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.bisec_iter = value;
             }    
             else if(keyword == "timestep_freq")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.n_t = value;
             }
             else if(keyword == "residue_freq")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.n_r = value;
             }
             else if(keyword == "boundary_freq")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.n_b = value;
             }
             else if(keyword == "export_freq")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.n_exp = value;
             }
             else if(keyword == "CFL")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.CFL = value;
             }
             else if(keyword == "timestep")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.dt = value;
             }
             else if(keyword == "max_time")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.max_time = value;
             }
             else if(keyword == "export_interval")
             {
+                value = std::stod(read_between(str,'{','}'));
                 cfg.export_interval = value;
             }
             else if(keyword == "axisymetric")
             {
-                std::vector<double> vals = read_multiple_between(str,'(',',',')');
-                
+                std::vector<double> vals = read_multiple_between(str,'{',',','}');
+
+                cfg.b = vals[0];
+                cfg.r_variable_idx = (int)(vals[1]);   
             }
+            else if(keyword == "dimension")
+            {
+                value = std::stod(read_between(str,'{','}'));
+                cfg.dim = (int)(value);
+            }
+
 
         }
     }

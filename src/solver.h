@@ -14,7 +14,7 @@ extern int N_threads;
 
 typedef unsigned int uint;
 
-void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cfg,double* bc_val)
+void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cfg)
 {
     std::cout << "////////////////////////////////////////////////////\n";
     std::cout << "Computation running...\n\n";
