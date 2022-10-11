@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 struct array
 {
     int k;
@@ -22,6 +24,7 @@ struct config
 {
     //dimenze ulohy
     int dim = 4;
+    int vel_comp = 2;
 
     double dt = 1e-50;
     //double dt = 1e-6;
@@ -45,14 +48,15 @@ struct config
 
 struct variables
 {
-    int N, N_walls, dim, N_res;
+    int N, N_walls, N_res;
+    int dim, vel_comp;
 
     double *p, *T, *M, *res;
 
-    array W,wall_flux,grad,alfa;
+    array W,wall_flux,grad,alfa,Source;
 
-    variables(int N, int N_walls, int dim, int N_res);
-    variables(int N, int N_walls, int dim, int N_res, double* U);
+    variables(int N, int N_walls, int dim, int vel_comp, int N_res);
+    variables(int N, int N_walls, int dim, int vel_comp, int N_res, std::vector<double>& U);
     ~variables();
 
     void pressure(parameters const& par);

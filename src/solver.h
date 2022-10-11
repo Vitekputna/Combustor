@@ -1,9 +1,13 @@
+#pragma once
+
+#include <iostream>
 #include "data_structures.h"
 #include "boundary.h"
 #include "mesh.h"
 #include "numerical_flux.h"
 #include "time_step.h"
 #include "fvm.h"
+#include "source_functions.h"
 
 #include <limits>
 #include <algorithm>
@@ -25,7 +29,7 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
     int f;
     int t = 1;
     int r = 0;
-    double delta;
+    double delta; 
     double time = 0;
     double last_time = 0;
     double res = cfg.max_res*2;
@@ -34,9 +38,8 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
     {
         //compute_cell_gradient(var,msh);
         //grad_limiting(var,msh);
-        compute_wall_flux(var,msh,par,HLL_flux);
-        compute_cell_res(var,msh,cfg);
-        
+        compute_wall_flux(var,msh,par,HLL_flux_axi);
+        compute_cell_res(var,msh,cfg,no_source_cartesian);
 
         if(!(t % cfg.n_b))
         {
@@ -71,7 +74,7 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
             r++;
         }
 
-        if(time - last_time >= cfg.export_interval)
+        if(time - last_time >= cfg.export_interval)        
         {
             last_time = time;
             var.pressure(par); 

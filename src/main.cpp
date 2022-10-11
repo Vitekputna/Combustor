@@ -28,7 +28,7 @@ int main(int argc, char** argv)
     
     read_config_files(msh, bdr, cfg, par, IC);
     
-    variables var(msh.N,msh.N_walls,cfg.dim,cfg.max_iter/cfg.n_r,IC.U);
+    variables var(msh.N,msh.N_walls,cfg.dim,cfg.vel_comp,cfg.max_iter/cfg.n_r,IC.U);
 
     bdr.apply(var);
     

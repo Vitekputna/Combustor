@@ -37,7 +37,7 @@ Curve Loop(1) = {7, 1, 8, 2, 3, 4, 5, 6};
 //+
 Plane Surface(1) = {1};
 //+
-Physical Surface("internal", 9) = {1};
+Physical Surface("internal", 1) = {1};
 //+
 Physical Curve("left", 1) = {7};
 //+

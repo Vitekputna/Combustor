@@ -10,7 +10,7 @@ double time_step(mesh const& msh,parameters const& par,variables& var)
     for(int i = 0; i < var.N; i++)
     {
         u = sqrt(var.W(i,1)*var.W(i,1) + var.W(i,2)*var.W(i,2));
-        c = sqrt(par.gamma*thermo::pressure(par,var.W(i))/var.W(i,0));
+        c = sqrt(par.gamma*thermo::pressure(var.dim,par,var.W(i))/var.W(i,0));
 
         dt = std::min(dt,msh.min_V/(2*(c+u)));
     }

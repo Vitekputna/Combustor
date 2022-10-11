@@ -35,12 +35,13 @@ double* array::operator()(int i)
     return arr + i*k;
 }
 
-variables::variables(int N, int N_walls, int dim, int N_res) : N{N}, dim{dim}, N_walls{N_walls}, N_res{N_res}
+variables::variables(int N, int N_walls, int dim, int vel_comp, int N_res) : N{N}, dim{dim}, N_walls{N_walls}, N_res{N_res}, vel_comp{vel_comp}
 {
     W.allocate(N*dim,dim);
     wall_flux.allocate(N_walls*dim,dim);
     grad.allocate(2*N*dim,2*dim);
     alfa.allocate(N*dim,dim);
+    Source.allocate(N*dim,dim);
 
     p = (double*)(malloc(N*sizeof(double)));
     T = (double*)(malloc(N*sizeof(double)));
@@ -48,7 +49,7 @@ variables::variables(int N, int N_walls, int dim, int N_res) : N{N}, dim{dim}, N
     res = (double*)(calloc((int)(N_res),sizeof(double)));
 }
 
-variables::variables(int N, int N_walls, int dim, int N_res, double* U) : variables(N, N_walls, dim, N_res)
+variables::variables(int N, int N_walls, int dim, int vel_comp, int N_res, std::vector<double>& U) : variables(N, N_walls, dim, vel_comp, N_res)
 {
     for(uint n = 0; n < N; n++)  
     {  
@@ -71,7 +72,7 @@ void variables::pressure(parameters const& par)
 {
     for(uint i = 0; i < N; i++)
     {
-        p[i] = thermo::pressure(par,W(i));
+        p[i] = thermo::pressure(dim,par,W(i));
     }
 }
 
@@ -79,7 +80,7 @@ void variables::temperature(parameters const& par)
 {
     for(uint i = 0; i < N; i++)
     {
-        T[i] = thermo::temperature(par,W(i));
+        T[i] = thermo::temperature(dim,par,W(i));
     }
 }
 
@@ -87,6 +88,6 @@ void variables::mach_number(parameters const& par)
 {
     for(uint i = 0; i < N; i++)
     {
-        M[i] = thermo::mach_number_stagnate(par,W(i));
+        M[i] = thermo::mach_number_stagnate(dim,par,W(i));
     }
 }

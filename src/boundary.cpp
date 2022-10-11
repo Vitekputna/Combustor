@@ -26,18 +26,26 @@ void boundary::wall(std::vector<uint> const& group_idx, variables& var,mesh cons
     int cell_idx;
     double nx, ny;
 
+    std::vector<double> n(3);
+
     for(auto const& idx : group_idx)
     {
         cell_idx = msh.walls[msh.cells[idx].cell_walls[0]].owner_cell_index;
 
-        nx = msh.walls[msh.cells[idx].cell_walls[0]].n[0];
-        ny = msh.walls[msh.cells[idx].cell_walls[0]].n[1];
+        n[0] = msh.walls[msh.cells[idx].cell_walls[0]].n[0];
+        n[1] = msh.walls[msh.cells[idx].cell_walls[0]].n[1];
+        n[2] = 0;
 
         var.W(idx,0) = var.W(cell_idx,0);
-        var.W(idx,3) = var.W(cell_idx,3);
+        var.W(idx,var.dim-1) = var.W(cell_idx,var.dim-1);
 
-        var.W(idx,1) = var.W(cell_idx,1) - 2*(var.W(cell_idx,1)*nx + var.W(cell_idx,2)*ny)*nx;
-        var.W(idx,2) = var.W(cell_idx,2) - 2*(var.W(cell_idx,1)*nx + var.W(cell_idx,2)*ny)*ny;
+        for(int i = 0; i < var.vel_comp; i++)
+        {
+            var.W(idx,i+1) = var.W(cell_idx,i+1) - 2*(var.W(cell_idx,1)*n[0] + var.W(cell_idx,2)*n[1])*n[i];
+        }
+
+        //var.W(idx,1) = var.W(cell_idx,1) - 2*(var.W(cell_idx,1)*n[0] + var.W(cell_idx,2)*n[1])*n[0];
+        //var.W(idx,2) = var.W(cell_idx,2) - 2*(var.W(cell_idx,1)*n[0] + var.W(cell_idx,2)*n[1])*n[1];
     }
 }
 
@@ -91,45 +99,60 @@ void boundary::subsonic_inlet(std::vector<uint> const& group_idx, variables& var
 
     double rho = thermo::isoentropic_density(par,P[0]/par.r/P[1],Min); //density
     c = sqrt(par.gamma*par.r*thermo::isoentropic_temperature(par,P[1],Min));
-    double ru = rho*c*Min*cos(P[2]);
+    double ru = rho*c*Min*cos(P[2]);        //Pridat uhel vstupního proudu u axisymetrického pripadu
     double rv = rho*c*Min*sin(P[2]);
+    double rw = 0;
+
+    std::vector<double> V = {ru,rv,rw};
 
     for(auto const& idx : group_idx)
     {
         var.W(idx,0) = rho;
-        var.W(idx,1) = ru;
-        var.W(idx,2) = rv;
-        var.W(idx,3) = e;
+
+        for(int i = 0; i < var.vel_comp; i++)
+        {
+            var.W(idx,i+1) = V[i];
+        }
+
+        // var.W(idx,1) = ru;
+        // var.W(idx,2) = rv;
+        var.W(idx,var.dim-1) = e;
     }
 }
 
 void boundary::subsonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, std::vector<double> const& P)
 {
     int cell_idx;
-    double M_max;
+    //double M_max;
 
-    for(auto const& idx : group_idx)
-    {   
-        cell_idx = msh.walls[msh.cells[idx].cell_walls[0]].owner_cell_index;
-        M_max = std::max(0.0,std::abs(thermo::mach_number(par,var.W(cell_idx))));
-    }
+    // for(auto const& idx : group_idx)
+    // {   
+    //     cell_idx = msh.walls[msh.cells[idx].cell_walls[0]].owner_cell_index;
+    //     M_max = std::max(0.0,std::abs(thermo::mach_number(par,var.W(cell_idx))));
+    // }
 
     for(auto const& idx : group_idx)
     {
         cell_idx = msh.walls[msh.cells[idx].cell_walls[0]].owner_cell_index;
 
         var.W(idx,0) = var.W(cell_idx,0);
-        var.W(idx,1) = var.W(cell_idx,1);
-        var.W(idx,2) = var.W(cell_idx,2);
+        // var.W(idx,1) = var.W(cell_idx,1);
+        // var.W(idx,2) = var.W(cell_idx,2);
     
-        if(M_max >= 1)
+        for(int i = 0; i < var.vel_comp; i++)
         {
-            var.W(idx,3) = var.W(cell_idx,3);
+            var.W(idx,i+1) = var.W(cell_idx,i+1);
         }
-        else
-        {
-            var.W(idx,3) = P[0]/(par.gamma-1) + 0.5*(var.W(idx,1)+var.W(idx,2))/var.W(idx,0);
-        }
+
+        var.W(idx,var.dim-1) = P[0]/(par.gamma-1) + 0.5*(var.W(idx,1)+var.W(idx,2))/var.W(idx,0);
+        // if(M_max >= 1)
+        // {
+        //     var.W(idx,3) = var.W(cell_idx,3);
+        // }
+        // else
+        // {
+        //     var.W(idx,3) = P[0]/(par.gamma-1) + 0.5*(var.W(idx,1)+var.W(idx,2))/var.W(idx,0);
+        // }
     }
 }
 

@@ -28,10 +28,7 @@ face::face(vec1d const& a, vec1d const& b)
 
 face::face(){}
 
-cell::cell()
-{
-    x = 0, y = 0;
-}
+cell::cell(){x = 0, y = 0;}
 
 cell::cell(int N_walls, vec1ui nodes, vec2d const& all_nodes)
 {
@@ -72,15 +69,9 @@ void cell::add_cell_wall(unsigned int wall_idx)
     free_wall_slot_idx++;
 }
 
-group::group()
-{
-    member_idx = std::vector<uint>{};
-}
+group::group(){member_idx = std::vector<uint>{};}
 
-mesh::mesh(int i)
-{
-    name = "";
-}
+mesh::mesh(int i){name = "";}
 
 mesh::mesh(std::string path)
 {
@@ -674,6 +665,36 @@ void mesh::import_mesh(std::string path)
     }
 
     file.close();
+}
+
+void mesh::transform_axi_X()
+{
+
+}
+
+void mesh::transform_axi_Y()
+{
+
+}
+
+void mesh::transform_axisymetric(int axis_idx)
+{
+    std::cout << "Axisymetric transformation along ";
+
+    switch (axis_idx)
+    {
+    case 0:
+        std::cout << "x axis\n";
+        transform_axi_X();
+        break;
+    case 1:
+        std::cout << "y axis\n";
+        transform_axi_Y();
+        break;
+    default:
+        std::cout << "\n Error, axis index not available\nCombustor exiting...\n";
+        exit(1);
+    }
 
 
 }

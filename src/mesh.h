@@ -28,8 +28,6 @@ class cell
     double x = 0, y = 0, V;
     std::vector<double> X,Y;
     std::vector<unsigned int> cell_walls;
-    std::vector<unsigned int> cell_node_x;
-    std::vector<unsigned int> cell_node_y;
     unsigned char free_wall_slot_idx = 0;
     int owner_idx[4] = {-1,-1,-1,-1};
 
@@ -89,4 +87,11 @@ class mesh
 
     void export_mesh();
     void import_mesh(std::string path);
+
+    void transform_axisymetric(int axis_idx);
+
+    private:
+
+    void transform_axi_X();
+    void transform_axi_Y();
 };

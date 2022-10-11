@@ -117,114 +117,11 @@ int find_boundaryGroup(int bdr_val, boundary const& bdr, mesh const& msh)
     return -1;
 }
 
-void read_config_files(mesh const& msh, boundary& bdr, config& cfg, parameters& par, initial_conditions& IC)
+void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, initial_conditions& IC)
 {
     std::string str, keyword;
     double value;
 
-    //initial data
-    std::ifstream stream("config/init.txt");
-
-    while(std::getline(stream,str))
-    {
-        if((str[0] != '/' && str[1] != '/') && !str.empty())
-        {
-            keyword = read_first_word(str);
-            value = std::stod(read_between(str,'{','}'));
-
-            if(keyword == "p_init")
-            {
-                IC.p_start = value;
-            }
-            else if(keyword == "T_init")
-            {
-                IC.T_start = value;
-            }
-            else if(keyword == "M_init")
-            {
-                IC.M_start = value;
-            }
-            else if(keyword == "alfa_init")
-            {
-                IC.alfa_start = value;
-            }    
-        }
-    }
-
-    move_flow(IC);
-
-    //boundary data
-    int g_idx;
-    int bdrf_val;
-    int mshGidx;
-    std::vector<double> g_val;
-    std::ifstream stream2("config/boundary.txt");
-
-    while(std::getline(stream2,str))
-    {
-        if((str[0] != '/' && str[1] != '/') && !str.empty())
-        {
-            g_idx = std::stoi(read_between(str,'{','}'));
-            g_val = read_multiple_between(str,'(',',',')');
-
-            if(str.find("wall") != std::string::npos)
-            {
-                bdrf_val = 0;
-                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
-                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));
-
-                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
-            }
-            else if(str.find("supersonic_inlet") != std::string::npos)
-            {
-                bdrf_val = 1;
-                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
-                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));
-                bdr.boundary_groups.back().p_0 = g_val[0];
-                bdr.boundary_groups.back().T_0 = g_val[1];
-                bdr.boundary_groups.back().Min = g_val[2];
-                bdr.boundary_groups.back().alfa = g_val[3];
-
-                supersonic_inlet(par,bdr.boundary_groups.back());
-
-                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
-            }
-            else if(str.find("supersonic_outlet") != std::string::npos)
-            {
-                bdrf_val = 2;
-                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
-                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));
-
-                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
-            }
-            else if(str.find("subsonic_inlet") != std::string::npos)
-            {
-                bdrf_val = 3;
-                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
-                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));                
-                bdr.boundary_groups.back().p_0 = g_val[0];
-                bdr.boundary_groups.back().T_0 = g_val[1];
-                bdr.boundary_groups.back().alfa = g_val[2];
-
-                subsonic_inlet(par,bdr.boundary_groups.back());
-
-                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
-            }
-            else if(str.find("subsonic_outlet") != std::string::npos)
-            {
-                bdrf_val = 4;
-                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
-                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));   
-                bdr.boundary_groups.back().p_stat = g_val[0];
-
-                subsonic_outlet(par,bdr.boundary_groups.back());
-                
-                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
-            }
-        }
-        
-    }
-    
     //controll data
     std::ifstream stream3("config/controll.txt");
 
@@ -302,19 +199,122 @@ void read_config_files(mesh const& msh, boundary& bdr, config& cfg, parameters& 
             }
             else if(keyword == "axisymetric")
             {
-                std::vector<double> vals = read_multiple_between(str,'{',',','}');
+                value = std::stod(read_between(str,'{','}'));
+                cfg.r_variable_idx = (int)(value);   
 
-                cfg.b = vals[0];
-                cfg.r_variable_idx = (int)(vals[1]);   
+                msh.transform_axisymetric(value);
             }
             else if(keyword == "dimension")
             {
                 value = std::stod(read_between(str,'{','}'));
-                cfg.dim = (int)(value);
+                cfg.dim = (int)(value+2);
+                cfg.vel_comp = value;
             }
 
 
         }
+    }
+
+    //initial data
+    std::ifstream stream("config/init.txt");
+
+    while(std::getline(stream,str))
+    {
+        if((str[0] != '/' && str[1] != '/') && !str.empty())
+        {
+            keyword = read_first_word(str);
+            value = std::stod(read_between(str,'{','}'));
+
+            if(keyword == "p_init")
+            {
+                IC.p_start = value;
+            }
+            else if(keyword == "T_init")
+            {
+                IC.T_start = value;
+            }
+            else if(keyword == "M_init")
+            {
+                IC.M_start = value;
+            }
+            else if(keyword == "alfa_init")
+            {
+                IC.alfa_start = value;
+            }    
+        }
+    }
+
+    move_flow(cfg.dim,IC);
+
+    //boundary data
+    int g_idx;
+    int bdrf_val;
+    int mshGidx;
+    std::vector<double> g_val;
+    std::ifstream stream2("config/boundary.txt");
+
+    while(std::getline(stream2,str))
+    {
+        if((str[0] != '/' && str[1] != '/') && !str.empty())
+        {
+            g_idx = std::stoi(read_between(str,'{','}'));
+            g_val = read_multiple_between(str,'(',',',')');
+
+            if(str.find("wall") != std::string::npos)
+            {
+                bdrf_val = 0;
+                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
+                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));
+
+                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
+            }
+            else if(str.find("supersonic_inlet") != std::string::npos)
+            {
+                bdrf_val = 1;
+                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
+                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));
+                bdr.boundary_groups.back().p_0 = g_val[0];
+                bdr.boundary_groups.back().T_0 = g_val[1];
+                bdr.boundary_groups.back().Min = g_val[2];
+                bdr.boundary_groups.back().alfa = g_val[3];
+
+                supersonic_inlet(cfg.dim,par,bdr.boundary_groups.back());
+
+                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
+            }
+            else if(str.find("supersonic_outlet") != std::string::npos)
+            {
+                bdrf_val = 2;
+                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
+                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));
+
+                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
+            }
+            else if(str.find("subsonic_inlet") != std::string::npos)
+            {
+                bdrf_val = 3;
+                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
+                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));                
+                bdr.boundary_groups.back().p_0 = g_val[0];
+                bdr.boundary_groups.back().T_0 = g_val[1];
+                bdr.boundary_groups.back().alfa = g_val[2];
+
+                subsonic_inlet(par,bdr.boundary_groups.back());
+
+                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
+            }
+            else if(str.find("subsonic_outlet") != std::string::npos)
+            {
+                bdrf_val = 4;
+                mshGidx = find_boundaryGroup(g_idx,bdr,msh);
+                bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));   
+                bdr.boundary_groups.back().p_stat = g_val[0];
+
+                subsonic_outlet(par,bdr.boundary_groups.back());
+                
+                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
+            }
+        }   
     }
 }
 

@@ -11,8 +11,8 @@
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-boundary{0} = subsonic_inlet(100000,300,0);          
-boundary{1} = subsonic_outlet(125000);
-boundary{2} = wall;
-boundary{3} = wall;
+boundary{2} = supersonic_outlet;
+boundary{1} = supersonic_inlet(100000,300,1.5,0);
+boundary{0} = wall;
+//boundary{3} = wall;
 //boundary{4} = wall;
