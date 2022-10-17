@@ -669,12 +669,28 @@ void mesh::import_mesh(std::string path)
 
 void mesh::transform_axi_X()
 {
+    for(auto& cell : cells)
+    {
+        cell.V = cell.x*cell.V;
+    }
 
+    for(auto& wall : walls)
+    {
+        wall.S = wall.xf*wall.S;
+    }
 }
 
 void mesh::transform_axi_Y()
 {
+    for(auto& cell : cells)
+    {
+        cell.V = (cell.y)*cell.V;
+    }
 
+    for(auto& wall : walls)
+    {
+        wall.S = (wall.yf)*wall.S;
+    }
 }
 
 void mesh::transform_axisymetric(int axis_idx)

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include "data_structures.h"
+#include "source_functions.h"
 #include "initial_cond.h"
 #include "boundary.h"
 
@@ -201,6 +202,8 @@ void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, i
             {
                 value = std::stod(read_between(str,'{','}'));
                 cfg.r_variable_idx = (int)(value);   
+                
+                
 
                 msh.transform_axisymetric(value);
             }

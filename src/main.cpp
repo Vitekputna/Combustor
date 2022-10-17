@@ -34,10 +34,6 @@ int main(int argc, char** argv)
     
     solve(var,msh,bdr,par,cfg);
 
-    var.pressure(par);
-    var.mach_number(par);
-    var.temperature(par);
-
     export_vtk(var,msh,"exp.vtk");
     export_res(var, "res.txt");
 }   

@@ -38,7 +38,8 @@ void compute_wall_flux(variables& var, mesh const& msh, parameters const& par, v
         }
 }
 
-void compute_cell_res(variables& var, mesh const& msh, config const& cfg,void(*source_func)(double,double*))
+void compute_cell_res(variables& var, mesh const& msh, config const& cfg, parameters const& par,
+                      void(*source_func)(variables&,mesh const&,config const&,parameters const&))
 {
     int f;
     #pragma omp parallel for private(f) shared(var,cfg,msh)
@@ -54,8 +55,9 @@ void compute_cell_res(variables& var, mesh const& msh, config const& cfg,void(*s
             }
             
         }
-        source_func(cfg.dt,var.W(c));
     }
+
+    source_func(var,msh,cfg,par);
 }
 
 void compute_cell_gradient(variables& var, mesh const& msh)

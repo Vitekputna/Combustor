@@ -35,11 +35,12 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
     double res = cfg.max_res*2;
 
     do 
-    {
+    {  
+        var.pressure(par);
         //compute_cell_gradient(var,msh);
         //grad_limiting(var,msh);
         compute_wall_flux(var,msh,par,HLL_flux_axi);
-        compute_cell_res(var,msh,cfg,no_source_cartesian);
+        compute_cell_res(var,msh,cfg,par,no_source_cartesian);
 
         if(!(t % cfg.n_b))
         {
@@ -93,7 +94,6 @@ void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cf
     
     std::cout << "\n";
 
-    var.pressure(par); 
     var.temperature(par);
     var.mach_number(par);
 }
