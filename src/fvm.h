@@ -1,6 +1,7 @@
 #pragma once
 #include "data_structures.h"
 #include "mesh.h"
+#include "math.h"
 
 void reconstruct(int dim, int c, int w, double* Wr, double* W, double* grad, mesh const& msh)
 {
@@ -13,10 +14,10 @@ void reconstruct(int dim, int c, int w, double* Wr, double* W, double* grad, mes
     }
 }
 
-void compute_wall_flux(variables& var, mesh const& msh, parameters const& par, void(*flux)(int dim,
-                                                                                           double* w,
-                                                                                           double* n,
-                                                                                           double* o,
+void compute_wall_flux(variables& var, mesh const& msh, parameters const& par, void(*flux)(int,
+                                                                                           double*,
+                                                                                           double*,
+                                                                                           double*,
                                                                                            parameters const&,
                                                                                            face const&))
 {

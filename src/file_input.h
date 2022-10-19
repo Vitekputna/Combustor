@@ -6,6 +6,7 @@
 #include "source_functions.h"
 #include "initial_cond.h"
 #include "boundary.h"
+#include "solver.h"
 
 // predělat tohle na volání konfiguračních funkcí a ne if elseif špagetu
 
@@ -118,7 +119,7 @@ int find_boundaryGroup(int bdr_val, boundary const& bdr, mesh const& msh)
     return -1;
 }
 
-void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, initial_conditions& IC)
+void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, initial_conditions& IC, solver& sol)
 {
     std::string str, keyword;
     double value;
@@ -203,7 +204,8 @@ void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, i
                 value = std::stod(read_between(str,'{','}'));
                 cfg.r_variable_idx = (int)(value);   
                 
-                
+                sol.source_func = axisymetric_source;
+                sol.flux_func = HLL_flux_axi;
 
                 msh.transform_axisymetric(value);
             }
@@ -319,5 +321,7 @@ void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, i
             }
         }   
     }
+
 }
+
 

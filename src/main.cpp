@@ -21,18 +21,19 @@ int main(int argc, char** argv)
     parameters par;
     config cfg;
     initial_conditions IC;
+    solver sol;
 
     mesh msh("mesh/" + std::string(argv[1]));
     
     boundary bdr(msh,par,cfg);
     
-    read_config_files(msh, bdr, cfg, par, IC);
+    read_config_files(msh, bdr, cfg, par, IC,sol);
     
     variables var(msh.N,msh.N_walls,cfg.dim,cfg.vel_comp,cfg.max_iter/cfg.n_r,IC.U);
 
     bdr.apply(var);
     
-    solve(var,msh,bdr,par,cfg);
+    sol.solve(var,msh,bdr,par,cfg);
 
     export_vtk(var,msh,"exp.vtk");
     export_res(var, "res.txt");

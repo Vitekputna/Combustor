@@ -1,99 +1,18 @@
 #pragma once
-
-#include <iostream>
 #include "data_structures.h"
-#include "boundary.h"
-#include "mesh.h"
-#include "numerical_flux.h"
-#include "time_step.h"
-#include "fvm.h"
 #include "source_functions.h"
+#include "numerical_flux.h"
+#include "mesh.h"
+#include "boundary.h"
 
-#include <limits>
-#include <algorithm>
 
-#include "omp.h"
-
-extern int N_threads;
-
-typedef unsigned int uint;
-
-void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cfg)
+class solver
 {
-    std::cout << "////////////////////////////////////////////////////\n";
-    std::cout << "Computation running...\n\n";
+public:
+    void(*flux_func)(int,double*,double*,double*,parameters const&,face const&) = HLL_flux_axi;
+    void(*source_func)(variables&,mesh const&,config const&,parameters const&) = no_source_cartesian;
 
-    omp_set_num_threads(N_threads);
-    std::cout << "Running on: " << omp_get_max_threads() << " threads\n";
+    solver();
 
-    int f;
-    int t = 1;
-    int r = 0;
-    double delta; 
-    double time = 0;
-    double last_time = 0;
-    double res = cfg.max_res*2;
-
-    do 
-    {  
-        var.pressure(par);
-        //compute_cell_gradient(var,msh);
-        //grad_limiting(var,msh);
-        compute_wall_flux(var,msh,par,HLL_flux_axi);
-        compute_cell_res(var,msh,cfg,par,no_source_cartesian);
-
-        if(!(t % cfg.n_b))
-        {
-            bdr.apply(var);
-        }
-        
-        if(!(t % cfg.n_t))
-        {
-            cfg.dt = cfg.CFL*time_step(msh,par,var);
-        }
-
-        if(!(t % cfg.n_r))
-        {
-            res = 0;
-            for(uint c = 0; c < msh.N_cells; c++)
-            {
-                f = 0,delta = 0;
-                for(auto const& wall : msh.cells[c].cell_walls)
-                {
-                    delta += var.wall_flux(wall,cfg.res_idx)*msh.cells[c].owner_idx[f];
-                    f++;
-                }
-                
-                res = std::max(res,abs(delta));
-            }
-
-            std::cout << "                                                                         \r"; 
-            std::cout << "Time : " <<  time << " s\t"
-                      << "Residual: " <<  res << "\t\r" << std::flush;
-
-            var.res[r] = res;
-            r++;
-        }
-
-        if(time - last_time >= cfg.export_interval)        
-        {
-            last_time = time;
-            var.pressure(par); 
-            var.temperature(par);
-            var.mach_number(par);
-
-            //std::cout << "out/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(t) + ".vtk" << "\n";
-            
-            export_vtk(var,msh,"timesteps/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(time) + ".vtk");
-        }
-
-        t++;
-        time += cfg.dt;
-        
-   } while((res > cfg.max_res || t < cfg.min_iter) && t < cfg.max_iter && time < cfg.max_time);
-    
-    std::cout << "\n";
-
-    var.temperature(par);
-    var.mach_number(par);
-}
+    void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cfg);
+};

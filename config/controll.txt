@@ -6,16 +6,16 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 dimension {3};                  // dimenze úlohy
-axisymetric {1};                // parametry cylindrické transformace úhel výseče a proměnná r: 0 = x, 1 = y
+//axisymetric {1};                // parametry cylindrické transformace úhel výseče a proměnná r: 0 = x, 1 = y
 min_iterations {100};           // minimální počet iterací           
 max_iterations {70000000};      // maximální počet iterací
-max_time {5};                 // maximální čas
+max_time {1.5};                 // maximální čas
 max_residue {100};              // mezní residuum
 residue_idx {4};                // index sledovaného residua
 bisection_iterations {15};      // počet iterací algoritmu pro výpočet M pro podzvukový vstup
 timestep_freq {100};            // počet iterací na výpočet časového kroku
-residue_freq {10000};            // počet iterací na výpočet residua
+residue_freq {10000};           // počet iterací na výpočet residua
 boundary_freq {100};            // počet iterací na výpočet okrajových podmínek
 export_freq {10000};            // počet iterací na export
-export_interval {0.001};        // časový interval exportu dat
+export_interval {0.1};          // časový interval exportu dat
 CFL {1};                        // CFL konstanta

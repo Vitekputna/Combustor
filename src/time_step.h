@@ -1,3 +1,4 @@
+#pragma once
 #include "data_structures.h"
 #include "mesh.h"
 #include "thermodynamics.h"

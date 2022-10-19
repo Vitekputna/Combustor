@@ -1,6 +1,7 @@
 #pragma once
 #include "data_structures.h"
 #include "thermodynamics.h"
+#include "mesh.h"
 
 inline void no_source_cartesian(variables& var, mesh const& msh, config const& cfg, parameters const& par){}
 
