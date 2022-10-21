@@ -16,9 +16,12 @@ namespace thermo
     }
 
     inline double mach_number(int dim, parameters const& par, double* U)
-    {
-        double T = temperature(dim,par,U);
-        return sqrt((U[1]*U[1] + U[2]*U[2] + U[3]*U[3])/U[0]/U[0])/sqrt(par.gamma*par.r*T);
+    {   
+        double p = pressure(dim,par,U);
+        double k = par.gamma;
+        double t = (-1+sqrt(1-4*(k-1)/k*(1/(k-1)-U[dim-1]/p)))/(k-1);
+
+        return sqrt(t);
     }
 
     inline double mach_number_stagnate(int dim, parameters const& par, double* U)

@@ -246,6 +246,10 @@ void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, i
             {
                 IC.alfa_start = value;
             }    
+            else if(keyword == "beta_init")
+            {
+                IC.beta = value;
+            }    
         }
     }
 
@@ -282,6 +286,7 @@ void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, i
                 bdr.boundary_groups.back().T_0 = g_val[1];
                 bdr.boundary_groups.back().Min = g_val[2];
                 bdr.boundary_groups.back().alfa = g_val[3];
+                bdr.boundary_groups.back().beta = g_val[4];
 
                 supersonic_inlet(cfg.dim,par,bdr.boundary_groups.back());
 
@@ -303,6 +308,7 @@ void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, i
                 bdr.boundary_groups.back().p_0 = g_val[0];
                 bdr.boundary_groups.back().T_0 = g_val[1];
                 bdr.boundary_groups.back().alfa = g_val[2];
+                bdr.boundary_groups.back().beta = g_val[3];
 
                 subsonic_inlet(par,bdr.boundary_groups.back());
 

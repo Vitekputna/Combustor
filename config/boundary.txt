@@ -4,21 +4,26 @@
 //
 //  boundary functions: 
 //      wall == no slip condition
-//      supersonic_inlet(p_0, T_0, Min, alfa) == supersonic inlet / fixed mass flow inlet
+//      supersonic_inlet(p_0, T_0, Min, alfa, beta) == supersonic inlet / fixed mass flow inlet
 //      supersonic_outlet == no gradient condition
-//      subsonic_inlet(p_0, T_0, alfa) == subsonic inlet
+//      subsonic_inlet(p_0, T_0, alfa, beta) == subsonic inlet
 //      subsonic_outlet(p_stat) == subsonic outlet with defined static pressure
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //nozzle
 //boundary{0} = wall;
-//boundary{1} = supersonic_inlet(100000,300,2,0);
+//boundary{1} = subsonic_inlet(100000,300,0,0);
 //boundary{2} = supersonic_outlet;
 //boundary{3} = subsonic_outlet(10000);
 //boundary{4} = wall;
 
 //gamm
 boundary{0} = wall;
-boundary{1} = supersonic_inlet(100000,300,2,0);
+boundary{1} = supersonic_inlet(100000,300,1.5,0,0);
 boundary{2} = supersonic_outlet;
+
+//pipe
+//boundary{2} = wall;
+//boundary{0} = supersonic_inlet(100000,300,2,0,0.1);
+//boundary{1} = supersonic_outlet;

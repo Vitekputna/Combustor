@@ -12,7 +12,7 @@ struct boundary_group
     boundary_group(int i, const std::vector<unsigned int> idxs);
     std::vector<unsigned int> member_idx;
     int bc_func_idx;
-    double p_0, T_0, Min, alfa, p_stat;
+    double p_0, T_0, Min, alfa, beta, p_stat;
     std::vector<double> bc_val;
 };
 

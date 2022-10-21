@@ -89,19 +89,23 @@ void boundary::subsonic_inlet(std::vector<uint> const& group_idx, variables& var
     for(auto const& idx : group_idx)
     {
         cell_idx = msh.walls[msh.cells[idx].cell_walls[0]].owner_cell_index;
-        e += var.W(cell_idx,3);
+        e += var.W(cell_idx,var.dim-1);
     }
     e = e/N;
-    
+
     //compute inlet mach number
     double params[5] = {0,1,cfg.bisec_iter*1.0,e,P[0]};
     Min = bisection_method(M_iter_func, *this, params, 2);
 
     double rho = thermo::isoentropic_density(par,P[0]/par.r/P[1],Min); //density
     c = sqrt(par.gamma*par.r*thermo::isoentropic_temperature(par,P[1],Min));
-    double ru = rho*c*Min*cos(P[2]);        //Pridat uhel vstupního proudu u axisymetrického pripadu
-    double rv = rho*c*Min*sin(P[2]);
-    double rw = 0;
+    double ru = rho*c*Min*cos(P[2])*cos(P[3]);
+    double rv = rho*c*Min*sin(P[2])*cos(P[3]);
+    double rw = rho*c*Min*sin(P[3]);
+
+    // std::cout << e << "\n";
+    // std::cout << P[0] << " " << P[1] << " " << P[2] << " " << P[3] << "\n";
+    // std::cout << Min << " " << rho << " " << c << " " << ru << " " << rv << " " << rw << "\n";
 
     std::vector<double> V = {ru,rv,rw};
 

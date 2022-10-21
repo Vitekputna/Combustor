@@ -22,5 +22,7 @@ inline void axisymetric_source(variables& var, mesh const& msh, config const& cf
     for(int c = 0; c < msh.N_cells; c++)
     {
         var.W(c,2) += cfg.dt*var.p[c]/msh.cells[c].y;
+        var.W(c,2) += cfg.dt*var.W(c,0)*var.W(c,3)*var.W(c,3)/msh.cells[c].y;
+        var.W(c,3) += -cfg.dt*var.W(c,0)*var.W(c,2)*var.W(c,3)/msh.cells[c].y;
     }
 }

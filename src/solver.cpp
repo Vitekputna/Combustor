@@ -93,6 +93,11 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, parameters& par, co
         
    } while((res > cfg.max_res || t < cfg.min_iter) && t < cfg.max_iter && time < cfg.max_time);
     
+    // var.pressure(par);
+    // compute_wall_flux(var,msh,par,flux_func);
+    // compute_cell_res(var,msh,cfg,par,source_func);
+
+
     std::cout << "\n";
 
     var.temperature(par);

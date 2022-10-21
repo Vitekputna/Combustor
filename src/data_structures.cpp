@@ -88,6 +88,6 @@ void variables::mach_number(parameters const& par)
 {
     for(uint i = 0; i < N; i++)
     {
-        M[i] = thermo::mach_number_stagnate(dim,par,W(i));
+        M[i] = thermo::mach_number(dim,par,W(i));
     }
 }

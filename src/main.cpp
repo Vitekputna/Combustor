@@ -31,6 +31,9 @@ int main(int argc, char** argv)
     
     variables var(msh.N,msh.N_walls,cfg.dim,cfg.vel_comp,cfg.max_iter/cfg.n_r,IC.U);
 
+    var.pressure(par);
+    var.temperature(par);
+    var.mach_number(par);
     bdr.apply(var);
     
     sol.solve(var,msh,bdr,par,cfg);
