@@ -4,7 +4,7 @@
 #include <string>
 #include "data_structures.h"
 #include "source_functions.h"
-#include "initial_cond.h"
+#include "initial_func.h"
 #include "boundary.h"
 #include "solver.h"
 
@@ -119,7 +119,7 @@ int find_boundaryGroup(int bdr_val, boundary const& bdr, mesh const& msh)
     return -1;
 }
 
-void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, initial_conditions& IC, solver& sol)
+std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, solver& sol)
 {
     std::string str, keyword;
     double value;
@@ -223,6 +223,11 @@ void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, i
     //initial data
     std::ifstream stream("config/init.txt");
 
+    int sur_idx = 0;
+    int n_ps = 0;
+
+    std::vector<initial_conditions> IC_vec;
+
     while(std::getline(stream,str))
     {
         if((str[0] != '/' && str[1] != '/') && !str.empty())
@@ -230,31 +235,49 @@ void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, i
             keyword = read_first_word(str);
             value = std::stod(read_between(str,'{','}'));
 
+            if(keyword == "surface")
+            {
+                sur_idx = value;
+                IC_vec.resize(sur_idx+1);
+                n_ps++;
+            }
+
             if(keyword == "p_init")
             {
-                IC.p_start = value;
+                IC_vec[sur_idx].p_start = value;
             }
             else if(keyword == "T_init")
             {
-                IC.T_start = value;
+                IC_vec[sur_idx].T_start = value;
             }
             else if(keyword == "M_init")
             {
-                IC.M_start = value;
+                IC_vec[sur_idx].M_start = value;
             }
             else if(keyword == "alfa_init")
             {
-                IC.alfa_start = value;
+                IC_vec[sur_idx].alfa_start = value;
             }    
             else if(keyword == "beta_init")
             {
-                IC.beta = value;
+                IC_vec[sur_idx].beta = value;
             }    
         }
     }
 
-    move_flow(cfg.dim,IC);
+    if(n_ps != IC_vec.size())
+    {
+        std::cout << "Error creating physical surface BC, check your settings...\n";
+        exit(1);
+    }
 
+    std::vector<std::vector<double>> ret_vec;
+
+    for(int i = 0; i < IC_vec.size(); i++)
+    {
+        ret_vec.push_back(move_flow(cfg.dim,IC_vec[i]));
+    }
+    
     //boundary data
     int g_idx;
     int bdrf_val;
@@ -328,6 +351,7 @@ void read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, i
         }   
     }
 
+    return ret_vec;
 }
 
 

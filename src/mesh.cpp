@@ -173,6 +173,11 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
     std::string s3 = "Quadrilaterals";
     std::string s4 = "Triangles";
 
+    std::vector<uint> quad_ps;
+    std::vector<uint> trig_ps;
+
+    std::vector<uint> ps_idx = {};
+
     for(int i = 0; i < text_vec.size(); i++)
     {
         if(text_vec[i].find(s1) != std::string::npos)
@@ -191,8 +196,13 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
         {
             //std::cout << "reading Quadrilaterals...\n";
             quads = read_segment<uint>(text_vec,i+1,-1,4);
+            quad_ps.resize(quads.size());
 
-            // tady identifikovat oblasti v síti a převést je na physical surface (idx,value)
+            auto temp = read_segment<uint>(text_vec,i+1,0,5);
+            for(int i = 0; i < temp.size(); i++)
+            {
+                quad_ps[i] = temp[i].back();
+            }
 
             //std::cout << quads.size() << "\n";
         }
@@ -200,11 +210,33 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
         {
             //std::cout << "reading Triangles...\n";
             trigs = read_segment<uint>(text_vec,i+1,-1,3);
+            trig_ps.resize(trigs.size());
+
+            auto temp = read_segment<uint>(text_vec,i+1,0,4);
+            for(int i = 0; i < temp.size(); i++)
+            {
+                trig_ps[i] = temp[i].back();
+            }
+
             //std::cout << trigs.size() << "\n";
         }
     }
 
+    ps_idx.resize(quad_ps.size() + trig_ps.size());
 
+    for(int i = 0; i < quad_ps.size(); i++)
+    {
+        ps_idx[i] = quad_ps[i];
+    }
+    for(int i = quad_ps.size(); i < quad_ps.size()+trig_ps.size();i++)
+    {
+        ps_idx[i] = trig_ps[i];
+    }
+
+    //ps_idx.insert(ps_idx.end(),quad_ps.begin(),quad_ps.end());
+    //ps_idx.insert(ps_idx.end(),trig_ps.begin(),trig_ps.end());
+
+    group_surfaces(ps_idx);
 }
 
 void mesh::print_mesh()
@@ -285,11 +317,7 @@ bool mesh::wall_uniqueness(face const& new_wall)
 
 void mesh::construct_ghost_cells()
 {
-    //std::cout << "constructing ghosts...\n";
-
     N_ghosts = edges.size();
-
-    //std::cout << N_ghosts << "\n";
 
     for(auto const& edge : edges)
     {
@@ -299,9 +327,6 @@ void mesh::construct_ghost_cells()
         }
     }
 
-    //std::cout << N_ghosts << "\n";
-
-    
     ghosts.resize(N_ghosts,std::vector<uint>(2));
     ghost_cell_val.resize(N_ghosts);
 
@@ -310,17 +335,11 @@ void mesh::construct_ghost_cells()
     {  
        if(edge.back() != std::numeric_limits<uint>::max())
        {
-            //std::cout << "ghost n: " << i << "\n";
             ghost_cell_val[i] = edge.back();
-            //ghosts[i] = (std::vector<unsigned int>{edge[0],edge[1],edge[0],edge[1]});
             ghosts[i] = (std::vector<unsigned int>{edge[0],edge[1]});
             i++;     
        }
     }
-
-    //std::cout << "N ghosts: " << N_ghosts << "\n";
-
-
 }
 
 void mesh::sort_mesh()
@@ -464,20 +483,44 @@ void mesh::group_inlets()
                   << " ,size: " << group.member_idx.size() << "\n";
         g++;
     }
+}
 
-    // g = 0;
-    // for(auto const& group : boundary_groups) 
-    // {
-    //     std::cout << "Group: " << g << "\n"; 
+void mesh::group_surfaces(std::vector<uint> data)
+{
+    uint val;
+    std::vector<int> group_idx;
+    std::vector<int> group_size;
 
-    //     for(auto const& item : group.member_idx)
-    //     {
-    //         std::cout << item << " : " << group.group_value << "\n";
-    //     }
+    for(int c = 0; c < data.size(); c++)
+    {
+        val = data[c];
 
-    //     g++;
-    // }
-    // std::cout << "\n";
+        if(!std::count(group_idx.begin(),group_idx.end(),val))
+        {
+            group_idx.push_back(val);
+            group_size.push_back(0);
+            physical_surface.push_back(group());
+        }
+
+        for(uint i = 0; i < group_idx.size(); i++)
+        {
+            if(val == group_idx[i])
+            {
+                group_size[i]++;
+                physical_surface[i].member_idx.push_back(c);
+                physical_surface[i].group_value = val;
+            }
+        }
+    }
+
+    int g = 0;
+    std::cout << "Surface groups: \n";
+    for(auto const& group : physical_surface)
+    {
+        std::cout << "group: " << g << " ,value: " << group.group_value
+                  << " ,size: " << group.member_idx.size() << "\n";
+        g++;
+    }
 }
 
 void mesh::export_mesh()
@@ -502,7 +545,6 @@ void mesh::export_mesh()
     ff << N_cells << " " << N_ghosts << "\n";
     int c_idx = 0;
     for(c_idx = 0; c_idx < N; c_idx++)
-    //for(auto const& cell : cells)
     {
         ff << c_idx << "\n";
         ff << cells[c_idx].x << " " << cells[c_idx].y << " " << cells[c_idx].V << "\n";
@@ -517,26 +559,6 @@ void mesh::export_mesh()
             ff << wall << " ";
         }
         ff << "\n";
-
-        // if(cells[c_idx].N_faces > 1)
-        // {
-        //     for(unsigned int k = 0; k < cells[c_idx].N_faces; k++)
-        //     {
-        //         if(walls[cells[c_idx].cell_walls[k]].neigbour_cell_index == c_idx)
-        //         {
-        //             ff << walls[cells[c_idx].cell_walls[k]].owner_cell_index;
-        //         }
-        //         else
-        //         {
-        //             ff << walls[cells[c_idx].cell_walls[k]].neigbour_cell_index;
-        //         }
-        //         ff << " ";
-        //     }
-        // }
-        // else
-        // {
-        //     ff << walls[cells[c_idx].cell_walls[0]].owner_cell_index;
-        // }
 
         ff << "\n\n";
     }

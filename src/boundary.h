@@ -1,6 +1,6 @@
 #pragma once
+
 #include "mesh.h"
-#include "data_structures.h"
 #include <vector>
 
 typedef unsigned int uint;

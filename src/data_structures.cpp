@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <limits>
 #include <algorithm>
+#include <iostream>
 
 typedef unsigned int uint;
 
@@ -51,13 +52,27 @@ variables::variables(int N, int N_walls, int dim, int vel_comp, int N_res) : N{N
 
 variables::variables(int N, int N_walls, int dim, int vel_comp, int N_res, std::vector<double>& U) : variables(N, N_walls, dim, vel_comp, N_res)
 {
-    for(uint n = 0; n < N; n++)  
+    for(uint n = 0; n < N; n++)
     {  
         for(uint i = 0; i < dim; i++)
         {
             W(n,i) = U[i];
         }
     }
+}
+
+variables::variables(mesh const msh, config const cfg, std::vector<std::vector<double>> U) : variables(msh.N, msh.N_walls, cfg.dim, cfg.vel_comp, cfg.max_iter/cfg.n_r)
+{
+   for(auto const& group : msh.physical_surface)
+   {
+        for(auto const& idx : group.member_idx)
+        {
+            for(uint i = 0; i < dim; i++)
+            {
+                W(idx,i) = U[group.group_value][i];
+            }
+        }
+   }
 }
 
 variables::~variables()

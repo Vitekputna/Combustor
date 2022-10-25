@@ -20,19 +20,21 @@ int main(int argc, char** argv)
     std::cout << message;
     parameters par;
     config cfg;
-    initial_conditions IC;
     solver sol;
 
     mesh msh("mesh/" + std::string(argv[1]));
     
     boundary bdr(msh,par,cfg);
     
-    read_config_files(msh, bdr, cfg, par, IC,sol);
-    
-    variables var(msh.N,msh.N_walls,cfg.dim,cfg.vel_comp,cfg.max_iter/cfg.n_r,IC.U);
-    
+    std::vector<std::vector<double>> IC_vec;
+    IC_vec = read_config_files(msh, bdr, cfg, par, sol);
+
+    std::vector<std::vector<double>> kek;
+
+    variables var(msh, cfg, IC_vec);
+
     sol.solve(var,msh,bdr,par,cfg);
 
     export_vtk(var,msh,"exp.vtk");
     export_res(var, "res.txt");
-}   
+}

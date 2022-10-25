@@ -35,6 +35,8 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, parameters& par, co
     double last_time = 0;
     double res = cfg.max_res*2;
 
+    bdr.apply(var);
+
     do 
     {  
         var.pressure(par);

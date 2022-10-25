@@ -19,9 +19,14 @@
 //boundary{4} = wall;
 
 //gamm
+//boundary{2} = wall;
+//boundary{0} = subsonic_inlet(100000,300,0,0);
+//boundary{1} = subsonic_outlet(85000);
+
+//PS_test
+boundary{2} = wall;
 boundary{0} = wall;
-boundary{1} = subsonic_inlet(100000,300,0,0);
-boundary{2} = subsonic_outlet(95000);
+boundary{1} = wall;
 
 //pipe
 //boundary{2} = wall;

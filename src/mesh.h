@@ -83,6 +83,7 @@ class mesh
     void set_owner_idx();
 
     void group_inlets();
+    void group_surfaces(std::vector<uint> data);
  
     std::vector<double> extract(std::string& text);
 

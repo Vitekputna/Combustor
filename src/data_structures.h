@@ -1,5 +1,5 @@
 #pragma once
-
+#include "mesh.h"
 #include <vector>
 
 struct array
@@ -57,6 +57,7 @@ struct variables
 
     variables(int N, int N_walls, int dim, int vel_comp, int N_res);
     variables(int N, int N_walls, int dim, int vel_comp, int N_res, std::vector<double>& U);
+    variables(mesh const msh, config const cfg, std::vector<std::vector<double>> U);
     ~variables();
 
     void pressure(parameters const& par);
