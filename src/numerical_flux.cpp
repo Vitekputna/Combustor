@@ -3,6 +3,7 @@
 #include "mesh.h"
 #include "thermodynamics.h"
 #include "math.h"
+#include <iostream>
 
 typedef unsigned int uint;
 

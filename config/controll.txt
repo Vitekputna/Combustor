@@ -17,5 +17,5 @@ timestep_freq {100};            // počet iterací na výpočet časového kroku
 residue_freq {10000};           // počet iterací na výpočet residua
 boundary_freq {1};            // počet iterací na výpočet okrajových podmínek
 export_freq {10000};            // počet iterací na export
-export_interval {0.002};          // časový interval exportu dat
+export_interval {0.01};          // časový interval exportu dat
 CFL {1};                        // CFL konstanta
