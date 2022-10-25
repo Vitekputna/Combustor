@@ -191,6 +191,9 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
         {
             //std::cout << "reading Quadrilaterals...\n";
             quads = read_segment<uint>(text_vec,i+1,-1,4);
+
+            // tady identifikovat oblasti v síti a převést je na physical surface (idx,value)
+
             //std::cout << quads.size() << "\n";
         }
         else if(text_vec[i].find(s4) != std::string::npos)
@@ -200,6 +203,8 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
             //std::cout << trigs.size() << "\n";
         }
     }
+
+
 }
 
 void mesh::print_mesh()

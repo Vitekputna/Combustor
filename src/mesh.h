@@ -61,6 +61,7 @@ class mesh
     vec1i ghost_cell_val;
 
     std::vector<group> boundary_groups;
+    std::vector<group> physical_surface;
 
     unsigned int N_cells, N_walls, N_ghosts, N_trigs, N_quads, N;
     double min_V = std::numeric_limits<double>::max();
