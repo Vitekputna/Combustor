@@ -11,11 +11,18 @@ typedef std::vector<unsigned int> vec1ui;
 
 typedef unsigned int uint;
 
+struct vertex
+{
+    std::vector<unsigned int> common_cell_idx = {0,0,0,0,0,0};
+};
+
 class face
 {
     public:
     double xf,yf,S;
-    double n[2], s[2];
+    double n[2],s[2];
+    std::vector<vertex> vertices;
+
     int owner_cell_index, neigbour_cell_index;
     face(vec1d const& a, vec1d const& b);
     face();
@@ -32,7 +39,7 @@ class cell
     int owner_idx[4] = {-1,-1,-1,-1};
 
     cell();
-    cell(int N_walls, vec1ui nodes,vec2d const& all_nodes);
+    cell(char N_walls, vec1ui nodes,vec2d const& all_nodes);
     void add_cell_wall(unsigned int wall_idx);
 };
 
@@ -49,10 +56,13 @@ typedef std::vector<face> face_vec;
 class mesh
 {
     public:
+
+    //things loaded from file
     std::string name;
     vec2d nodes;
     vec2ui edges,quads,trigs;
 
+    //things constructed at runtime
     cell_vec cells;
     face_vec walls;
 
@@ -69,30 +79,28 @@ class mesh
     mesh(int i);
     mesh(std::string path);
     void load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quads);
-
-    template<typename T>
-    std::vector<std::vector<T>> read_segment(std::vector<std::string>& text,int from,int offset, int length);
-
     void print_mesh();
-    void sort_mesh();
+    void export_mesh();
+    void import_mesh(std::string path);
+    void transform_axisymetric(int axis_idx);
 
+    private:
     int find_neigbour_cell(vec2ui const& polygons, vec1i common_nodes_idx,int owner_idx);
     bool wall_uniqueness(face const& new_wall);
     void construct_ghost_cells();
     void construct_cells();
     void set_owner_idx();
+    void expand_ghost_cells();
 
     void group_inlets();
     void group_surfaces(std::vector<uint> data);
  
     std::vector<double> extract(std::string& text);
 
-    void export_mesh();
-    void import_mesh(std::string path);
+    void sort_mesh();
 
-    void transform_axisymetric(int axis_idx);
-
-    private:
+    template<typename T>
+    std::vector<std::vector<T>> read_segment(std::vector<std::string>& text,int from,int offset, int length);
 
     void transform_axi_X();
     void transform_axi_Y();

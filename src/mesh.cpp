@@ -10,10 +10,15 @@ typedef unsigned int uint;
 
 face::face(vec1d const& a, vec1d const& b)
 {
+    vertices.reserve(2);
+
     double sx,sy;
 
     sx = b[0]-a[0];
     sy = b[1]-a[1];
+
+    s[0] = sx;
+    s[1] = sy;
 
     xf = a[0] + sx/2;
 	yf = a[1] + sy/2; 
@@ -22,17 +27,14 @@ face::face(vec1d const& a, vec1d const& b)
 
     n[0] = sy/S;
     n[1] = -sx/S;
-    s[0] = sx;
-    s[1] = sy;
 }
 
 face::face(){}
 
 cell::cell(){x = 0, y = 0;}
 
-cell::cell(int N_walls, vec1ui nodes, vec2d const& all_nodes)
+cell::cell(char N_walls, vec1ui nodes, vec2d const& all_nodes) : N_faces{N_walls}
 {
-    N_faces = N_walls;
     this->cell_walls.resize(N_walls);
     
     X.reserve(N_walls);
@@ -59,6 +61,7 @@ cell::cell(int N_walls, vec1ui nodes, vec2d const& all_nodes)
     else
     {
         V = 0;
+
     }
     
 }
@@ -78,16 +81,16 @@ mesh::mesh(std::string path)
     name = path.substr(0,path.find('.'));
     std::cout << "Loading mesh: " << name << "\n";
 
-    load_mesh(path,nodes,edges,quads);
+    load_mesh(path,nodes,edges,quads); //načtou se data ze souboru
 
-    N_quads = quads.size();
-    N_trigs = trigs.size();
-    N_ghosts = edges.size();
+    N_quads = quads.size(); // počet 4uhelníkových buněk
+    N_trigs = trigs.size(); // počet 3uhelníkových buněk
+    N_ghosts = edges.size(); // počet virtuálních buněk
 
-    construct_ghost_cells();
+    construct_ghost_cells(); // vytvoření dat k fiktivním buňkám
 
-    N_cells = N_quads+N_trigs;
-    N = N_quads+N_trigs+N_ghosts;
+    N_cells = N_quads+N_trigs; // celokový počet reálných buněk
+    N = N_quads+N_trigs+N_ghosts; // celkový počet buněk
 
     cells.resize(N_cells+N_ghosts);
 
@@ -97,6 +100,8 @@ mesh::mesh(std::string path)
     N_walls = walls.size();
     
     group_inlets();
+
+    expand_ghost_cells();
     
     std::cout << "Mesh loaded, number of walls: " << N_walls << " , number of cells: " 
               << N_cells << " number of ghosts: " << N_ghosts << "\n\n";
@@ -233,9 +238,6 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
         ps_idx[i] = trig_ps[i];
     }
 
-    //ps_idx.insert(ps_idx.end(),quad_ps.begin(),quad_ps.end());
-    //ps_idx.insert(ps_idx.end(),trig_ps.begin(),trig_ps.end());
-
     group_surfaces(ps_idx);
 }
 
@@ -317,8 +319,6 @@ bool mesh::wall_uniqueness(face const& new_wall)
 
 void mesh::construct_ghost_cells()
 {
-    N_ghosts = edges.size();
-
     for(auto const& edge : edges)
     {
         if(edge.back() == std::numeric_limits<uint>::max())
@@ -416,6 +416,9 @@ void mesh::set_owner_idx()
 void mesh::construct_cells()
 {
     //std::cout << "Constructing cells...\n";
+
+    std::vector<unsigned int> ghost_vec(3,0);
+
     for(uint k = 0; k < N_quads;k++)
     {
         cells[k] = cell(4,quads[k],nodes);
@@ -442,6 +445,20 @@ void mesh::construct_cells()
     }
 
     //std::cout << "Done!\n\n";
+}
+
+void mesh::expand_ghost_cells()
+{
+    double x_g,y_g;
+
+    for(int i = N_cells; i < N; i++)
+    {
+        cells[walls[cells[i].cell_walls[0]].owner_cell_index];
+
+        x_g = walls[cells[i].cell_walls[0]].xf + walls[cells[i].cell_walls[0]].s[1];
+        y_g = walls[cells[i].cell_walls[0]].yf - walls[cells[i].cell_walls[0]].s[0];
+        
+    }
 }
 
 void mesh::group_inlets()
@@ -680,8 +697,8 @@ void mesh::import_mesh(std::string path)
 
         std::getline(f, text);
         double_vec = extract(text);
-        C.s[0] = double_vec[0];
-        C.s[1] = double_vec[1];
+        // C.s[0] = double_vec[0];
+        // C.s[1] = double_vec[1];
 
         std::getline(f, text);
         double_vec = extract(text);

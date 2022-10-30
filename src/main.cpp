@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
     variables var(msh, cfg, IC_vec);
 
-    sol.solve(var,msh,bdr,par,cfg);
+    //sol.solve(var,msh,bdr,par,cfg);
 
     export_vtk(var,msh,"exp.vtk");
     export_res(var, "res.txt");
