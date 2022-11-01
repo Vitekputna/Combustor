@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     solver sol;
 
     mesh msh("mesh/" + std::string(argv[1]));
-    
+
     boundary bdr(msh,par,cfg);
     
     std::vector<std::vector<double>> IC_vec;
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
     variables var(msh, cfg, IC_vec);
 
-    //sol.solve(var,msh,bdr,par,cfg);
+    sol.solve(var,msh,bdr,par,cfg);
 
     export_vtk(var,msh,"exp.vtk");
     export_res(var, "res.txt");

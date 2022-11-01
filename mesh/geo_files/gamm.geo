@@ -44,3 +44,7 @@ Physical Curve("right", 2) = {3};
 Physical Curve("bottom", 3) = {1, 8, 2};
 //+
 Physical Curve("top", 4) = {6, 5, 4};
+//+
+Plane Surface(2) = {1};
+//+
+Physical Surface("fluid") = {1};

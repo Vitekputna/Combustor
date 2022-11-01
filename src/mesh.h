@@ -41,6 +41,7 @@ class cell
     cell();
     cell(char N_walls, vec1ui nodes,vec2d const& all_nodes);
     void add_cell_wall(unsigned int wall_idx);
+    void ghost(vec1ui nodes,vec2d const& all_nodes);
 };
 
 struct group
@@ -79,6 +80,7 @@ class mesh
     mesh(int i);
     mesh(std::string path);
     void load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quads);
+    void load_msh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quads);
     void print_mesh();
     void export_mesh();
     void import_mesh(std::string path);

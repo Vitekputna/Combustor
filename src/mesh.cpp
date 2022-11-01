@@ -37,8 +37,8 @@ cell::cell(char N_walls, vec1ui nodes, vec2d const& all_nodes) : N_faces{N_walls
 {
     this->cell_walls.resize(N_walls);
     
-    X.reserve(N_walls);
-    Y.reserve(N_walls);
+    X.reserve(std::max((int)N_faces,3));
+    Y.reserve(std::max((int)N_faces,3));
 
     for(int i = 0; i < N_walls; i++)
     {
@@ -49,21 +49,32 @@ cell::cell(char N_walls, vec1ui nodes, vec2d const& all_nodes) : N_faces{N_walls
         y += Y[i]/N_walls;
     }
 
-    if(N_walls == 4)
+    if(N_faces == 4)
     {
         V = 0.5*abs( (X[1] - X[0]) * (Y[2] - Y[1]) - (Y[1] - Y[0]) * (X[2] - X[1]) )
             + 0.5*abs( (X[3] - X[2]) * (Y[0] - Y[3]) - (X[0] - X[3]) * (Y[3] - Y[2]) ); 
     }
-    else if(N_walls == 3)
+    else if(N_faces == 3)
     {
         V = 0.5*abs( (X[1] - X[0]) * (Y[2] - Y[1]) - (Y[1] - Y[0]) * (X[2] - X[1]) );
     }
     else
     {
         V = 0;
-
     }
-    
+}
+
+void cell::ghost(vec1ui nodes,vec2d const& all_nodes)
+{
+    for(int i = 0; i < 3; i++)
+    {
+        X[i] = all_nodes[nodes[i]][0];
+        Y[i] = all_nodes[nodes[i]][1];
+
+        x += X[i]/3;
+        y += Y[i]/3;
+    }
+    V = 0.5*abs( (X[1] - X[0]) * (Y[2] - Y[1]) - (Y[1] - Y[0]) * (X[2] - X[1]) );
 }
 
 void cell::add_cell_wall(unsigned int wall_idx)
@@ -239,6 +250,31 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
     }
 
     group_surfaces(ps_idx);
+}
+
+void mesh::load_msh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quads)
+{
+    std::ifstream file(path);
+    std::cout << "Warning: This reader takes in gmsh format, counting from 1 not zero!!!\n";
+
+	if(file.fail())
+	{
+		std::cout << "//////////////////////////////////// \n";
+		std::cout << "File not found \n";
+		std::cout << "//////////////////////////////////// \n";
+		throw std::exception();
+	}
+
+	std::vector<std::string> text_vec;
+	std::string text;
+
+	// Reading as text file na picu predelat na cteni a formatovani primo ze souboru
+	while (std::getline(file, text))
+	{
+		text_vec.push_back(text);
+	}
+
+
 }
 
 void mesh::print_mesh()
@@ -450,14 +486,22 @@ void mesh::construct_cells()
 void mesh::expand_ghost_cells()
 {
     double x_g,y_g;
+    std::vector<double> G = {0,0,0};
 
     for(int i = N_cells; i < N; i++)
     {
         cells[walls[cells[i].cell_walls[0]].owner_cell_index];
 
-        x_g = walls[cells[i].cell_walls[0]].xf + walls[cells[i].cell_walls[0]].s[1];
-        y_g = walls[cells[i].cell_walls[0]].yf - walls[cells[i].cell_walls[0]].s[0];
-        
+        x_g = walls[cells[i].cell_walls[0]].xf + walls[cells[i].cell_walls[0]].n[0] * walls[cells[i].cell_walls[0]].S;
+        y_g = walls[cells[i].cell_walls[0]].yf + walls[cells[i].cell_walls[0]].n[1] * walls[cells[i].cell_walls[0]].S;
+
+        G = {x_g,y_g,0.0};
+
+        nodes.push_back(G);
+
+        ghosts[i-N_cells].push_back(nodes.size()-1);
+
+        cells[i].ghost(ghosts[i-N_cells],nodes);
     }
 }
 
