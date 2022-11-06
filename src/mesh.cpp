@@ -29,6 +29,35 @@ face::face(vec1d const& a, vec1d const& b)
     n[1] = -sx/S;
 }
 
+face::face(vec1d const& a, vec1d const& b, unsigned int ca, unsigned int cb, unsigned int ia, unsigned int ib)
+{
+    vertices.resize(2);
+
+    vertices[0].node_idx = ia;
+    vertices[0].common_cell_idx[0] = ca;
+    vertices[0].common_cell_idx[1] = cb;
+
+    vertices[1].node_idx = ib;
+    vertices[1].common_cell_idx[0] = ca;
+    vertices[1].common_cell_idx[1] = cb;
+
+    double sx,sy;
+
+    sx = b[0]-a[0];
+    sy = b[1]-a[1];
+
+    s[0] = sx;
+    s[1] = sy;
+
+    xf = a[0] + sx/2;
+	yf = a[1] + sy/2; 
+
+    S = sqrt(sx*sx + sy*sy);
+
+    n[0] = sy/S;
+    n[1] = -sx/S;
+}
+
 face::face(){}
 
 cell::cell(){x = 0, y = 0;}
@@ -113,6 +142,8 @@ mesh::mesh(std::string path)
     group_inlets();
 
     expand_ghost_cells();
+
+    vertex_init();
     
     std::cout << "Mesh loaded, number of walls: " << N_walls << " , number of cells: " 
               << N_cells << " number of ghosts: " << N_ghosts << "\n\n";
@@ -409,7 +440,7 @@ void mesh::sort_mesh()
 
             neighbour = find_neigbour_cell(polygons, node_vec, c_idx);
 
-            face wall(nodes[node_vec[0]],nodes[node_vec[1]]);
+            face wall(nodes[node_vec[0]],nodes[node_vec[1]], c_idx, neighbour,node_vec[0],node_vec[1]);
             wall.owner_cell_index = c_idx;
             wall.neigbour_cell_index = neighbour;
 
@@ -487,6 +518,7 @@ void mesh::expand_ghost_cells()
 {
     double x_g,y_g;
     std::vector<double> G = {0,0,0};
+    ghost_node_offset = nodes.size();
 
     for(int i = N_cells; i < N; i++)
     {
@@ -502,6 +534,38 @@ void mesh::expand_ghost_cells()
         ghosts[i-N_cells].push_back(nodes.size()-1);
 
         cells[i].ghost(ghosts[i-N_cells],nodes);
+    }
+}
+
+void mesh::vertex_init()
+{
+    unsigned int idx;
+
+    vec2ui polygons = quads;
+
+    polygons.insert(polygons.end(),trigs.begin(),trigs.end());
+    polygons.insert(polygons.end(),ghosts.begin(),ghosts.end());
+
+    for(auto& wall : walls)
+    {
+        for(auto& vertex : wall.vertices)
+        {
+            idx = vertex.node_idx;
+            //loop over all quads/trigs and find those containing certain node idx
+            unsigned int cell_idx = 0;
+            for(auto const& poly : polygons)
+            {
+                if(std::find(poly.begin(),poly.end(),idx) != poly.end())
+                {
+                    vertex.common_cell_idx.push_back(cell_idx);
+                }
+                cell_idx++;
+            }
+
+            vertex.common_cell_idx.shrink_to_fit();
+
+            //check if found node is already stored in vertex struct
+        }
     }
 }
 

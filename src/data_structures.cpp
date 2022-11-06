@@ -106,3 +106,18 @@ void variables::mach_number(parameters const& par)
         M[i] = thermo::mach_number(dim,par,W(i));
     }
 }
+
+std::vector<double> variables::compute_vertex_average(vertex const& node, mesh const& msh)
+{
+    std::vector<double> W_avg(dim,0.0);
+
+    for(int k = 0; k < dim; k++)
+    {
+        for(auto const& cell_idx : node.common_cell_idx)        
+        {
+            W_avg[k] += (1/(double)node.common_cell_idx.size())*W(cell_idx,k);
+        }
+    }
+
+    return W_avg;
+}

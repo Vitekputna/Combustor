@@ -13,7 +13,9 @@ typedef unsigned int uint;
 
 struct vertex
 {
-    std::vector<unsigned int> common_cell_idx = {0,0,0,0,0,0};
+    int node_idx;
+    std::vector<unsigned int> common_cell_idx;
+    vertex(){common_cell_idx.reserve(6);}   
 };
 
 class face
@@ -24,8 +26,10 @@ class face
     std::vector<vertex> vertices;
 
     int owner_cell_index, neigbour_cell_index;
-    face(vec1d const& a, vec1d const& b);
+
     face();
+    face(vec1d const& a, vec1d const& b);
+    face(vec1d const& a, vec1d const& b, unsigned int ca, unsigned int cb, unsigned int ia, unsigned int ib);
 };
 
 class cell
@@ -68,6 +72,7 @@ class mesh
     face_vec walls;
 
     int quads_offset;
+    int ghost_node_offset;
     vec2ui ghosts;
     vec1i ghost_cell_val;
 
@@ -90,9 +95,10 @@ class mesh
     int find_neigbour_cell(vec2ui const& polygons, vec1i common_nodes_idx,int owner_idx);
     bool wall_uniqueness(face const& new_wall);
     void construct_ghost_cells();
-    void construct_cells();
+    void construct_cells(); 
     void set_owner_idx();
     void expand_ghost_cells();
+    void vertex_init();
 
     void group_inlets();
     void group_surfaces(std::vector<uint> data);

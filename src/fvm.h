@@ -70,10 +70,11 @@ void compute_cell_gradient(variables& var, mesh const& msh)
     {   
         V = msh.cells[c].V;
 
-        for(int k = 0; k < var.dim; k++) // Neslo by to prehodit s loopem pres steny?
+        for(auto const& w : msh.cells[c].cell_walls)
         {   
             int idx = 0;
-            for(auto const& w : msh.cells[c].cell_walls)
+            
+            for(int k = 0; k < var.dim; k++)
             {
                 n = msh.walls[w].neigbour_cell_index;
                 o = msh.walls[w].owner_cell_index;

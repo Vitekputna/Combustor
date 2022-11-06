@@ -63,4 +63,6 @@ struct variables
     void pressure(parameters const& par);
     void temperature(parameters const& par);
     void mach_number(parameters const& par);
+
+    std::vector<double> compute_vertex_average(vertex const& node, mesh const& msh);
 };

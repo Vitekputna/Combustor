@@ -29,8 +29,6 @@ int main(int argc, char** argv)
     std::vector<std::vector<double>> IC_vec;
     IC_vec = read_config_files(msh, bdr, cfg, par, sol);
 
-    std::vector<std::vector<double>> kek;
-
     variables var(msh, cfg, IC_vec);
 
     sol.solve(var,msh,bdr,par,cfg);
