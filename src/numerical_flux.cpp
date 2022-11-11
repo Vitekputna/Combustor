@@ -7,18 +7,20 @@
 
 typedef unsigned int uint;
 
-void HLL_flux(int dim, double* w, double* n, double* o, parameters const& par, face const& f)
+void HLL_flux(int vel_comp, int n_comp, double* w, double* n, double* o, parameters const& par, face const& f)
 {
+    int dim = n_comp+vel_comp+1;
+
     double So,Sn;
     double uo,vo;
     double po,pn;
     double un,vn;
     double co,cn;
 
-    double phi[4], phi_o[4], phi_n[4];
+    double phi[dim], phi_o[dim], phi_n[dim];
 
-    po = thermo::pressure(dim,par,o);
-    pn = thermo::pressure(dim,par,n);
+    po = thermo::pressure(vel_comp,n_comp,par,o);
+    pn = thermo::pressure(vel_comp,n_comp,par,n);
 
     co = sqrt(par.gamma*po/ o[0]);
     cn = sqrt(par.gamma*pn/ n[0]);
@@ -35,8 +37,25 @@ void HLL_flux(int dim, double* w, double* n, double* o, parameters const& par, f
     So = std::min(un*f.n[0]+vn*f.n[1] - cn,
                   uo*f.n[0]+vo*f.n[1] - co);    
 
-    double Xn[4] = {0,f.n[0],f.n[1],un*f.n[0]+vn*f.n[1]};
-    double Xo[4] = {0,f.n[0],f.n[1],uo*f.n[0]+vo*f.n[1]};
+    double Xn[dim];// = {0,f.n[0],f.n[1],un*f.n[0]+vn*f.n[1]};
+    double Xo[dim];// = {0,f.n[0],f.n[1],uo*f.n[0]+vo*f.n[1]};
+
+    for(int n = 0; n < n_comp; n++)
+    {
+        Xn[n] = 0;
+        Xo[n] = 0;
+    }
+
+    double vel_X[3] = {f.n[0],f.n[1],0}; 
+
+    for(int v = 0; v < vel_comp; v++)
+    {
+        Xn[v+n_comp] = vel_X[v];
+        Xo[v+n_comp] = vel_X[v];
+    }
+
+    Xn[dim-1] = un*f.n[0]+vn*f.n[1];
+    Xo[dim-1] = uo*f.n[0]+vo*f.n[1];
 
     for(uint k = 0; k < dim; k++)
     {
@@ -59,18 +78,20 @@ void HLL_flux(int dim, double* w, double* n, double* o, parameters const& par, f
     } 
 } 
 
-void HLL_flux_axi(int dim, double* w, double* n, double* o, parameters const& par, face const& f)
+void HLL_flux_axi(int vel_comp, int n_comp, double* w, double* n, double* o, parameters const& par, face const& f)
 {
+    int dim = n_comp+vel_comp+1;
+
     double So,Sn;
     double uo,vo;
     double po,pn;
     double un,vn;
     double co,cn;
 
-    double phi[4], phi_o[4], phi_n[4];
+    double phi[dim], phi_o[dim], phi_n[dim];
 
-    po = thermo::pressure(dim,par,o);
-    pn = thermo::pressure(dim,par,n);
+    po = thermo::pressure(vel_comp,n_comp,par,o);
+    pn = thermo::pressure(vel_comp,n_comp,par,n);
 
     co = sqrt(par.gamma*po/ o[0]);
     cn = sqrt(par.gamma*pn/ n[0]);
@@ -87,8 +108,8 @@ void HLL_flux_axi(int dim, double* w, double* n, double* o, parameters const& pa
     So = std::min(un*f.n[0]+vn*f.n[1] - cn,
                   uo*f.n[0]+vo*f.n[1] - co);    
 
-    double Xn[5] = {0,f.n[0],f.n[1],0,un*f.n[0]+vn*f.n[1]};
-    double Xo[5] = {0,f.n[0],f.n[1],0,uo*f.n[0]+vo*f.n[1]};
+    double Xn[dim] = {0,f.n[0],f.n[1],0,un*f.n[0]+vn*f.n[1]};
+    double Xo[dim] = {0,f.n[0],f.n[1],0,uo*f.n[0]+vo*f.n[1]};
 
     for(uint k = 0; k < dim; k++)
     {

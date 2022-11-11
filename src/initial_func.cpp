@@ -12,15 +12,14 @@ void no_move_flow(int dim, initial_conditions& IC)
     IC.U.push_back(IC.p_start/(IC.par.gamma-1));
 }
 
-std::vector<double> move_flow(int dim, initial_conditions& IC)
+std::vector<double> move_flow(int vel_comp, int n_comp, initial_conditions& IC)
 {
-    int vel_comp = dim-2;
+    //hustoty chemických složek
+    for(int n = 0; n < n_comp; n++)
+    {
+        IC.U.push_back(IC.p_start/IC.par.r/IC.T_start);
+    }
 
-    // IC.U.push_back(pow(1/(1-IC.par.1+(IC.par.gamma-1)/2*IC.M_start*IC.M_start,gamma))*IC.p_start/IC.par.r/IC.T_start);
-    // double p = pow(1+(IC.par.gamma-1)/2*IC.M_start*IC.M_start,IC.par.gamma/(1-IC.par.gamma))*IC.p_start;
-    // double c = sqrt(IC.par.gamma*p/IC.U[0]);
-
-    IC.U.push_back(IC.p_start/IC.par.r/IC.T_start);
     double p = IC.p_start;
     double p_o = pow(1+(IC.par.gamma-1)/2*IC.M_start*IC.M_start,IC.par.gamma/(IC.par.gamma-1))*IC.p_start;
     double T_o = (1+(IC.par.gamma-1)/2*IC.M_start*IC.M_start)*IC.T_start;
@@ -32,19 +31,19 @@ std::vector<double> move_flow(int dim, initial_conditions& IC)
         IC.U.push_back(c*IC.M_start*cos(IC.alfa_start)*IC.U[0]);
         IC.U.push_back(c*IC.M_start*sin(IC.alfa_start)*IC.U[0]);
 
-        IC.U.push_back(p/(IC.par.gamma-1) + 0.5*(IC.U[1]*IC.U[1] + IC.U[2]*IC.U[2])/IC.U[0]);
+        IC.U.push_back(p/(IC.par.gamma-1) + 0.5*(IC.U[n_comp]*IC.U[n_comp] + IC.U[n_comp +1]*IC.U[n_comp +1])/IC.U[0]);
 
-        return std::vector<double>{IC.U[0], IC.U[1], IC.U[2], IC.U[3]};
+        return IC.U;
         break;
 
-    case 3: // pridat uhel rotace proudu
+    case 3:
         IC.U.push_back(c*IC.M_start*cos(IC.alfa_start)*cos(IC.beta)*IC.U[0]);
         IC.U.push_back(c*IC.M_start*sin(IC.alfa_start)*cos(IC.beta)*IC.U[0]);
         IC.U.push_back(c*IC.M_start*sin(IC.beta)*IC.U[0]);
 
-        IC.U.push_back(p/(IC.par.gamma-1) + 0.5*(IC.U[1]*IC.U[1] + IC.U[2]*IC.U[2] + IC.U[3]*IC.U[3])/IC.U[0]);
+        IC.U.push_back(p/(IC.par.gamma-1) + 0.5*(IC.U[n_comp]*IC.U[n_comp] + IC.U[n_comp + 1]*IC.U[n_comp + 1] + IC.U[n_comp + 2]*IC.U[n_comp + 2])/IC.U[0]);
 
-        return std::vector<double>{IC.U[0], IC.U[1], IC.U[2], IC.U[3], IC.U[4]};
+        return IC.U;
         break;
 
     default:

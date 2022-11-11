@@ -212,13 +212,21 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
             else if(keyword == "dimension")
             {
                 value = std::stod(read_between(str,'{','}'));
-                cfg.dim = (int)(value+2);
+                // cfg.dim = (int)(value+2);
                 cfg.vel_comp = value;
             }
-
-
+            else if(keyword == "compounds")
+            {
+                value = std::stod(read_between(str,'{','}'));
+                cfg.n_comp = value;
+            }
         }
     }
+
+    cfg.dim = cfg.n_comp + cfg.vel_comp + 1; //chemicke slozky + slozky hybnosti + energie
+    if(cfg.res_idx < 0) cfg.res_idx = cfg.dim;
+
+
 
     //initial data
     std::ifstream stream("config/init.txt");
@@ -261,7 +269,14 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
             else if(keyword == "beta_init")
             {
                 IC_vec[sur_idx].beta = value;
-            }    
+            } 
+            else if(keyword == "composition")
+            {
+                std::vector<double> values = read_multiple_between(str,'{',',','}');
+
+                IC_vec[sur_idx].composition.push_back(values[0]);
+                IC_vec[sur_idx].composition_mass_frac.push_back(values[1]);
+            }
         }
     }
 
@@ -271,11 +286,13 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
         exit(1);
     }
 
+    //Creating initial conditions
+
     std::vector<std::vector<double>> ret_vec;
 
     for(int i = 0; i < IC_vec.size(); i++)
     {
-        ret_vec.push_back(move_flow(cfg.dim,IC_vec[i]));
+        ret_vec.push_back(move_flow(cfg.vel_comp,cfg.n_comp,IC_vec[i]));
     }
     
     //boundary data

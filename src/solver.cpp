@@ -40,9 +40,12 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, parameters& par, co
     do 
     {  
         var.pressure(par);
+        var.temperature(par);
         //compute_cell_gradient(var,msh);
         //grad_limiting(var,msh);
+        compute_wall_T_gradiend(var,msh);
         compute_wall_flux(var,msh,par,flux_func);
+        compute_diffusive_flux(var,msh,cfg,par);
         compute_cell_res(var,msh,cfg,par,source_func);
 
         if(!(t % cfg.n_b))
@@ -52,7 +55,7 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, parameters& par, co
         
         if(!(t % cfg.n_t))
         {
-            cfg.dt = cfg.CFL*time_step(msh,par,var);
+            cfg.dt = cfg.CFL*time_step(msh,par,cfg,var);
         }
 
         if(!(t % cfg.n_r))
@@ -94,14 +97,6 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, parameters& par, co
         time += cfg.dt;
         
    } while((res > cfg.max_res || t < cfg.min_iter) && t < cfg.max_iter && time < cfg.max_time);
-    
-    // for(int i = 0; i < 100; i++)
-    // {
-    //     var.pressure(par);
-    //     bdr.apply(var);
-    //     compute_wall_flux(var,msh,par,flux_func);
-    //     compute_cell_res(var,msh,cfg,par,source_func);  
-    // }
 
     std::cout << "\n";
 

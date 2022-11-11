@@ -9,7 +9,7 @@
 class solver
 {
 public:
-    void(*flux_func)(int,double*,double*,double*,parameters const&,face const&) = HLL_flux_axi;
+    void(*flux_func)(int,int,double*,double*,double*,parameters const&,face const&) = HLL_flux;
     void(*source_func)(variables&,mesh const&,config const&,parameters const&) = no_source_cartesian;
 
     solver();

@@ -14,7 +14,7 @@ void reconstruct(int dim, int c, int w, double* Wr, double* W, double* grad, mes
     }
 }
 
-void compute_wall_flux(variables& var, mesh const& msh, parameters const& par, void(*flux)(int,
+void compute_wall_flux(variables& var, mesh const& msh, parameters const& par, void(*flux)(int,int,
                                                                                            double*,
                                                                                            double*,
                                                                                            double*,
@@ -27,16 +27,24 @@ void compute_wall_flux(variables& var, mesh const& msh, parameters const& par, v
     double Wn[var.dim];
 
     #pragma omp parallel for private(o,n,Wn,Wo) shared(msh,var,par)
-        for(int w = 0; w < msh.N_walls;w++)
-        {
-            n = msh.walls[w].neigbour_cell_index;
-            o = msh.walls[w].owner_cell_index;
+    for(int w = 0; w < msh.N_walls;w++)
+    {
+        n = msh.walls[w].neigbour_cell_index;
+        o = msh.walls[w].owner_cell_index;
 
-            reconstruct(var.dim,o,w,Wo,var.W(o),var.grad(o),msh);
-            reconstruct(var.dim,n,w,Wn,var.W(n),var.grad(n),msh);
+        reconstruct(var.dim,o,w,Wo,var.W(o),var.grad(o),msh);
+        reconstruct(var.dim,n,w,Wn,var.W(n),var.grad(n),msh);
 
-            flux(var.dim,var.wall_flux(w),Wn,Wo,par,msh.walls[w]);
-        }
+        flux(var.vel_comp,var.n_comp,var.wall_flux(w),Wn,Wo,par,msh.walls[w]);
+    }
+}
+
+void compute_diffusive_flux(variables& var, mesh const& msh, config const& cfg, parameters const& par)
+{
+    for(int i = 0; i < msh.N_walls; i++)
+    {
+        var.diff_flux(i,4) = par.lambda*msh.walls[i].S*var.T_grad[i];
+    }
 }
 
 void compute_cell_res(variables& var, mesh const& msh, config const& cfg, parameters const& par,
@@ -51,10 +59,9 @@ void compute_cell_res(variables& var, mesh const& msh, config const& cfg, parame
             f = 0;
             for(auto const& wall : msh.cells[c].cell_walls)
             {
-                var.W(c,k) += -cfg.dt/msh.cells[c].V*var.wall_flux(wall,k)*msh.cells[c].owner_idx[f];
+                var.W(c,k) += -cfg.dt/msh.cells[c].V*(var.wall_flux(wall,k)*msh.cells[c].owner_idx[f]);
                 f++;
             }
-            
         }
     }
 
@@ -129,5 +136,126 @@ void grad_limiting(variables& var, mesh const& msh)
             var.grad(c,2*k+1) *= 0.5*alfa;
             var.alfa(c,k) = 0.5*alfa;
         }
+    }
+}
+
+void compute_wall_gradiend(int j, variables& var, mesh const& msh)
+{
+    double Nx,Ny;
+    double nx,ny;
+    double fx,fy;
+    double xf,yf;
+    double S,V_cell;
+
+    std::vector<std::vector<double>> V(5,std::vector<double>(2,0));
+    std::vector<double> U(5,0.0);    
+
+    int w = 0;
+    #pragma omp parallel for private(V,U,Nx,Ny,nx,ny,xf,yf,S,V_cell) shared(msh,var)
+    for(auto const& wall : msh.walls)
+    {
+        xf = wall.xf;
+        yf = wall.yf;
+
+        V[0][0] = msh.cells[wall.owner_cell_index].x;
+        V[0][1] = msh.cells[wall.owner_cell_index].y;
+
+        V[1][0] = msh.nodes[wall.vertices[0].node_idx][0];
+        V[1][1] = msh.nodes[wall.vertices[0].node_idx][1];
+
+        V[2][0] = msh.cells[wall.neigbour_cell_index].x;
+        V[2][1] = msh.cells[wall.neigbour_cell_index].y;
+
+        V[3][0] = msh.nodes[wall.vertices[1].node_idx][0];
+        V[3][1] = msh.nodes[wall.vertices[1].node_idx][1];
+
+        V[4][0] = msh.cells[wall.owner_cell_index].x;
+        V[4][1] = msh.cells[wall.owner_cell_index].y;
+
+        U[0] = var.W(wall.owner_cell_index,j);
+        U[1] = var.compute_vertex_average(wall.vertices[0],msh)[j];
+        U[2] = var.W(wall.neigbour_cell_index,j);
+        U[3] = var.compute_vertex_average(wall.vertices[1],msh)[j];
+        U[4] = var.W(wall.owner_cell_index,j);
+
+        V_cell = 0.5*(V[0][1]*V[1][0] - V[0][0]*V[1][1]) + 0.5*(V[2][1]*V[3][0] - V[2][0]*V[3][1]);
+
+        for(int i = 0; i < 3; i++)
+        {
+            Nx = V[i+1][1] - V[i][1];
+            Ny = V[i][0] - V[i+1][0];
+
+            S = sqrt(Nx*Nx+Ny*Ny);
+
+            fx = 0.5*(V[i+1][0] + V[i][0]) - xf;
+            fy = 0.5*(V[i+1][1] + V[i][1]) - yf;
+
+            nx = Nx/(S)*(Nx*fx+Ny*fy)/(abs(Nx*fx+Ny*fy));
+            ny = Ny/(S)*(Nx*fx+Ny*fy)/(abs(Nx*fx+Ny*fy));
+
+            var.wall_grad(w,j) += 1/V_cell*(nx*wall.n[0] + ny*wall.n[1])*S*(U[i+1] - U[i])/2;
+        }
+        
+        w++;
+    }
+}
+
+void compute_wall_T_gradiend(variables& var, mesh const& msh)
+{
+    double Nx,Ny;
+    double nx,ny;
+    double fx,fy;
+    double xf,yf;
+    double S,V_cell;
+
+    std::vector<std::vector<double>> V(5,std::vector<double>(2,0));
+    std::vector<double> U(5,0.0);    
+
+    int w = 0;
+    for(auto const& wall : msh.walls)
+    {
+        xf = wall.xf;
+        yf = wall.yf;
+
+        V[0][0] = msh.cells[wall.owner_cell_index].x;
+        V[0][1] = msh.cells[wall.owner_cell_index].y;
+
+        V[1][0] = msh.nodes[wall.vertices[0].node_idx][0];
+        V[1][1] = msh.nodes[wall.vertices[0].node_idx][1];
+
+        V[2][0] = msh.cells[wall.neigbour_cell_index].x;
+        V[2][1] = msh.cells[wall.neigbour_cell_index].y;
+
+        V[3][0] = msh.nodes[wall.vertices[1].node_idx][0];
+        V[3][1] = msh.nodes[wall.vertices[1].node_idx][1];
+
+        V[4][0] = msh.cells[wall.owner_cell_index].x;
+        V[4][1] = msh.cells[wall.owner_cell_index].y;
+
+        U[0] = var.T[wall.owner_cell_index];
+        U[1] = var.compute_T_vertex_average(wall.vertices[0],msh);
+        U[2] = var.T[wall.neigbour_cell_index];
+        U[3] = var.compute_T_vertex_average(wall.vertices[1],msh);
+        U[4] = var.T[wall.owner_cell_index];
+
+        V_cell = 0.5*(V[0][1]*V[1][0] - V[0][0]*V[1][1]) + 0.5*(V[2][1]*V[3][0] - V[2][0]*V[3][1]);
+
+        for(int i = 0; i < 3; i++)
+        {
+            Nx = V[i+1][1] - V[i][1];
+            Ny = V[i][0] - V[i+1][0];
+
+            S = sqrt(Nx*Nx+Ny*Ny);
+
+            fx = 0.5*(V[i+1][0] + V[i][0]) - xf;
+            fy = 0.5*(V[i+1][1] + V[i][1]) - yf;
+
+            nx = Nx/(S)*(Nx*fx+Ny*fy)/(abs(Nx*fx+Ny*fy));
+            ny = Ny/(S)*(Nx*fx+Ny*fy)/(abs(Nx*fx+Ny*fy));
+
+            var.T_grad[w] += 1/V_cell*(nx*wall.n[0] + ny*wall.n[1])*S*(U[i+1] - U[i])/2;
+        }
+        
+        w++;
     }
 }

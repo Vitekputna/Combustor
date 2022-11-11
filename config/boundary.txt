@@ -24,11 +24,11 @@
 //boundary{1} = subsonic_outlet(85000);
 
 //PS_test
-boundary{2} = wall;
-boundary{0} = wall;
-boundary{1} = wall;
+//boundary{2} = wall;
+//boundary{0} = wall;
+//boundary{1} = wall;
 
 //pipe
-//boundary{2} = wall;
-//boundary{0} = supersonic_inlet(100000,300,2,0,0.1);
-//boundary{1} = supersonic_outlet;
+boundary{2} = wall;
+boundary{0} = supersonic_inlet(100000,300,2,0,0);
+boundary{1} = supersonic_outlet;
