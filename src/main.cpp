@@ -31,10 +31,6 @@ int main(int argc, char** argv)
 
     variables var(msh, cfg, IC_vec);
 
-    var.pressure(par);
-    var.temperature(par);
-    var.mach_number(par);
-
     sol.solve(var,msh,bdr,par,cfg);
 
     export_vtk(var,msh,"exp.vtk");

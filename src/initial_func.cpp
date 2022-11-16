@@ -50,19 +50,15 @@ std::vector<double> move_flow(int vel_comp, int n_comp, initial_conditions& IC)
         std::cout << "Error creating initial conditions...\n";
         exit(1);
     }
-    
-    // IC.U.push_back(p/(IC.par.gamma-1) + 0.5*(IC.U[1]*IC.U[1] + IC.U[2]*IC.U[2])/IC.U[0]);
 }
 
-void supersonic_inlet(int dim, parameters& par, boundary_group& bdr)
+void supersonic_inlet(int vel_comp, int n_comp, parameters& par, boundary_group& bdr)
 {
-    int vel_comp = dim-2;
+    for(int i = 0; i < n_comp; i++)
+    {
+        bdr.bc_val.push_back(bdr.p_0/par.r/bdr.T_0);
+    }
 
-    // bdr.bc_val.push_back(pow(1+(par.gamma-1)/2*bdr.Min*bdr.Min,1/(1-par.gamma))*bdr.p_0/par.r/bdr.T_0);
-    // double p = pow(1+(par.gamma-1)/2*bdr.Min*bdr.Min,par.gamma/(1-par.gamma))*bdr.p_0;
-    // double c = sqrt(par.gamma*par.r*bdr.T_0);
-
-    bdr.bc_val.push_back(bdr.p_0/par.r/bdr.T_0);
     double p = bdr.p_0;
     double T_o = (1+(par.gamma-1)/2*bdr.Min*bdr.Min)*bdr.T_0;
     double c = sqrt(par.gamma*par.r*T_o);

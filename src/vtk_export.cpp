@@ -142,39 +142,19 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 	f << "VECTORS " << "velocity" << " float" << std::endl;
 	for (unsigned int j = 0; j < MESH.N_cells; j++)
 	{
-		f << var.W(j,1) << " " << var.W(j,2) << " 0" << std::endl;
+		switch (var.vel_comp)
+		{
+		case 2:
+			f << var.W(j,var.n_comp) << " " << var.W(j,var.n_comp+1) << " 0" << std::endl;	
+			break;
+		
+		case 3:
+			f << var.W(j,var.n_comp) << " " << var.W(j,var.n_comp+1) << " " << var.W(j,var.n_comp+2) << std::endl;
+			break;
+		}
+		
 	}
 	f << std::endl;
-
-	// f << "VECTORS " << "rho_grad" << " float" << std::endl;
-	// for (unsigned int j = 0; j < MESH.N_cells; j++)
-	// {
-	// 	f << var.grad(j,0) << " " << var.grad(j,1) << " 0" << std::endl;
-	// }
-	// f << std::endl;
-
-	// f << "VECTORS " << "u_grad" << " float" << std::endl;
-	// for (unsigned int j = 0; j < MESH.N_cells; j++)
-	// {
-	// 	f << var.grad(j,2) << " " << var.grad(j,3) << " 0" << std::endl;
-	// }
-	// f << std::endl;
-
-	// f << "VECTORS " << "v_grad" << " float" << std::endl;
-	// for (unsigned int j = 0; j < MESH.N_cells; j++)
-	// {
-	// 	f << var.grad(j,4) << " " << var.grad(j,5) << " 0" << std::endl;
-	// }
-	// f << std::endl;
-
-	// f << "VECTORS " << "e_grad" << " float" << std::endl;
-	// for (unsigned int j = 0; j < MESH.N_cells; j++)
-	// {
-	// 	f << var.grad(j,6) << " " << var.grad(j,7) << " 0" << std::endl;
-	// }
-	// f << std::endl;
-
-	//std::cout << "Done! \n\n";
 }
 
 void export_res(variables& var, std::string name)

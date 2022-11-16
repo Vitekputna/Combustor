@@ -25,11 +25,11 @@ void HLL_flux(int vel_comp, int n_comp, double* w, double* n, double* o, paramet
     co = sqrt(par.gamma*po/ o[0]);
     cn = sqrt(par.gamma*pn/ n[0]);
 
-    uo = o[1]/o[0];
-    un = n[1]/n[0];
+    uo = o[n_comp]/o[0];
+    un = n[n_comp]/n[0];
 
-    vo = o[2]/o[0];
-    vn = n[2]/n[0];
+    vo = o[n_comp+1]/o[0];
+    vn = n[n_comp+1]/n[0];
 
     Sn = std::max(un*f.n[0]+vn*f.n[1] + cn,
                   uo*f.n[0]+vo*f.n[1] + co);
@@ -75,7 +75,13 @@ void HLL_flux(int vel_comp, int n_comp, double* w, double* n, double* o, paramet
         {
             w[k] = phi[k]*f.S;
         }
-    } 
+
+        // //
+        // if(k == 1)
+        // {
+        //     w[k] = 0;
+        // }
+    }
 } 
 
 void HLL_flux_axi(int vel_comp, int n_comp, double* w, double* n, double* o, parameters const& par, face const& f)
@@ -96,11 +102,11 @@ void HLL_flux_axi(int vel_comp, int n_comp, double* w, double* n, double* o, par
     co = sqrt(par.gamma*po/ o[0]);
     cn = sqrt(par.gamma*pn/ n[0]);
 
-    uo = o[1]/o[0];
-    un = n[1]/n[0];
+    uo = o[n_comp]/o[0];
+    un = n[n_comp]/n[0];
 
-    vo = o[2]/o[0];
-    vn = n[2]/n[0];
+    vo = o[n_comp+1]/o[0];
+    vn = n[n_comp+1]/n[0];
 
     Sn = std::max(un*f.n[0]+vn*f.n[1] + cn,
                   uo*f.n[0]+vo*f.n[1] + co);

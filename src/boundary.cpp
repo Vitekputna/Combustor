@@ -37,16 +37,18 @@ void boundary::wall(std::vector<uint> const& group_idx, variables& var,mesh cons
         n[1] = msh.walls[msh.cells[idx].cell_walls[0]].n[1];
         n[2] = 0;
 
-        var.W(idx,0) = var.W(cell_idx,0);
-        var.W(idx,var.dim-1) = var.W(cell_idx,var.dim-1);
-
+        for(int i = 0; i < var.n_comp; i++)
+        {
+            var.W(idx,i) = var.W(cell_idx,i);
+        }
+        
         for(int i = 0; i < var.vel_comp; i++)
         {
-            var.W(idx,i+1) = var.W(cell_idx,i+1) - 2*(var.W(cell_idx,1)*n[0] + var.W(cell_idx,2)*n[1])*n[i];
+            var.W(idx,i+var.n_comp) = var.W(cell_idx,i+var.n_comp) - 2*(var.W(cell_idx,var.n_comp)*n[0] + var.W(cell_idx,var.n_comp+1)*n[1])*n[i];
         }
 
-        //var.W(idx,1) = var.W(cell_idx,1) - 2*(var.W(cell_idx,1)*n[0] + var.W(cell_idx,2)*n[1])*n[0];
-        //var.W(idx,2) = var.W(cell_idx,2) - 2*(var.W(cell_idx,1)*n[0] + var.W(cell_idx,2)*n[1])*n[1];
+        var.W(idx,var.dim-1) = var.W(cell_idx,var.dim-1);
+
     }
 }
 

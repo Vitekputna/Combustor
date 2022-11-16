@@ -328,7 +328,7 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
                 bdr.boundary_groups.back().alfa = g_val[3];
                 bdr.boundary_groups.back().beta = g_val[4];
 
-                supersonic_inlet(cfg.dim,par,bdr.boundary_groups.back());
+                supersonic_inlet(cfg.vel_comp,cfg.n_comp,par,bdr.boundary_groups.back());
 
                 //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
             }

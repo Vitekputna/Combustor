@@ -37,15 +37,15 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, parameters& par, co
 
     bdr.apply(var);
 
-    do 
+    do
     {  
         var.pressure(par);
         var.temperature(par);
         //compute_cell_gradient(var,msh);
         //grad_limiting(var,msh);
-        compute_wall_T_gradiend(var,msh);
+        //compute_wall_T_gradiend(var,msh);
         compute_wall_flux(var,msh,par,flux_func);
-        compute_diffusive_flux(var,msh,cfg,par);
+        //compute_diffusive_flux(var,msh,cfg,par);
         compute_cell_res(var,msh,cfg,par,source_func);
 
         if(!(t % cfg.n_b))
@@ -84,18 +84,13 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, parameters& par, co
         if(time - last_time >= cfg.export_interval)        
         {
             last_time = time;
-            var.pressure(par); 
-            var.temperature(par);
             var.mach_number(par);
-
-            //std::cout << "out/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(t) + ".vtk" << "\n";
-            
             export_vtk(var,msh,"timesteps/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(time) + ".vtk");
         }
 
         t++;
         time += cfg.dt;
-        
+
    } while((res > cfg.max_res || t < cfg.min_iter) && t < cfg.max_iter && time < cfg.max_time);
 
     std::cout << "\n";
