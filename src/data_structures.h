@@ -16,6 +16,8 @@ struct array
 
 struct parameters
 {
+    parameters();
+
     double gamma = 1.4;
     double r = 287;
     double lambda = 0.004;

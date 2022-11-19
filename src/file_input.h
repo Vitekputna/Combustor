@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include "data_structures.h"
 #include "source_functions.h"
 #include "initial_func.h"
@@ -119,12 +120,13 @@ int find_boundaryGroup(int bdr_val, boundary const& bdr, mesh const& msh)
     return -1;
 }
 
-std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, config& cfg, parameters& par, solver& sol)
+std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, config& cfg, std::vector<parameters>& par, solver& sol)
 {
     std::string str, keyword;
     double value;
 
     //controll data
+    //////////////////////////////////////////////////////////////////////////////////////
     std::ifstream stream3("config/controll.txt");
 
     while(std::getline(stream3,str))
@@ -225,10 +227,10 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
 
     cfg.dim = cfg.n_comp + cfg.vel_comp + 1; //chemicke slozky + slozky hybnosti + energie
     if(cfg.res_idx < 0) cfg.res_idx = cfg.dim;
-
-
+    //////////////////////////////////////////////////////////////////////////////////////
 
     //initial data
+    //////////////////////////////////////////////////////////////////////////////////////
     std::ifstream stream("config/init.txt");
 
     int sur_idx = 0;
@@ -274,7 +276,7 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
             {
                 std::vector<double> values = read_multiple_between(str,'{',',','}');
 
-                IC_vec[sur_idx].composition.push_back(values[0]);
+                IC_vec[sur_idx].composition.push_back((int)values[0]);
                 IC_vec[sur_idx].composition_mass_frac.push_back(values[1]);
             }
         }
@@ -285,17 +287,49 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
         std::cout << "Error creating physical surface BC, check your settings...\n";
         exit(1);
     }
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    //read species data
+    //////////////////////////////////////////////////////////////////////////////////////
+    std::ifstream spec("config/species.txt");
+
+    while(std::getline(spec,str))
+    {
+        if((str[0] != '/' && str[1] != '/') && !str.empty())
+        {
+            keyword = read_first_word(str);
+            value = std::stod(read_between(str,'{','}'));
+
+            if(keyword == "specie")
+            {
+                sur_idx = value;
+                par.resize(sur_idx+1);
+            }
+
+            if(keyword == "specific_gas_constant")
+            {
+                par[sur_idx].r = value;
+            }
+            else if(keyword == "isoentropic_exponent")
+            {
+                par[sur_idx].gamma = value;
+            }
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////////////////
 
     //Creating initial conditions
-
+    //////////////////////////////////////////////////////////////////////////////////////
     std::vector<std::vector<double>> ret_vec;
 
     for(int i = 0; i < IC_vec.size(); i++)
     {
-        ret_vec.push_back(move_flow(cfg.vel_comp,cfg.n_comp,IC_vec[i]));
+        ret_vec.push_back(move_flow(cfg.vel_comp,cfg.n_comp,IC_vec[i],par));
     }
+    //////////////////////////////////////////////////////////////////////////////////////
     
     //boundary data
+    //////////////////////////////////////////////////////////////////////////////////////
     int g_idx;
     int bdrf_val;
     int mshGidx;
@@ -327,6 +361,8 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
                 bdr.boundary_groups.back().Min = g_val[2];
                 bdr.boundary_groups.back().alfa = g_val[3];
                 bdr.boundary_groups.back().beta = g_val[4];
+                bdr.boundary_groups.back().composition;
+                bdr.boundary_groups.back().composition_mass_frac;
 
                 supersonic_inlet(cfg.vel_comp,cfg.n_comp,par,bdr.boundary_groups.back());
 
@@ -367,6 +403,7 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
             }
         }   
     }
+    //////////////////////////////////////////////////////////////////////////////////////
 
     return ret_vec;
 }

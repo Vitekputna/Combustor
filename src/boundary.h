@@ -1,5 +1,4 @@
 #pragma once
-
 #include "mesh.h"
 #include <vector>
 
@@ -14,29 +13,32 @@ struct boundary_group
     int bc_func_idx;
     double p_0, T_0, Min, alfa, beta, p_stat;
     std::vector<double> bc_val;
+
+    std::vector<int> composition;
+    std::vector<double> composition_mass_frac;
 };
 
 class boundary
 {
-    typedef void (boundary::*func)(std::vector<uint> const&,variables&,mesh const&,std::vector<double> const&);
+    typedef void (boundary::*func)(std::vector<uint> const&,variables&,mesh const&,boundary_group&);
 
     public:
-    boundary(mesh const& msh,parameters const& par, config& cfg);
+    boundary(mesh const& msh,std::vector<parameters> const& par, config& cfg);
     boundary();
 
     mesh const& msh;
-    parameters const& par;
+    std::vector<parameters> const& par;
     config& cfg;
 
     double bc_val[20];
 
     void apply(variables& var); 
 
-    void wall(std::vector<uint> const& group_idx, variables& var, mesh const& msh, std::vector<double> const& P); //0
-    void supersonic_inlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, std::vector<double> const& P); //1
-    void supersonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, std::vector<double> const& P); //2
-    void subsonic_inlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, std::vector<double> const& P); //3
-    void subsonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, std::vector<double> const& P); //4
+    void wall(std::vector<uint> const& group_idx, variables& var, mesh const& msh, boundary_group& bdr); //0
+    void supersonic_inlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, boundary_group& bdr); //1
+    void supersonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, boundary_group& bdr); //2
+    void subsonic_inlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, boundary_group& bdr); //3
+    void subsonic_outlet(std::vector<uint> const& group_idx, variables& var, mesh const& msh, boundary_group& bdr); //4
 
     std::vector<func> BC_funcs = {&boundary::wall,
                                   &boundary::supersonic_inlet,

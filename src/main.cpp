@@ -2,6 +2,7 @@
 #include <string>
 #include <stdio.h>
 #include <unistd.h>
+#include <vector>
 #include "mesh.h"
 #include "data_structures.h"
 #include "boundary.h"
@@ -17,8 +18,8 @@ int N_threads;
 int main(int argc, char** argv)
 {
     N_threads = std::stoi(argv[2]);
-    std::cout << message;
-    parameters par;
+    // std::cout << message;
+    std::vector<parameters> par; // specie parameters
     config cfg;
     solver sol;
 
@@ -31,7 +32,7 @@ int main(int argc, char** argv)
 
     variables var(msh, cfg, IC_vec);
 
-    sol.solve(var,msh,bdr,par,cfg);
+    //sol.solve(var,msh,bdr,par,cfg);
 
     export_vtk(var,msh,"exp.vtk");
     export_res(var, "res.txt");

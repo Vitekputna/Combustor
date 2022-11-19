@@ -75,12 +75,6 @@ void HLL_flux(int vel_comp, int n_comp, double* w, double* n, double* o, paramet
         {
             w[k] = phi[k]*f.S;
         }
-
-        // //
-        // if(k == 1)
-        // {
-        //     w[k] = 0;
-        // }
     }
 } 
 

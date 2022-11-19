@@ -8,6 +8,8 @@
 
 typedef unsigned int uint;
 
+parameters::parameters(){}
+
 array::array(){}
 
 array::array(int N, int k) : k{k}

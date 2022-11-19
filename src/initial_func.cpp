@@ -1,29 +1,24 @@
 #include "initial_func.h"
+#include "thermodynamics.h"
 #include <iostream>
 
-void no_move_flow(int dim, initial_conditions& IC)
-{
-    int vel_comp = dim-2;
-
-    IC.U.push_back(IC.p_start/IC.par.r/IC.T_start);
-    
-    for(int i = 0; i < vel_comp; i++) {IC.U.push_back(0);}
-
-    IC.U.push_back(IC.p_start/(IC.par.gamma-1));
-}
-
-std::vector<double> move_flow(int vel_comp, int n_comp, initial_conditions& IC)
+std::vector<double> move_flow(int vel_comp, int n_comp, initial_conditions& IC, std::vector<parameters> const& par)
 {
     //hustoty chemických složek
-    for(int n = 0; n < n_comp; n++)
+    double r = thermo::r_mix(IC,par);
+    double gamma = thermo::gamma_mix(IC,par);
+
+    IC.U.push_back(IC.p_start/r/IC.T_start); // total density
+
+    for(int n = 1; n < n_comp; n++)
     {
-        IC.U.push_back(IC.p_start/IC.par.r/IC.T_start);
+        IC.U.push_back(IC.composition_mass_frac[n]*IC.p_start/par[n].r/IC.T_start);
     }
 
     double p = IC.p_start;
-    double p_o = pow(1+(IC.par.gamma-1)/2*IC.M_start*IC.M_start,IC.par.gamma/(IC.par.gamma-1))*IC.p_start;
-    double T_o = (1+(IC.par.gamma-1)/2*IC.M_start*IC.M_start)*IC.T_start;
-    double c = sqrt(IC.par.gamma*IC.par.r*T_o);
+    double p_o = pow(1+(gamma-1)/2*IC.M_start*IC.M_start,gamma/(gamma-1))*IC.p_start;
+    double T_o = (1+(gamma-1)/2*IC.M_start*IC.M_start)*IC.T_start;
+    double c = sqrt(gamma*r*T_o);
 
     switch (vel_comp)
     {
@@ -31,7 +26,7 @@ std::vector<double> move_flow(int vel_comp, int n_comp, initial_conditions& IC)
         IC.U.push_back(c*IC.M_start*cos(IC.alfa_start)*IC.U[0]);
         IC.U.push_back(c*IC.M_start*sin(IC.alfa_start)*IC.U[0]);
 
-        IC.U.push_back(p/(IC.par.gamma-1) + 0.5*(IC.U[n_comp]*IC.U[n_comp] + IC.U[n_comp +1]*IC.U[n_comp +1])/IC.U[0]);
+        IC.U.push_back(p/(gamma-1) + 0.5*(IC.U[n_comp]*IC.U[n_comp] + IC.U[n_comp +1]*IC.U[n_comp +1])/IC.U[0]);
 
         return IC.U;
         break;
@@ -41,7 +36,7 @@ std::vector<double> move_flow(int vel_comp, int n_comp, initial_conditions& IC)
         IC.U.push_back(c*IC.M_start*sin(IC.alfa_start)*cos(IC.beta)*IC.U[0]);
         IC.U.push_back(c*IC.M_start*sin(IC.beta)*IC.U[0]);
 
-        IC.U.push_back(p/(IC.par.gamma-1) + 0.5*(IC.U[n_comp]*IC.U[n_comp] + IC.U[n_comp + 1]*IC.U[n_comp + 1] + IC.U[n_comp + 2]*IC.U[n_comp + 2])/IC.U[0]);
+        IC.U.push_back(p/(gamma-1) + 0.5*(IC.U[n_comp]*IC.U[n_comp] + IC.U[n_comp + 1]*IC.U[n_comp + 1] + IC.U[n_comp + 2]*IC.U[n_comp + 2])/IC.U[0]);
 
         return IC.U;
         break;
@@ -52,16 +47,22 @@ std::vector<double> move_flow(int vel_comp, int n_comp, initial_conditions& IC)
     }
 }
 
-void supersonic_inlet(int vel_comp, int n_comp, parameters& par, boundary_group& bdr)
+void supersonic_inlet(int vel_comp, int n_comp, std::vector<parameters> const& par, boundary_group& bdr)
 {
-    for(int i = 0; i < n_comp; i++)
+    //hustoty chemických složek
+    double r = thermo::r_mix(bdr.composition,bdr.composition_mass_frac,par);
+    double gamma = thermo::gamma_mix(bdr.composition,bdr.composition_mass_frac,par);
+
+    bdr.bc_val.push_back(bdr.p_0/r/bdr.T_0);
+
+    for(int i = 1; i < n_comp; i++)
     {
-        bdr.bc_val.push_back(bdr.p_0/par.r/bdr.T_0);
+        bdr.bc_val.push_back(bdr.composition_mass_frac[i]*bdr.p_0/par[i].r/bdr.T_0);
     }
 
     double p = bdr.p_0;
-    double T_o = (1+(par.gamma-1)/2*bdr.Min*bdr.Min)*bdr.T_0;
-    double c = sqrt(par.gamma*par.r*T_o);
+    double T_o = (1+(gamma-1)/2*bdr.Min*bdr.Min)*bdr.T_0;
+    double c = sqrt(gamma*r*T_o);
 
     switch (vel_comp)
     {
@@ -81,15 +82,15 @@ void supersonic_inlet(int vel_comp, int n_comp, parameters& par, boundary_group&
         exit(1);
     }
 
-    bdr.bc_val.push_back(p/(par.gamma-1) + 0.5*(bdr.bc_val[1]*bdr.bc_val[1] + bdr.bc_val[2]*bdr.bc_val[2])/bdr.bc_val[0]);
+    bdr.bc_val.push_back(p/(gamma-1) + 0.5*(bdr.bc_val[1]*bdr.bc_val[1] + bdr.bc_val[2]*bdr.bc_val[2])/bdr.bc_val[0]);
 }
 
-void supersonic_outlet(parameters& par, boundary_group& bdr)
+void supersonic_outlet(std::vector<parameters> const& par, boundary_group& bdr)
 {
     //nothing to do here
 }
 
-void subsonic_inlet(parameters& par, boundary_group& bdr)
+void subsonic_inlet(std::vector<parameters> const& par, boundary_group& bdr)
 {
     bdr.bc_val.push_back(bdr.p_0);
     bdr.bc_val.push_back(bdr.T_0);
@@ -97,7 +98,7 @@ void subsonic_inlet(parameters& par, boundary_group& bdr)
     bdr.bc_val.push_back(bdr.beta);
 }
 
-void subsonic_outlet(parameters& par, boundary_group& bdr)
+void subsonic_outlet(std::vector<parameters> const& par, boundary_group& bdr)
 {
     bdr.bc_val.push_back(bdr.p_stat);
 }
