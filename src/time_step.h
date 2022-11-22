@@ -4,7 +4,7 @@
 #include "thermodynamics.h"
 #include <limits.h>
 
-double time_step(mesh const& msh,parameters const& par,config const& cfg,variables& var)
+double time_step(mesh const& msh,std::vector<parameters> const& par,config const& cfg,variables& var)
 {
     double u = 0,c;
     double dt =  std::numeric_limits<double>::max();
@@ -17,7 +17,9 @@ double time_step(mesh const& msh,parameters const& par,config const& cfg,variabl
 
         u = sqrt(u);
 
-        c = sqrt(par.gamma*thermo::pressure(var.vel_comp,var.n_comp,par,var.W(i))/var.W(i,0));
+        double gamma = thermo::gamma_mix(thermo::composition(var.n_comp,var.W(i)),par);
+
+        c = sqrt(gamma*thermo::pressure(var.vel_comp,var.n_comp,par,var.W(i))/var.W(i,0));
 
         dt = std::min(dt,msh.min_V/(2*(c+u)));
     }

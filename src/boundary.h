@@ -14,7 +14,7 @@ struct boundary_group
     double p_0, T_0, Min, alfa, beta, p_stat;
     std::vector<double> bc_val;
 
-    std::vector<int> composition;
+    //std::vector<int> composition;
     std::vector<double> composition_mass_frac;
 };
 

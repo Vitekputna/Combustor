@@ -6,103 +6,6 @@
 
 namespace thermo
 {
-    inline double pressure(int vel_comp,int n_comp, parameters const& par,double* U)
-    {
-        double p = 0;
-
-        for(int i = n_comp; i < n_comp + vel_comp; i++)
-        {
-            p += U[i]*U[i];
-        }
-
-        return (par.gamma-1)*(U[n_comp+vel_comp]-0.5*p/U[0]);
-    }
-
-    inline double temperature(int vel_comp,int n_comp, parameters const& par, double* U)
-    {
-        double p = pressure(vel_comp,n_comp,par,U);
-        return p/U[0]/par.r;
-    }
-
-    inline double speed_of_sound(int vel_comp, int n_comp, parameters const& par, double*U)
-    {
-        double p = pressure(vel_comp,n_comp,par,U);
-        return sqrt(par.gamma*p/U[0]);
-    }
-
-    inline double r_mix(initial_conditions const& IC, std::vector<parameters> const& par)
-    {
-        double r = 0;
-
-        int idx = 0;
-        for(auto const& i : IC.composition)
-        {
-            r += IC.composition_mass_frac[idx]*par[i].r;
-            idx++;
-        }
-        return r;
-    }
-
-    inline double r_mix(std::vector<int> const& composition, std::vector<double> const& mass_frac, std::vector<parameters> const& par)
-    {
-        double r = 0;
-
-        int idx = 0;
-        for(auto const& i : composition)
-        {
-            r += mass_frac[idx]*par[i].r;
-            idx++;
-        }
-        return r;
-    }
-
-    inline double r_mix(std::vector<double> const& mass_frac, std::vector<parameters> const& par)
-    {
-        double r = 0;
-        int idx = 0;
-        for(auto const& spec : par)
-        {
-            r += mass_frac[idx]*spec.r;
-        }
-        return r;
-    }
-
-    inline double gamma_mix(initial_conditions const& IC, std::vector<parameters> const& par) // ????
-    {
-        double gamma = 0;
-
-        int idx = 0;
-        for(auto const& i : IC.composition)
-        {
-            gamma += IC.composition_mass_frac[idx]*par[i].gamma;
-            idx++;
-        }
-        return gamma;
-    }
-    
-    inline double gamma_mix(std::vector<int> const& composition, std::vector<double> const& mass_frac, std::vector<parameters> const& par)
-    {
-        double gamma = 0;
-
-        int idx = 0;
-        for(auto const& i : composition)
-        {
-            gamma += mass_frac[idx]*par[i].r;
-            idx++;
-        }
-        return gamma;
-    }
-
-    inline double gamma_mix(std::vector<double> const& mass_frac, std::vector<parameters> const& par)
-    {
-        double gamma = 0;
-        int idx = 0;
-        for(auto const& spec : par)
-        {
-            gamma += mass_frac[idx]*spec.gamma;
-        }
-        return gamma;
-    }
 
     inline std::vector<double> composition(int n_comp, double* W)
     {
@@ -117,27 +20,101 @@ namespace thermo
             rho1 -= W[i];
         }
 
-        Y[0] = (rho1/rho)*(rho1/rho > 0);
+        // Y[0] = (rho1/rho)*(rho1/rho > 0);
+        Y[0] = (rho1/rho);
 
         return Y;
     }
 
-    inline double mach_number(int vel_comp,int n_comp, parameters const& par, double* U)
-    {   
-        double p = pressure(vel_comp,n_comp,par,U);
-        double k = par.gamma;
-        double t = (-1+sqrt(1-4*(k-1)/k*(1/(k-1)-U[n_comp+vel_comp]/p)))/(k-1);
+    inline double r_mix(std::vector<double> const& mass_frac, std::vector<parameters> const& par)
+    {
+        double r = 0;
 
-        return sqrt(t);
+        for(int i = 0; i < mass_frac.size(); i++)
+        {
+            r += mass_frac[i]*par[i].r;
+        }
+        return r;
     }
 
-    // inline double mach_number_stagnate(int dim, parameters const& par, double* U)
-    // {
-    //     double T = temperature(dim,par,U);
-    //     double M = sqrt((U[1]*U[1] + U[2]*U[2] + U[3]*U[3])/U[0]/U[0])/sqrt(par.gamma*par.r*T);
+    inline double gamma_mix(std::vector<double> const& mass_frac, std::vector<parameters> const& par)
+    {
+        double gamma = 0;
+        
+        for(int i = 0; i < mass_frac.size(); i++)
+        {
+            gamma += mass_frac[i]*par[i].gamma;
+        }
+        return gamma;
+    }
 
-    //     return sqrt((-1+sqrt(1+2*(par.gamma-1)*M*M))/(par.gamma-1));
-    // }
+    inline double pressure(int vel_comp,int n_comp, std::vector<parameters> const& par,double* U)
+    {
+        double p = 0;
+
+        for(int i = n_comp; i < n_comp + vel_comp; i++)
+        {
+            p += U[i]*U[i];
+        }
+
+        double gamma = gamma_mix(composition(n_comp,U),par);
+
+        std::cout << p << " " << gamma << " " << U[0] << "\n";
+
+        return (gamma-1)*(U[n_comp+vel_comp]-0.5*p/U[0]);
+    }
+
+    inline double temperature(int vel_comp,int n_comp, std::vector<parameters> const& par, double* U)
+    {
+        double p = pressure(vel_comp,n_comp,par,U);
+        double r = r_mix(composition(n_comp,U),par);
+        return p/U[0]/r;
+    }
+
+    inline double speed_of_sound(int vel_comp, int n_comp, std::vector<parameters> const& par, double*U)
+    {
+        double p = pressure(vel_comp,n_comp,par,U);
+        double gamma = gamma_mix(composition(n_comp,U),par);
+        //std::cout << composition(n_comp,U)[0] << " " << composition(n_comp,U)[1] << " " << composition(n_comp,U)[2] << "\n";
+        //std::cout << p << "\n";
+        return sqrt(gamma*p/U[0]);
+    }
+
+    inline double r_mix(initial_conditions const& IC, std::vector<parameters> const& par)
+    {
+        double r = 0;
+
+        for(int i = 0; i < IC.composition_mass_frac.size(); i++)
+        {
+            r += IC.composition_mass_frac[i]*par[i].r;
+        }
+        return r;
+    }
+
+    inline double gamma_mix(initial_conditions const& IC, std::vector<parameters> const& par) // ????
+    {
+        double gamma = 0;
+
+        for(int i = 0; i < IC.composition_mass_frac.size(); i++)
+        {
+            gamma += IC.composition_mass_frac[i]*par[i].gamma;
+        }
+        return gamma;
+    }
+
+    inline double mach_number(int vel_comp,int n_comp, std::vector<parameters> const& par, double* U)
+    {   
+        double U2 = 0;
+
+        for(int i = 0; i < vel_comp; i++)
+        {
+            U2 += U[n_comp+i]/U[0];
+        }
+
+        double c = speed_of_sound(vel_comp,n_comp,par,U);
+
+        return sqrt(U2)/c;
+    }
 
     inline double isoentropic_pressure(parameters const& par, double p_0, double M)
     {

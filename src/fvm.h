@@ -14,11 +14,11 @@ void reconstruct(int dim, int c, int w, double* Wr, double* W, double* grad, mes
     }
 }
 
-void compute_wall_flux(variables& var, mesh const& msh, parameters const& par, void(*flux)(int,int,
+void compute_wall_flux(variables& var, mesh const& msh, std::vector<parameters> const& par, void(*flux)(int,int,
                                                                                            double*,
                                                                                            double*,
                                                                                            double*,
-                                                                                           parameters const&,
+                                                                                           std::vector<parameters> const&,
                                                                                            face const&))
 {
     int n,o;
@@ -39,16 +39,16 @@ void compute_wall_flux(variables& var, mesh const& msh, parameters const& par, v
     }
 }
 
-void compute_diffusive_flux(variables& var, mesh const& msh, config const& cfg, parameters const& par)
+void compute_diffusive_flux(variables& var, mesh const& msh, config const& cfg, std::vector<parameters> const& par)
 {
     for(int i = 0; i < msh.N_walls; i++)
     {
-        var.diff_flux(i,4) = par.lambda*msh.walls[i].S*var.T_grad[i];
+        var.diff_flux(i,4) = par[0].lambda*msh.walls[i].S*var.T_grad[i];
     }
 }
 
-void compute_cell_res(variables& var, mesh const& msh, config const& cfg, parameters const& par,
-                      void(*source_func)(variables&,mesh const&,config const&,parameters const&))
+void compute_cell_res(variables& var, mesh const& msh, config const& cfg, std::vector<parameters> const& par,
+                      void(*source_func)(variables&,mesh const&,config const&,std::vector<parameters> const&))
 {
     int f;
     #pragma omp parallel for private(f) shared(var,cfg,msh)

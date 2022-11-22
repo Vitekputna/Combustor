@@ -6,9 +6,13 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 specie {0};
-specific_gas_constant {300};
-isoentropic_exponent {1.3};
+specific_gas_constant {297};
+isoentropic_exponent {1.4};
 
 specie {1};
-specific_gas_constant {350};
+specific_gas_constant {260};
+isoentropic_exponent {1.4};
+
+specie {2};
+specific_gas_constant {280};
 isoentropic_exponent {1.4};

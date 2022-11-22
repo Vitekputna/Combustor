@@ -9,10 +9,8 @@
 class solver
 {
 public:
-    void(*flux_func)(int,int,double*,double*,double*,parameters const&,face const&) = HLL_flux;
-    void(*source_func)(variables&,mesh const&,config const&,parameters const&) = no_source_cartesian;
-
+    void(*flux_func)(int,int,double*,double*,double*,std::vector<parameters> const&,face const&) = HLL_flux;
+    void(*source_func)(variables&,mesh const&,config const&,std::vector<parameters> const&) = no_source_cartesian;
     solver();
-
-    void solve(variables& var, mesh& msh, boundary& bdr, parameters& par, config& cfg);
+    void solve(variables& var, mesh& msh, boundary& bdr, std::vector<parameters>& par, config& cfg);
 };

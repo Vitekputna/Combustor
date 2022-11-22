@@ -8,15 +8,16 @@
 surface {0};
 p_init {100000};
 T_init {300};
-M_init {0};
+M_init {2};
 alfa_init {0};
 beta_init {0};
 composition {0,1};
 
-surface {1};
-p_init {200000};
-T_init {300};
-M_init {0};
-alfa_init {0};
-beta_init {0};
-composition {1,1};
+//surface {1};
+//p_init {200000};
+//T_init {300};
+//M_init {0};
+//alfa_init {0};
+//beta_init {0};
+//composition {0,0.7};
+//composition {1,0.3};

@@ -63,9 +63,9 @@ struct variables
     variables(mesh const msh, config const cfg, std::vector<std::vector<double>> U);
     ~variables();
 
-    void pressure(parameters const& par);
-    void temperature(parameters const& par);
-    void mach_number(parameters const& par);
+    void pressure(std::vector<parameters> const& par);
+    void temperature(std::vector<parameters> const& par);
+    void mach_number(std::vector<parameters> const& par);
 
     std::vector<double> compute_vertex_average(vertex const& node, mesh const& msh);
     double compute_T_vertex_average(vertex const& node, mesh const& msh);

@@ -12,7 +12,8 @@ std::vector<double> move_flow(int vel_comp, int n_comp, initial_conditions& IC, 
 
     for(int n = 1; n < n_comp; n++)
     {
-        IC.U.push_back(IC.composition_mass_frac[n]*IC.p_start/par[n].r/IC.T_start);
+        // IC.U.push_back(IC.composition_mass_frac[n]*IC.p_start/par[n].r/IC.T_start);
+        IC.U.push_back(IC.composition_mass_frac[n]*IC.p_start/r/IC.T_start);
     }
 
     double p = IC.p_start;
@@ -50,14 +51,15 @@ std::vector<double> move_flow(int vel_comp, int n_comp, initial_conditions& IC, 
 void supersonic_inlet(int vel_comp, int n_comp, std::vector<parameters> const& par, boundary_group& bdr)
 {
     //hustoty chemických složek
-    double r = thermo::r_mix(bdr.composition,bdr.composition_mass_frac,par);
-    double gamma = thermo::gamma_mix(bdr.composition,bdr.composition_mass_frac,par);
+    double r = thermo::r_mix(bdr.composition_mass_frac,par);
+    double gamma = thermo::gamma_mix(bdr.composition_mass_frac,par);
 
     bdr.bc_val.push_back(bdr.p_0/r/bdr.T_0);
 
     for(int i = 1; i < n_comp; i++)
     {
-        bdr.bc_val.push_back(bdr.composition_mass_frac[i]*bdr.p_0/par[i].r/bdr.T_0);
+        // bdr.bc_val.push_back(bdr.composition_mass_frac[i]*bdr.p_0/par[i].r/bdr.T_0);
+        bdr.bc_val.push_back(bdr.composition_mass_frac[i]*bdr.p_0/r/bdr.T_0);
     }
 
     double p = bdr.p_0;

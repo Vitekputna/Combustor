@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include "data_structures.h"
+#include "thermodynamics.h"
 #include "mesh.h"
 
 typedef unsigned int uint;
@@ -155,6 +156,25 @@ void export_vtk(variables& var,mesh const& MESH, std::string name)
 		
 	}
 	f << std::endl;
+
+	std::vector<std::vector<double>> composition(MESH.N_cells,std::vector<double>(var.n_comp,0.0));
+
+	for(uint i = 0; i < MESH.N_cells; i++)
+	{
+		composition[i] = thermo::composition(var.n_comp,var.W(i));
+	}
+
+	for(int i = 0; i < var.n_comp; i++)
+	{
+		f << "SCALARS " << "Y_"<< i  << " float 1" << std::endl;
+		f << "LOOKUP_TABLE default" << std::endl;
+
+		for (unsigned int j = 0; j < MESH.N_cells; j++)
+		{
+			f << composition[j][i] << std::endl;
+		}
+		f << std::endl;
+	}
 }
 
 void export_res(variables& var, std::string name)

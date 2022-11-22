@@ -207,7 +207,7 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
                 cfg.r_variable_idx = (int)(value);   
                 
                 sol.source_func = axisymetric_source;
-                sol.flux_func = HLL_flux_axi;
+                // sol.flux_func = HLL_flux_axi;
 
                 msh.transform_axisymetric(value);
             }
@@ -226,7 +226,7 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
     }
 
     cfg.dim = cfg.n_comp + cfg.vel_comp + 1; //chemicke slozky + slozky hybnosti + energie
-    if(cfg.res_idx < 0) cfg.res_idx = cfg.dim;
+    if(cfg.res_idx < 0) cfg.res_idx = cfg.dim-1;
     //////////////////////////////////////////////////////////////////////////////////////
 
     //initial data
@@ -248,7 +248,7 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
             if(keyword == "surface")
             {
                 sur_idx = value;
-                IC_vec.resize(sur_idx+1);
+                if(IC_vec.size() < sur_idx+1) IC_vec.resize(sur_idx+1,initial_conditions(cfg.n_comp));
                 n_ps++;
             }
 
@@ -276,8 +276,9 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
             {
                 std::vector<double> values = read_multiple_between(str,'{',',','}');
 
-                IC_vec[sur_idx].composition.push_back((int)values[0]);
-                IC_vec[sur_idx].composition_mass_frac.push_back(values[1]);
+                // IC_vec[sur_idx].composition.push_back((int)values[0]);
+                // IC_vec[sur_idx].composition_mass_frac.push_back(values[1]);
+                IC_vec[sur_idx].composition_mass_frac[values[0]] = values[1];
             }
         }
     }
@@ -334,6 +335,9 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
     int bdrf_val;
     int mshGidx;
     std::vector<double> g_val;
+
+    std::vector<double> mass_frac(cfg.n_comp,0.0);
+
     std::ifstream stream2("config/boundary.txt");
 
     while(std::getline(stream2,str))
@@ -343,13 +347,18 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
             g_idx = std::stoi(read_between(str,'{','}'));
             g_val = read_multiple_between(str,'(',',',')');
 
+
+            if(str.find("composition") != std::string::npos)
+            {
+                mass_frac[g_val[0]] = g_val[1];
+            }
+
+
             if(str.find("wall") != std::string::npos)
             {
                 bdrf_val = 0;
                 mshGidx = find_boundaryGroup(g_idx,bdr,msh);
                 bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));
-
-                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
             }
             else if(str.find("supersonic_inlet") != std::string::npos)
             {
@@ -361,20 +370,18 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
                 bdr.boundary_groups.back().Min = g_val[2];
                 bdr.boundary_groups.back().alfa = g_val[3];
                 bdr.boundary_groups.back().beta = g_val[4];
-                bdr.boundary_groups.back().composition;
-                bdr.boundary_groups.back().composition_mass_frac;
+                bdr.boundary_groups.back().composition_mass_frac = mass_frac;
+
+                // clear the mass frac vector
+                std::fill(mass_frac.begin(),mass_frac.end(),0.0);
 
                 supersonic_inlet(cfg.vel_comp,cfg.n_comp,par,bdr.boundary_groups.back());
-
-                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
             }
             else if(str.find("supersonic_outlet") != std::string::npos)
             {
                 bdrf_val = 2;
                 mshGidx = find_boundaryGroup(g_idx,bdr,msh);
                 bdr.boundary_groups.push_back(boundary_group(bdrf_val,msh.boundary_groups[mshGidx].member_idx));
-
-                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
             }
             else if(str.find("subsonic_inlet") != std::string::npos)
             {
@@ -385,10 +392,12 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
                 bdr.boundary_groups.back().T_0 = g_val[1];
                 bdr.boundary_groups.back().alfa = g_val[2];
                 bdr.boundary_groups.back().beta = g_val[3];
+                bdr.boundary_groups.back().composition_mass_frac = mass_frac;
+
+                // clear the mass frac vector
+                std::fill(mass_frac.begin(),mass_frac.end(),0.0);
 
                 subsonic_inlet(par,bdr.boundary_groups.back());
-
-                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
             }
             else if(str.find("subsonic_outlet") != std::string::npos)
             {
@@ -398,8 +407,6 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
                 bdr.boundary_groups.back().p_stat = g_val[0];
 
                 subsonic_outlet(par,bdr.boundary_groups.back());
-                
-                //std::cout << g_idx << " " << bdrf_val - g_idx << "\n";
             }
         }   
     }

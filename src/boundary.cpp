@@ -124,8 +124,8 @@ void boundary::subsonic_inlet(std::vector<uint> const& group_idx, variables& var
 
     //std::cout << e << " " << p << " " << Min <<"\n";
 
-    double r = thermo::r_mix(bdr.composition,bdr.composition_mass_frac,par);
-    double gamma = thermo::gamma_mix(bdr.composition,bdr.composition_mass_frac,par);
+    double r = thermo::r_mix(bdr.composition_mass_frac,par);
+    double gamma = thermo::gamma_mix(bdr.composition_mass_frac,par);
 
     double rho = bdr.bc_val[0]/r/bdr.bc_val[1]; //density
     //double T_o = (1+(par.gamma-1)/2*Min*Min)*P[1];

@@ -89,7 +89,7 @@ variables::~variables()
     free(res);
 }
 
-void variables::pressure(parameters const& par)
+void variables::pressure(std::vector<parameters> const& par)
 {
     for(uint i = 0; i < N; i++)
     {
@@ -97,7 +97,7 @@ void variables::pressure(parameters const& par)
     }
 }
 
-void variables::temperature(parameters const& par)
+void variables::temperature(std::vector<parameters> const& par)
 {
     for(uint i = 0; i < N; i++)
     {
@@ -105,7 +105,7 @@ void variables::temperature(parameters const& par)
     }
 }
 
-void variables::mach_number(parameters const& par)
+void variables::mach_number(std::vector<parameters> const& par)
 {
     for(uint i = 0; i < N; i++)
     {
