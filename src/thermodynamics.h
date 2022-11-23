@@ -59,7 +59,9 @@ namespace thermo
 
         double gamma = gamma_mix(composition(n_comp,U),par);
 
-        std::cout << p << " " << gamma << " " << U[0] << "\n";
+        // std::cout << p << " " << gamma << " " << U[0] << "\n";    
+        // std::cout << U[n_comp+vel_comp] << "\n";
+        // std::cout << (gamma-1)*(U[n_comp+vel_comp]-0.5*p/U[0]) << "\n";
 
         return (gamma-1)*(U[n_comp+vel_comp]-0.5*p/U[0]);
     }

@@ -71,12 +71,16 @@ void supersonic_inlet(int vel_comp, int n_comp, std::vector<parameters> const& p
     case 2:
         bdr.bc_val.push_back(c*bdr.Min*cos(bdr.alfa)*bdr.bc_val[0]);
         bdr.bc_val.push_back(c*bdr.Min*sin(bdr.alfa)*bdr.bc_val[0]);
+
+        bdr.bc_val.push_back(p/(gamma-1) + 0.5*(bdr.bc_val[n_comp]*bdr.bc_val[n_comp] + bdr.bc_val[n_comp+1]*bdr.bc_val[n_comp+1])/bdr.bc_val[0]);
         break;
 
     case 3: // pridat uhel rotace proudu
         bdr.bc_val.push_back(c*bdr.Min*cos(bdr.alfa)*cos(bdr.beta)*bdr.bc_val[0]);
         bdr.bc_val.push_back(c*bdr.Min*sin(bdr.alfa)*cos(bdr.beta)*bdr.bc_val[0]);
         bdr.bc_val.push_back(c*bdr.Min*sin(bdr.beta)*bdr.bc_val[0]);
+
+        bdr.bc_val.push_back(p/(gamma-1) + 0.5*(bdr.bc_val[n_comp]*bdr.bc_val[n_comp] + bdr.bc_val[n_comp+1]*bdr.bc_val[n_comp+1] + bdr.bc_val[n_comp+2]*bdr.bc_val[n_comp+2])/bdr.bc_val[0]);
         break;
 
     default:
@@ -84,7 +88,7 @@ void supersonic_inlet(int vel_comp, int n_comp, std::vector<parameters> const& p
         exit(1);
     }
 
-    bdr.bc_val.push_back(p/(gamma-1) + 0.5*(bdr.bc_val[1]*bdr.bc_val[1] + bdr.bc_val[2]*bdr.bc_val[2])/bdr.bc_val[0]);
+    
 }
 
 void supersonic_outlet(std::vector<parameters> const& par, boundary_group& bdr)

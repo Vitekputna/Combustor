@@ -53,19 +53,16 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, std::vector<paramet
 
         if(!(t % cfg.n_b))
         {
-            std::cout << "boundary\n";
             bdr.apply(var);
         }
         
         if(!(t % cfg.n_t))
         {
-            std::cout << "time\n";
             cfg.dt = cfg.CFL*time_step(msh,par,cfg,var);
         }
 
         if(!(t % cfg.n_r))
         {
-            std::cout << "residual\n";
             res = 0;
             for(uint c = 0; c < msh.N_cells; c++)
             {
@@ -89,13 +86,10 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, std::vector<paramet
 
         if(time - last_time >= cfg.export_interval)        
         {
-            std::cout << "print\n";
             last_time = time;
             var.mach_number(par);
             export_vtk(var,msh,"timesteps/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(time) + ".vtk");
         }
-
-        std::cout << t << "\n";
 
         t++;
         time += cfg.dt;
