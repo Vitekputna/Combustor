@@ -19,4 +19,4 @@ residue_freq {5000};           // počet iterací na výpočet residua
 boundary_freq {1};              // počet iterací na výpočet okrajových podmínek
 export_freq {5000};            // počet iterací na export
 export_interval {0.001};          // časový interval exportu dat
-CFL {1.1};                        // CFL konstanta
+CFL {1};                        // CFL konstanta

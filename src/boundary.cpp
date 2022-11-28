@@ -115,29 +115,10 @@ void boundary::subsonic_inlet(std::vector<uint> const& group_idx, variables& var
     v_b = rv_b/rho_b;
     w_b = rw_b/rho_b;
 
-
-    //compute inlet mach number
-    // double params[5] = {0,1,cfg.bisec_iter*1.0,e,P[0]};
-    // Min = bisection_method(M_iter_func, *this, params, 2);
-
-    //Min = std::max(0.0,sqrt((-1+sqrt(1-4*(-1)/par.gamma*(1/(par.gamma-1)-e/p)))/(par.gamma-1)));
-
-    //std::cout << e << " " << p << " " << Min <<"\n";
-
     double r = thermo::r_mix(bdr.composition_mass_frac,par);
     double gamma = thermo::gamma_mix(bdr.composition_mass_frac,par);
-
     double rho = bdr.bc_val[0]/r/bdr.bc_val[1]; //density
-    //double T_o = (1+(par.gamma-1)/2*Min*Min)*P[1];
-    //c = sqrt(par.gamma*par.r*P[1]);
-    // double ru = rho*c*Min*cos(P[2])*cos(P[3]);
-    // double rv = rho*c*Min*sin(P[2])*cos(P[3]);
-    // double rw = rho*c*Min*sin(P[3]);
-
-
     double e_boundary = bdr.bc_val[0]/(gamma-1) + 0.5*rho_b*(u_b*u_b + v_b*v_b + w_b*w_b);
-
-    std::vector<double> V = {u_b,v_b,w_b};
 
     for(auto const& idx : group_idx)
     {
@@ -145,10 +126,14 @@ void boundary::subsonic_inlet(std::vector<uint> const& group_idx, variables& var
 
         var.W(idx,0) = rho;
 
+        for(int i = 1; i < var.n_comp; i++)
+        {
+            var.W(idx,i) = bdr.composition_mass_frac[i]*rho;
+        }
+
         for(int i = 0; i < var.vel_comp; i++)
         {
-            //var.W(idx,i+1) = V[i];
-            var.W(idx,i+1) = var.W(cell_idx,i+1);
+            var.W(idx,i+var.n_comp) = var.W(cell_idx,i+1);
         }
 
         var.W(idx,var.dim-1) = e_boundary;
@@ -177,14 +162,18 @@ void boundary::subsonic_outlet(std::vector<uint> const& group_idx, variables& va
         mass_frac = thermo::composition(var.n_comp,var.W(cell_idx));
         gamma = thermo::gamma_mix(mass_frac,par);
 
-        var.W(idx,0) = var.W(cell_idx,0);
+        for(int i = 0; i < var.n_comp; i++)
+        {
+            var.W(idx,i) = var.W(cell_idx,i);
+        }
     
         for(int i = 0; i < var.vel_comp; i++)
         {
-            var.W(idx,i+1) = var.W(cell_idx,i+1);
+            var.W(idx,i+var.n_comp) = var.W(cell_idx,i+var.n_comp);
         }
 
-        var.W(idx,var.dim-1) = bdr.bc_val[0]/(gamma-1) + 0.5*(var.W(idx,1)*var.W(idx,1)+var.W(idx,2)*var.W(idx,2))/var.W(idx,0);
+        var.W(idx,var.dim-1) = bdr.bc_val[0]/(gamma-1) + 0.5*(var.W(idx,var.n_comp)*var.W(idx,var.n_comp)
+                                                             +var.W(idx,var.n_comp+1)*var.W(idx,var.n_comp+1))/var.W(idx,0);
 
         // if(M_max >= 1)
         // {

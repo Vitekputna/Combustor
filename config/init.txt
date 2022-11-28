@@ -8,7 +8,7 @@
 surface {0};
 p_init {100000};
 T_init {300};
-M_init {2};
+M_init {0};
 alfa_init {0};
 beta_init {0};
 composition {0,1};

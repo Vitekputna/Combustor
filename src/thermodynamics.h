@@ -20,9 +20,7 @@ namespace thermo
             rho1 -= W[i];
         }
 
-        // Y[0] = (rho1/rho)*(rho1/rho > 0);
         Y[0] = (rho1/rho);
-
         return Y;
     }
 
@@ -58,10 +56,6 @@ namespace thermo
         }
 
         double gamma = gamma_mix(composition(n_comp,U),par);
-
-        // std::cout << p << " " << gamma << " " << U[0] << "\n";    
-        // std::cout << U[n_comp+vel_comp] << "\n";
-        // std::cout << (gamma-1)*(U[n_comp+vel_comp]-0.5*p/U[0]) << "\n";
 
         return (gamma-1)*(U[n_comp+vel_comp]-0.5*p/U[0]);
     }
@@ -110,10 +104,17 @@ namespace thermo
 
         for(int i = 0; i < vel_comp; i++)
         {
-            U2 += U[n_comp+i]/U[0];
+            U2 += U[n_comp+i]/U[0]; 
         }
 
         double c = speed_of_sound(vel_comp,n_comp,par,U);
+
+        if(std::isnan(sqrt(U2)/c))
+        {
+            std::cout << U2 << "\n";
+
+            exit(1);
+        }
 
         return sqrt(U2)/c;
     }
