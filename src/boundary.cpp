@@ -86,8 +86,7 @@ void boundary::subsonic_inlet(std::vector<uint> const& group_idx, variables& var
     int cell_idx;
     double e = 0 ,Min,c;
     double p;
-    double ru_b, rv_b, rw_b;
-    double u_b, v_b, w_b;
+    double U2;
     double rho_b;
 
     int N = group_idx.size();
@@ -98,27 +97,24 @@ void boundary::subsonic_inlet(std::vector<uint> const& group_idx, variables& var
         e += var.W(cell_idx,var.dim-1);
         p += var.p[cell_idx];
 
-        ru_b = var.W(cell_idx,1);
-        rv_b = var.W(cell_idx,2);
-        rw_b = var.W(cell_idx,3);
+        for(int i = 0; i < var.vel_comp; i++)
+        {
+            U2 += pow(var.W(cell_idx,var.n_comp+i)/var.W(cell_idx,0),2);
+        }
 
         rho_b += var.W(cell_idx,0);
     }
+
     e = e/N;
     p = p/N;
-    ru_b = ru_b/N;
-    rv_b = rv_b/N;
-    rw_b = rw_b/N;
     rho_b = rho_b/N;
-
-    u_b = ru_b/rho_b;
-    v_b = rv_b/rho_b;
-    w_b = rw_b/rho_b;
+    U2 = U2/N;
 
     double r = thermo::r_mix(bdr.composition_mass_frac,par);
     double gamma = thermo::gamma_mix(bdr.composition_mass_frac,par);
+
     double rho = bdr.bc_val[0]/r/bdr.bc_val[1]; //density
-    double e_boundary = bdr.bc_val[0]/(gamma-1) + 0.5*rho_b*(u_b*u_b + v_b*v_b + w_b*w_b);
+    double e_boundary = bdr.bc_val[0]/(gamma-1) + 0.5*rho_b*(U2);
 
     for(auto const& idx : group_idx)
     {
@@ -133,7 +129,7 @@ void boundary::subsonic_inlet(std::vector<uint> const& group_idx, variables& var
 
         for(int i = 0; i < var.vel_comp; i++)
         {
-            var.W(idx,i+var.n_comp) = var.W(cell_idx,i+1);
+            var.W(idx,i+var.n_comp) = var.W(cell_idx,i+var.n_comp);
         }
 
         var.W(idx,var.dim-1) = e_boundary;

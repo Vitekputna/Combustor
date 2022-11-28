@@ -32,6 +32,7 @@ namespace thermo
         {
             r += mass_frac[i]*par[i].r;
         }
+        
         return r;
     }
 
@@ -104,17 +105,10 @@ namespace thermo
 
         for(int i = 0; i < vel_comp; i++)
         {
-            U2 += U[n_comp+i]/U[0]; 
+            U2 += pow(U[n_comp+i]/U[0],2); 
         }
 
         double c = speed_of_sound(vel_comp,n_comp,par,U);
-
-        if(std::isnan(sqrt(U2)/c))
-        {
-            std::cout << U2 << "\n";
-
-            exit(1);
-        }
 
         return sqrt(U2)/c;
     }

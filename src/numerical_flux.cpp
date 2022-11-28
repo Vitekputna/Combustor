@@ -40,8 +40,8 @@ void HLL_flux(int vel_comp, int n_comp, double* w, double* n, double* o, std::ve
     So = std::min(un*f.n[0]+vn*f.n[1] - cn,
                   uo*f.n[0]+vo*f.n[1] - co);    
 
-    double Xn[dim];// = {0,f.n[0],f.n[1],un*f.n[0]+vn*f.n[1]};
-    double Xo[dim];// = {0,f.n[0],f.n[1],uo*f.n[0]+vo*f.n[1]};
+    double Xn[dim];
+    double Xo[dim];
 
     for(int n = 0; n < n_comp; n++)
     {
@@ -80,3 +80,4 @@ void HLL_flux(int vel_comp, int n_comp, double* w, double* n, double* o, std::ve
         }
     }
 }
+

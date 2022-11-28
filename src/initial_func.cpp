@@ -17,9 +17,9 @@ std::vector<double> move_flow(int vel_comp, int n_comp, initial_conditions& IC, 
     }
 
     double p = IC.p_start;
-    double p_o = pow(1+(gamma-1)/2*IC.M_start*IC.M_start,gamma/(gamma-1))*IC.p_start;
-    double T_o = (1+(gamma-1)/2*IC.M_start*IC.M_start)*IC.T_start;
-    double c = sqrt(gamma*r*T_o);
+    //double p_o = pow(1+(gamma-1)/2*IC.M_start*IC.M_start,gamma/(gamma-1))*IC.p_start;
+    //double T_o = (1+(gamma-1)/2*IC.M_start*IC.M_start)*IC.T_start;
+    double c = sqrt(gamma*r*IC.T_start);
 
     switch (vel_comp)
     {
@@ -63,8 +63,8 @@ void supersonic_inlet(int vel_comp, int n_comp, std::vector<parameters> const& p
     }
 
     double p = bdr.p_0;
-    double T_o = (1+(gamma-1)/2*bdr.Min*bdr.Min)*bdr.T_0;
-    double c = sqrt(gamma*r*T_o);
+    //double T_o = (1+(gamma-1)/2*bdr.Min*bdr.Min)*bdr.T_0;
+    double c = sqrt(gamma*r*bdr.T_0);
 
     switch (vel_comp)
     {

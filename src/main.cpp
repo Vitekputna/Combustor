@@ -35,5 +35,6 @@ int main(int argc, char** argv)
     sol.solve(var,msh,bdr,par,cfg);
 
     export_vtk(var,msh,"exp.vtk");
+    
     export_res(var, "res.txt");
 }

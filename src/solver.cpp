@@ -50,7 +50,7 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, std::vector<paramet
         compute_wall_flux(var,msh,par,flux_func);
         //compute_diffusive_flux(var,msh,cfg,par);
         compute_cell_res(var,msh,cfg,par,source_func);
-
+        
         if(!(t % cfg.n_b))
         {
             bdr.apply(var);
@@ -96,8 +96,7 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, std::vector<paramet
 
    } while((res > cfg.max_res || t < cfg.min_iter) && t < cfg.max_iter && time < cfg.max_time);
 
-    std::cout << "\n";
-
+    var.pressure(par);
     var.temperature(par);
     var.mach_number(par);
 }
