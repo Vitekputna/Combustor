@@ -29,8 +29,17 @@
 //boundary{1} = wall;
 
 //pipe
+//boundary{2} = wall;
+//composition{0} = (0,0.5);
+//composition{0} = (1,0.5);
+//composition{0} = (2,0);
+//boundary{0} = subsonic_inlet(100000,300,0,0);
+//boundary{1} = subsonic_outlet(90000);
+
+//mixing
+composition{0} = (0,1);
+boundary{0} = supersonic_inlet(100000,300,2,0,0);
+composition{1} = (1,1);
+boundary{1} = supersonic_inlet(100000,300,2,0,0);
 boundary{2} = wall;
-composition{0} = (0,0.9);
-composition{0} = (1,0.1);
-boundary{0} = subsonic_inlet(100000,300,0,0);
-boundary{1} = subsonic_outlet(90000);
+boundary{3} = supersonic_outlet;

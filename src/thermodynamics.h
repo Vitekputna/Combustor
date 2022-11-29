@@ -24,6 +24,37 @@ namespace thermo
         return Y;
     }
 
+    inline double Mm_mix(std::vector<double> const& mass_frac, std::vector<parameters> const& par)
+    {
+        double Mm = 0;
+
+        for(int i = 0; i < mass_frac.size(); i++)
+        {
+            Mm += mass_frac[i]/par[i].Mm;
+        }
+
+        return 1/Mm;
+    }
+
+    inline std::vector<double> molar_composition(int n_comp, double* W, std::vector<parameters> const& par)
+    {
+        double rho = W[0];
+        double rho1 = rho;
+
+        std::vector<double> X(n_comp,0.0);
+
+        double Ms = Mm_mix(composition(n_comp,W),par);
+
+        for(int i = 1; i < n_comp; i++)
+        {
+            X[i] = W[i]/rho*Ms/par[i].Mm;
+            rho1 -= W[i];
+        }
+
+        X[0] = (rho1/rho)*Ms/par[0].Mm;
+        return X;
+    }
+
     inline double r_mix(std::vector<double> const& mass_frac, std::vector<parameters> const& par)
     {
         double r = 0;

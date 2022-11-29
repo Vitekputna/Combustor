@@ -42,8 +42,6 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, std::vector<paramet
 
     do
     {  
-        var.pressure(par);
-        var.temperature(par);
         //compute_cell_gradient(var,msh);
         //grad_limiting(var,msh);
         //compute_wall_T_gradiend(var,msh);
@@ -88,6 +86,8 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, std::vector<paramet
         {
             last_time = time;
             var.mach_number(par);
+            var.pressure(par);
+            var.temperature(par);
             export_vtk(var,msh,"timesteps/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(time) + ".vtk");
         }
 

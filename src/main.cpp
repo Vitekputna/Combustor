@@ -13,6 +13,8 @@
 
 #include "startup.h"
 
+#include "thermodynamics.h"
+
 int N_threads;
 
 int main(int argc, char** argv)

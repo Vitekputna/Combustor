@@ -315,6 +315,10 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
             {
                 par[sur_idx].gamma = value;
             }
+            else if(keyword == "molar_mass")
+            {
+                par[sur_idx].Mm = value;
+            }
         }
     }
     //////////////////////////////////////////////////////////////////////////////////////

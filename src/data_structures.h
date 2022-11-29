@@ -21,6 +21,7 @@ struct parameters
     double gamma = 1.4;
     double r = 287;
     double lambda = 0.004;
+    double Mm = 32;
 };
 
 struct config
