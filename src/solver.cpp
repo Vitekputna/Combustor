@@ -42,11 +42,7 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, std::vector<paramet
 
     do
     {  
-        //compute_cell_gradient(var,msh);
-        //grad_limiting(var,msh);
-        //compute_wall_T_gradiend(var,msh);
         compute_wall_flux(var,msh,par,flux_func);
-        //compute_diffusive_flux(var,msh,cfg,par);
         compute_cell_res(var,msh,cfg,par,source_func);
         
         if(!(t % cfg.n_b))
@@ -91,6 +87,8 @@ void solver::solve(variables& var, mesh& msh, boundary& bdr, std::vector<paramet
             export_vtk(var,msh,"timesteps/" + msh.name.substr(5,msh.name.length()-5) + "_" + std::to_string(time) + ".vtk");
         }
 
+        // std::cout << t << "\n";
+        // std::cout << var.wall_flux(14,0) - var.wall_flux(70,0) + var.wall_flux(74,0) << "\n";
         t++;
         time += cfg.dt;
 

@@ -117,7 +117,7 @@ int find_boundaryGroup(int bdr_val, boundary const& bdr, mesh const& msh)
     }
 
     std::cout << "error: boundary with value: " << bdr_val << " not found\n";
-    return -1;
+    exit(1);
 }
 
 std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, config& cfg, std::vector<parameters>& par, solver& sol)
@@ -247,7 +247,7 @@ std::vector<std::vector<double>> read_config_files(mesh& msh, boundary& bdr, con
 
             if(keyword == "surface")
             {
-                sur_idx = value;
+                sur_idx = value-1;
                 if(IC_vec.size() < sur_idx+1) IC_vec.resize(sur_idx+1,initial_conditions(cfg.n_comp));
                 n_ps++;
             }

@@ -37,6 +37,6 @@ Physical Curve("outlet", 2) = {6};
 //+
 Physical Curve("wall", 3) = {3, 7, 1, 5};
 //+
-Physical Surface("fluid1",1) = {1};
-Physical Surface("fluid2",2) = {2};
+Physical Surface("fluid1",4) = {1};
+Physical Surface("fluid2",5) = {2};
 

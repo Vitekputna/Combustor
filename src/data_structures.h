@@ -32,7 +32,7 @@ struct config
     int n_comp = 1;
 
     //double dt = 1e-50;
-    double dt = 1e-7;
+    double dt = 1e-5;
     double CFL = 1;
 
     unsigned int iter,n_t = 50,n_r = 1000,n_b = 100, n_exp = 100000;

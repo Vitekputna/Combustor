@@ -79,7 +79,7 @@ class mesh
     std::vector<group> boundary_groups;
     std::vector<group> physical_surface;
 
-    unsigned int N_cells, N_walls, N_ghosts, N_trigs, N_quads, N;
+    unsigned int N_cells = 0, N_walls = 0, N_ghosts = 0, N_trigs = 0, N_quads = 0, N = 0;
     double min_V = std::numeric_limits<double>::max();
     
     mesh(int i);
@@ -99,6 +99,9 @@ class mesh
     void set_owner_idx();
     void expand_ghost_cells();
     void vertex_init();
+    void check_mesh();
+    void sort_polygons();
+    bool compare_quads(std::vector<unsigned int> q1, std::vector<unsigned int> q2);
 
     void group_inlets();
     void group_surfaces(std::vector<uint> data);
@@ -109,6 +112,9 @@ class mesh
 
     template<typename T>
     std::vector<std::vector<T>> read_segment(std::vector<std::string>& text,int from,int offset, int length);
+    
+    template<typename T>
+    std::vector<T> str_to_vec(std::string& str);
 
     void transform_axi_X();
     void transform_axi_Y();

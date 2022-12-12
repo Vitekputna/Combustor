@@ -21,7 +21,7 @@ face::face(vec1d const& a, vec1d const& b)
     s[1] = sy;
 
     xf = a[0] + sx/2;
-	yf = a[1] + sy/2; 
+	yf = a[1] + sy/2;
 
     S = sqrt(sx*sx + sy*sy);
 
@@ -50,7 +50,7 @@ face::face(vec1d const& a, vec1d const& b, unsigned int ca, unsigned int cb, uns
     s[1] = sy;
 
     xf = a[0] + sx/2;
-	yf = a[1] + sy/2; 
+	yf = a[1] + sy/2;
 
     S = sqrt(sx*sx + sy*sy);
 
@@ -65,7 +65,7 @@ cell::cell(){x = 0, y = 0;}
 cell::cell(char N_walls, vec1ui nodes, vec2d const& all_nodes) : N_faces{N_walls}
 {
     this->cell_walls.resize(N_walls);
-    
+
     X.reserve(std::max((int)N_faces,3));
     Y.reserve(std::max((int)N_faces,3));
 
@@ -81,7 +81,7 @@ cell::cell(char N_walls, vec1ui nodes, vec2d const& all_nodes) : N_faces{N_walls
     if(N_faces == 4)
     {
         V = 0.5*abs( (X[1] - X[0]) * (Y[2] - Y[1]) - (Y[1] - Y[0]) * (X[2] - X[1]) )
-            + 0.5*abs( (X[3] - X[2]) * (Y[0] - Y[3]) - (X[0] - X[3]) * (Y[3] - Y[2]) ); 
+            + 0.5*abs( (X[3] - X[2]) * (Y[0] - Y[3]) - (X[0] - X[3]) * (Y[3] - Y[2]) );
     }
     else if(N_faces == 3)
     {
@@ -123,6 +123,8 @@ mesh::mesh(std::string path)
 
     load_mesh(path,nodes,edges,quads); //načtou se data ze souboru
 
+    //sort_polygons();
+
     N_quads = quads.size(); // počet 4uhelníkových buněk
     N_trigs = trigs.size(); // počet 3uhelníkových buněk
     N_ghosts = edges.size(); // počet virtuálních buněk
@@ -138,15 +140,145 @@ mesh::mesh(std::string path)
     sort_mesh();
     set_owner_idx();
     N_walls = walls.size();
-    
+
     group_inlets();
 
     expand_ghost_cells();
 
     vertex_init();
-    
-    std::cout << "Mesh loaded, number of walls: " << N_walls << " , number of cells: " 
+
+    check_mesh();
+
+    std::cout << "Mesh loaded, number of walls: " << N_walls << " , number of cells: "
               << N_cells << " number of ghosts: " << N_ghosts << "\n\n";
+}
+
+void mesh::sort_polygons()
+{
+    struct M
+    {
+        M(std::vector<uint> _vec, double _dist){vec = _vec; dist = _dist;}
+        std::vector<unsigned int> vec;
+        double dist;
+    };
+
+    std::vector<M> duos;
+
+    for(auto const trig : trigs)
+    {
+        double x1 = 0, y1 = 0;
+        for(auto const& i : trig)
+        {
+            x1 += nodes[i][0];
+            y1 += nodes[i][1];
+        }
+        x1 = x1/trig.size();
+        y1 = y1/trig.size();
+
+        duos.push_back(M(trig,sqrt(x1*x1+y1*y1)));
+    }
+
+    auto compare = [](M q1, M q2) -> bool
+    {
+        return q1.dist < q2.dist;
+    };
+
+    std::sort(duos.begin(),duos.end(),compare);
+
+    for(uint i = 0; i < trigs.size(); i++)
+    {
+        trigs[i] = duos[i].vec;
+    }
+
+    // for(uint i = 0; i < trigs.size(); i++)
+    // {
+    //     std::cout << trigs[i][0] << " " << trigs[i][1] << " " << trigs[i][2] << "\n";
+    //     std::cout << duos[i].vec[0] << " " << duos[i].vec[1] << " " << duos[i].vec[2] << "\n\n"; 
+    // }
+
+}
+
+void mesh::check_mesh()
+{
+    double x_c,y_c;
+    double x_f,y_f;
+    double rev_idx;
+    int w;
+
+    int ni,oi;
+
+    for(uint i = 0; i < N; i++)
+    {
+        x_c = cells[i].x;
+        y_c = cells[i].y;
+
+        w = 0;
+        for(auto wall : cells[i].cell_walls)
+        {
+            x_f = walls[wall].xf - x_c;
+            y_f = walls[wall].yf - y_c;
+
+            rev_idx = walls[wall].n[0]*x_f + walls[wall].n[1]*y_f;
+            rev_idx = rev_idx/abs(rev_idx);
+
+            if(rev_idx == 1 && cells[i].owner_idx[w] == -1)
+            {
+                // oi = walls[wall].owner_cell_index;
+                // ni = walls[wall].neigbour_cell_index;
+
+                // walls[wall].owner_cell_index = ni;
+                // walls[wall].neigbour_cell_index = oi;
+
+                walls[wall].n[0] = -walls[wall].n[0];
+                walls[wall].n[1] = -walls[wall].n[1];
+            }
+            w++;
+        }
+    }
+
+    for(uint i = 0; i < N; i++)
+    {
+        x_c = cells[i].x;
+        y_c = cells[i].y;
+
+        w = 0;
+        for(auto wall : cells[i].cell_walls)
+        {
+            x_f = walls[wall].xf - x_c;
+            y_f = walls[wall].yf - y_c;
+
+            rev_idx = walls[wall].n[0]*x_f + walls[wall].n[1]*y_f;
+            rev_idx = rev_idx/abs(rev_idx);
+
+            if(rev_idx == 1 && cells[i].owner_idx[w] == -1) std::cout << wall << "    " << walls[wall].owner_cell_index << ":" << walls[wall].neigbour_cell_index << "\n";
+            w++;
+        }
+    }
+
+    // double u1x,u2x,u1y,u2y;
+    // int LH = 0, RH = 0;
+
+    // for(uint i = 0; i < N_cells; i++)
+    // {
+    //     //wall 1
+    //     u1x = walls[cells[i].cell_walls[0]].s[0];
+    //     u1y = walls[cells[i].cell_walls[0]].s[1];
+
+    //     //wall 2
+    //     u2x = walls[cells[i].cell_walls[1]].s[0];
+    //     u2y = walls[cells[i].cell_walls[1]].s[1];
+
+    //     if(u1x*u2y-u2x*u1y > 0)
+    //     {
+    //         std::cout << i << "\n";
+    //         LH++;
+    //     }
+    //     else RH++;
+    // }
+
+    // std::cout << LH << "    " << RH << "\n";
+
+    std::cout << "#########\n";
 }
 
 template<typename T>
@@ -188,6 +320,37 @@ std::vector<std::vector<T>> mesh::read_segment(std::vector<std::string>& text,in
 		res.push_back(row);
 		row.clear();
 		//std::cout << "\n";
+	}
+
+    return res;
+}
+
+template<typename T>
+std::vector<T> mesh::str_to_vec(std::string& str)
+{
+    char k;
+    std::string word;
+    T number;
+    std::vector<T> res;
+
+    int n = 0;
+    unsigned int j = 0;
+    while(j < str.length())
+    {
+        if (str[j] != 32)
+        {
+            while (str[j] != 32 && j < str.length())
+            {
+                k = str[j];
+                word.push_back(k);
+                j++;
+            }
+
+            number = (T)(std::stod(word));
+            res.push_back(number);
+            word = "";
+        }
+        j++;
 	}
 
     return res;
@@ -262,7 +425,7 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
             auto temp = read_segment<uint>(text_vec,i+1,0,4);
             for(int i = 0; i < temp.size(); i++)
             {
-                trig_ps[i] = temp[i].back();
+                trig_ps[i] = temp[i].back()-1;
             }
 
             //std::cout << trigs.size() << "\n";
@@ -296,16 +459,92 @@ void mesh::load_msh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quads
 		throw std::exception();
 	}
 
-	std::vector<std::string> text_vec;
 	std::string text;
+    std::vector<double> temp_node;
+    std::vector<unsigned int> temp_elem;
+    std::vector<std::vector<unsigned int>> temp_field;
 
-	// Reading as text file na picu predelat na cteni a formatovani primo ze souboru
 	while (std::getline(file, text))
 	{
-		text_vec.push_back(text);
+        if(text == "$Nodes")
+        {
+            std::getline(file, text);
+            nodes.resize(stoi(text));
+
+            for(uint i = 0; i < nodes.size(); i++)
+            {
+                std::getline(file, text);
+                temp_node = str_to_vec<double>(text);
+                nodes[i] = {temp_node[1],temp_node[2],temp_node[3]};
+            }
+        }
+        else if(text == "$Elements")
+        {
+            std::getline(file, text);
+            temp_field.resize(stoi(text));
+
+            for(uint i = 0; i < temp_field.size(); i++)
+            {
+                std::getline(file,text);
+                temp_elem = str_to_vec<unsigned int>(text);
+
+                if(temp_elem[1] == 1) N_ghosts++;
+                else if(temp_elem[1] == 2) N_trigs++;
+                else if(temp_elem[1] == 3) N_quads++;
+
+                temp_field[i] = temp_elem;
+            }
+        }
 	}
 
+    edges.resize(N_ghosts);
+    trigs.resize(N_trigs);
+    quads.resize(N_quads);
 
+    std::vector<uint> quad_ps;
+    quad_ps.resize(quads.size());
+    std::vector<uint> trig_ps;
+    trig_ps.resize(trigs.size());
+
+    std::vector<uint> ps_idx = {};
+
+    int edge_idx = 0;
+    int trig_idx = 0;
+    int quad_idx = 0;
+
+    for(auto const& e : temp_field)
+    {
+        if(e[1] == 1)
+        {
+            edges[edge_idx] = {e[5]-1,e[6]-1,e[3]};
+            edge_idx++;
+        }
+        else if(e[1] == 2)
+        {
+            trigs[trig_idx] = {e[5]-1,e[6]-1,e[7]-1};
+            trig_ps[trig_idx] = e[3]-1;
+            trig_idx++;
+        }
+        else if(e[1] == 3)
+        {
+            quads[quad_idx] = {e[5]-1,e[6]-1,e[7]-1,e[8]-1};
+            quad_ps[quad_idx] = e[3]-1;
+            quad_idx++;
+        }
+    }
+
+    ps_idx.resize(quad_ps.size() + trig_ps.size());
+
+    for(int i = 0; i < quad_ps.size(); i++)
+    {
+        ps_idx[i] = quad_ps[i];
+    }
+    for(int i = quad_ps.size(); i < quad_ps.size()+trig_ps.size();i++)
+    {
+        ps_idx[i] = trig_ps[i];
+    }
+
+    group_surfaces(ps_idx);
 }
 
 void mesh::print_mesh()
@@ -399,12 +638,12 @@ void mesh::construct_ghost_cells()
 
     int i = 0;
     for(auto const& edge : edges)
-    {  
+    {
        if(edge.back() != std::numeric_limits<uint>::max())
        {
             ghost_cell_val[i] = edge.back();
             ghosts[i] = (std::vector<unsigned int>{edge[0],edge[1]});
-            i++;     
+            i++;
        }
     }
 }
@@ -419,7 +658,6 @@ void mesh::sort_mesh()
     std::vector<int> node_vec;
 
     vec2ui polygons = quads;
-
     polygons.insert(polygons.end(),trigs.begin(),trigs.end());
     polygons.insert(polygons.end(),ghosts.begin(),ghosts.end());
 
@@ -431,7 +669,7 @@ void mesh::sort_mesh()
     for(auto const& cell : cells)
     {
         mask_i = cell.N_faces-1;
-        
+
         for(int w = 0; w < cell.N_faces; w++)
         {
             node_vec = {int(polygons[c_idx][mask[mask_i][w][0]]),
@@ -446,9 +684,9 @@ void mesh::sort_mesh()
 
             if(wall_uniqueness(wall) && neighbour != -1)
             {
-                walls.push_back(wall);   
+                walls.push_back(wall);
                 cells[c_idx].add_cell_wall(wall_idx);
-                
+
                 cells[neighbour].add_cell_wall(wall_idx);
                 wall_idx++;
             }
@@ -478,6 +716,32 @@ void mesh::set_owner_idx()
         }
         i++;
     }
+
+    // double x_c,y_c;
+    // double x_f,y_f;
+    // double rev_idx;
+    // int w;
+
+    // for(uint i = 0; i < N_cells; i++)
+    // {
+    //     x_c = cells[i].x;
+    //     y_c = cells[i].y;
+
+    //     w = 0;
+    //     for(auto wall : cells[i].cell_walls)
+    //     {
+    //         x_f = walls[wall].xf - x_c;
+    //         y_f = walls[wall].yf - y_c;
+
+    //         rev_idx = walls[wall].n[0]*x_f + walls[wall].n[1]*y_f;
+    //         rev_idx = rev_idx/abs(rev_idx);
+
+    //         cells[i].owner_idx[w] = -rev_idx;
+
+    //         w++;
+    //     }
+    // }
+
 }
 
 void mesh::construct_cells()
@@ -490,19 +754,24 @@ void mesh::construct_cells()
     {
         cells[k] = cell(4,quads[k],nodes);
 
-        if(cells[k].V > 0)
+        min_V = std::min(min_V,cells[k].V);
+
+        if(cells[k].V < 0)
         {
-            min_V = std::min(min_V,cells[k].V);
+            std::cout << "error: negative volume.";
+            exit(1);
         }
     }
 
     for(uint k = 0; k < N_trigs;k++)
     {
         cells[k+N_quads] = cell(3,trigs[k],nodes);
+        min_V = std::min(min_V,cells[k+N_quads].V);
 
-        if(cells[k].V > 0)
+        if(cells[k+N_quads].V < 0)
         {
-            min_V = std::min(min_V,cells[k].V);
+            std::cout << "error: negative volume.";
+            exit(1);
         }
     }
 
@@ -520,12 +789,25 @@ void mesh::expand_ghost_cells()
     std::vector<double> G = {0,0,0};
     ghost_node_offset = nodes.size();
 
+    double x_c,y_c;
+    double x_f,y_f;
+
+    double rev_idx;
+
     for(int i = N_cells; i < N; i++)
     {
-        cells[walls[cells[i].cell_walls[0]].owner_cell_index];
+        x_c = cells[walls[cells[i].cell_walls[0]].owner_cell_index].x;
+        y_c = cells[walls[cells[i].cell_walls[0]].owner_cell_index].y;
 
-        x_g = walls[cells[i].cell_walls[0]].xf + walls[cells[i].cell_walls[0]].n[0] * walls[cells[i].cell_walls[0]].S;
-        y_g = walls[cells[i].cell_walls[0]].yf + walls[cells[i].cell_walls[0]].n[1] * walls[cells[i].cell_walls[0]].S;
+        x_f = walls[cells[i].cell_walls[0]].xf - x_c;
+        y_f = walls[cells[i].cell_walls[0]].yf - y_c;
+
+        rev_idx = walls[cells[i].cell_walls[0]].n[0]*x_f + walls[cells[i].cell_walls[0]].n[1]*y_f;
+
+        rev_idx = rev_idx/abs(rev_idx)/2;
+
+        x_g = walls[cells[i].cell_walls[0]].xf + walls[cells[i].cell_walls[0]].n[0] * walls[cells[i].cell_walls[0]].S*rev_idx;
+        y_g = walls[cells[i].cell_walls[0]].yf + walls[cells[i].cell_walls[0]].n[1] * walls[cells[i].cell_walls[0]].S*rev_idx;
 
         G = {x_g,y_g,0.0};
 
@@ -587,7 +869,7 @@ void mesh::group_inlets()
             boundary_groups.push_back(group());
         }
 
-        
+
         for(uint i = 0; i < group_idx.size(); i++)
         {
             if(val == group_idx[i])
@@ -597,7 +879,7 @@ void mesh::group_inlets()
                 boundary_groups[i].group_value = val;
             }
         }
-        
+
     }
 
     int g = 0;
@@ -708,12 +990,12 @@ std::vector<double> mesh::extract(std::string& text)
             word = "";
         }
     }
-    
+
     return res;
 }
 
 void mesh::import_mesh(std::string path)
-{   
+{
     name = path.substr(0,path.find('.'));
     std::cout << "Loading mesh: " << name << "\n";
 
