@@ -7,18 +7,18 @@
 
 //N2
 specie {0};
-specific_gas_constant {277.13};
+specific_gas_constant {296.93};
 isoentropic_exponent {1.4};
-molar_mass {30};
+molar_mass {28};
 
 //O2
 specie {1};
-specific_gas_constant {277.13};
+specific_gas_constant {259.81};
 isoentropic_exponent {1.4};
-molar_mass {30};
+molar_mass {32};
 
 //nvm
 specie {2};
-specific_gas_constant {277.13};
+specific_gas_constant {138.56};
 isoentropic_exponent {1.4};
-molar_mass {30};
+molar_mass {60};

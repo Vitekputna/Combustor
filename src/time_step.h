@@ -3,11 +3,13 @@
 #include "mesh.h"
 #include "thermodynamics.h"
 #include <limits.h>
+#include <omp.h>
 
 double time_step(mesh const& msh,std::vector<parameters> const& par,config const& cfg,variables& var)
 {
     double u = 0,c;
     double dt =  std::numeric_limits<double>::max();
+
     for(int i = 0; i < var.N; i++)
     {
         for(int j = 0; j < var.vel_comp; j++)

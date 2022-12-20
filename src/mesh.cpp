@@ -149,8 +149,9 @@ mesh::mesh(std::string path)
 
     check_mesh();
 
-    std::cout << "Mesh loaded, number of walls: " << N_walls << " , number of cells: "
-              << N_cells << " number of ghosts: " << N_ghosts << "\n\n";
+    std::cout << "Mesh loaded, number of walls: " << N_walls << " , number of triangles: "
+              << N_trigs << " , number of quads: "
+              << N_quads << " number of ghosts: " << N_ghosts << "\n\n";
 }
 
 void mesh::sort_polygons()
@@ -411,7 +412,7 @@ void mesh::load_mesh(std::string path, vec2d& nodes, vec2ui& edges, vec2ui& quad
             auto temp = read_segment<uint>(text_vec,i+1,0,5);
             for(int i = 0; i < temp.size(); i++)
             {
-                quad_ps[i] = temp[i].back();
+                quad_ps[i] = temp[i].back()-1;
             }
 
             //std::cout << quads.size() << "\n";

@@ -32,35 +32,10 @@ int main(int argc, char** argv)
     std::vector<std::vector<double>> IC_vec;
     IC_vec = read_config_files(msh, bdr, cfg, par, sol);
 
-    variables var(msh, cfg, IC_vec);
-
-    // msh.walls[14].n[1] = -msh.walls[14].n[1];
-
-    // for(uint i = 0; i < msh.N_cells; i++)
-    // {
-    //     std::cout << i << " ";
-    //     for(auto wall : msh.cells[i].cell_walls)
-    //     {
-    //         std::cout << wall << " ";
-    //     }
-    //     std::cout << "\n";
-    // }
-
-    // std::cout << msh.cells[6].owner_idx[0] << " " << msh.cells[6].owner_idx[1] << " " << msh.cells[6].owner_idx[2] << "\n";
-    // std::cout << msh.cells[40].owner_idx[0] << " " << msh.cells[40].owner_idx[1] << " " << msh.cells[40].owner_idx[2] << "\n\n";
-
-    // std::cout << msh.walls[14].n[0] << " " << msh.walls[14].n[1] << "\n";
-    // std::cout << msh.walls[14].neigbour_cell_index << " " << msh.walls[14].owner_cell_index << "\n\n";
-
-    // std::cout << msh.walls[70].n[0] << " " << msh.walls[70].n[1] << "\n";
-    // std::cout << msh.walls[70].neigbour_cell_index << " " << msh.walls[70].owner_cell_index << "\n\n";
-
-    // std::cout << msh.walls[74].n[0] << " " << msh.walls[74].n[1] << "\n";
-    // std::cout << msh.walls[74].neigbour_cell_index << " " << msh.walls[74].owner_cell_index << "\n\n";
+    variables var(msh, cfg, IC_vec);    
     
     sol.solve(var,msh,bdr,par,cfg);
 
     export_vtk(var,msh,"exp.vtk");
-    
-    // export_res(var, "res.txt");
+    export_res(var, "res.txt");
 }

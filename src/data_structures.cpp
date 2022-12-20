@@ -5,6 +5,7 @@
 #include <limits>
 #include <algorithm>
 #include <iostream>
+#include <cstring>
 
 typedef unsigned int uint;
 
@@ -20,6 +21,7 @@ array::array(int N, int k) : k{k}
 void array::allocate(int N, int m_k)
 {
     k = m_k;
+    this->N = N;
     arr = (double*)(calloc(N,sizeof(double)));
 }
 
@@ -38,6 +40,15 @@ double* array::operator()(int i)
     return arr + i*k;
 }
 
+array& array::operator=(array& other)
+{
+    k = other.k;
+    N = other.N;
+    std::memcpy(arr,other.arr,N);
+
+    return *this;
+}
+
 variables::variables(int N, int N_walls, int dim, int vel_comp, int n_comp, int N_res) : N{N}, dim{dim}, N_walls{N_walls}, N_res{N_res}, vel_comp{vel_comp}, n_comp{n_comp}
 {
     W.allocate(N*dim,dim);
@@ -46,7 +57,7 @@ variables::variables(int N, int N_walls, int dim, int vel_comp, int n_comp, int 
     grad.allocate(2*N*dim,2*dim);
     alfa.allocate(N*dim,dim);
     Source.allocate(N*dim,dim);
-    wall_grad.allocate(N*dim,dim);
+    wall_grad.allocate(N*dim,dim);  
 
     T_grad = (double*)(calloc(N_walls,sizeof(double)));
     p = (double*)(malloc(N*sizeof(double)));
@@ -70,10 +81,14 @@ variables::variables(mesh const msh, config const cfg, std::vector<std::vector<d
 {
     for(auto const& group : msh.physical_surface)
     {
+        // std::cout << group.group_value << "\n";
         for(auto const& idx : group.member_idx)
         {
+            // std::cout << idx << "\n";
             for(uint i = 0; i < dim; i++)
             {
+                // std::cout << i << "\n";
+                // std::cout << U.size() << "\n";
                 W(idx,i) = U[group.group_value][i];
             }
         }

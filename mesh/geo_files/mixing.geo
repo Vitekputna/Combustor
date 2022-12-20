@@ -91,13 +91,6 @@ Physical Curve("outlet", 4) = {10,14};
 
 //Recombine Surface {2};
 //+
-
-//+
-
-//+
-//Transfinite Curve {5, 9, 1, 4, 12, 2} = 50 Using Progression 1;
-//+
-//ansfinite Curve {6, 7, 8, 13, 14, 10} = 20 Using Progression 1;
 //+
 Physical Surface("fluid1",1) = {2};
 //+
@@ -105,3 +98,15 @@ Physical Surface("fluid2",2) = {4};
 //+
 Physical Surface("fluid3",3) = {3};
 Physical Surface("fluid4",4) = {1};
+//+
+Transfinite Surface {1};
+//+
+Transfinite Surface {2};
+//+
+Transfinite Surface {3};
+//+
+Transfinite Surface {4};
+//+
+Transfinite Curve {9, 12, 1, 5, 4, 2} = 21 Using Progression 1;
+//+
+Transfinite Curve {6, 13, 14, 10, 8, 7} = 6 Using Progression 1;

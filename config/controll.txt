@@ -10,13 +10,13 @@ compounds {3};                  // počet chemických složek
 //axisymetric {1};                // parametry cylindrické transformace úhel výseče a proměnná r: 0 = x, 1 = y
 min_iterations {50};           // minimální počet iterací           
 max_iterations {1000000000};      // maximální počet iterací
-max_time {0.1};                 // maximální čas
-max_residue {1};              // mezní residuum
+max_time {1};                 // maximální čas
+max_residue {1000};              // mezní residuum
 residue_idx {-1};                // index sledovaného residua
 bisection_iterations {15};      // počet iterací algoritmu pro výpočet M pro podzvukový vstup
 timestep_freq {100};            // počet iterací na výpočet časového kroku
 residue_freq {5000};           // počet iterací na výpočet residua
 boundary_freq {1000};              // počet iterací na výpočet okrajových podmínek
 export_freq {5000};            // počet iterací na export
-export_interval {0.0001};          // časový interval exportu dat
-CFL {0.1};                        // CFL konstanta
+export_interval {0.001};          // časový interval exportu dat
+CFL {0.8};                        // CFL konstanta

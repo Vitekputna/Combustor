@@ -5,6 +5,7 @@
 struct array
 {
     int k;
+    int N;
     double* arr;
     array();
     void allocate(int N, int m_k);
@@ -12,6 +13,7 @@ struct array
     ~array();
     double& operator()(int i,int j);
     double* operator()(int i);
+    array& operator=(array& other);
 };
 
 struct parameters

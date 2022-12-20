@@ -2,6 +2,9 @@
 #include "data_structures.h"
 #include "mesh.h"
 #include "math.h"
+#include "omp.h"
+
+extern int N_threads;
 
 void reconstruct(int dim, int c, int w, double* Wr, double* W, double* grad, mesh const& msh)
 {
@@ -22,20 +25,22 @@ void compute_wall_flux(variables& var, mesh const& msh, std::vector<parameters> 
                                                                                            face const&))
 {
     int n,o;
-
     double Wo[var.dim];
     double Wn[var.dim];
 
-    #pragma omp parallel for private(o,n,Wn,Wo) shared(msh,var,par)
-    for(int w = 0; w < msh.N_walls;w++)
+    #pragma omp parallel num_threads(N_threads) private(o,n,Wn,Wo) shared(msh,var,par)
     {
-        n = msh.walls[w].neigbour_cell_index;
-        o = msh.walls[w].owner_cell_index;
+        #pragma omp for
+        for(int w = 0; w < msh.N_walls;w++)
+        {
+            n = msh.walls[w].neigbour_cell_index;
+            o = msh.walls[w].owner_cell_index;
 
-        reconstruct(var.dim,o,w,Wo,var.W(o),var.grad(o),msh);
-        reconstruct(var.dim,n,w,Wn,var.W(n),var.grad(n),msh);
+            reconstruct(var.dim,o,w,Wo,var.W(o),var.grad(o),msh);
+            reconstruct(var.dim,n,w,Wn,var.W(n),var.grad(n),msh);
 
-        flux(var.vel_comp,var.n_comp,var.wall_flux(w),Wn,Wo,par,msh.walls[w]);
+            flux(var.vel_comp,var.n_comp,var.wall_flux(w),Wn,Wo,par,msh.walls[w]);
+        }
     }
 }
 
@@ -47,25 +52,86 @@ void compute_diffusive_flux(variables& var, mesh const& msh, config const& cfg, 
     }
 }
 
-void compute_cell_res(variables& var, mesh const& msh, config const& cfg, std::vector<parameters> const& par,
-                      void(*source_func)(variables&,mesh const&,config const&,std::vector<parameters> const&))
+void apply_cell_res(variables& var, mesh const& msh, config const& cfg, std::vector<parameters> const& par,
+                      void(*source_func)(array&,variables&,mesh const&,config const&,std::vector<parameters> const&))
 {
     int f;
-    #pragma omp parallel for private(f) shared(var,cfg,msh)
-    for(int c = 0; c < msh.N_cells; c++)
+    #pragma omp parallel private(f) shared(var,cfg,msh)
     {
-        for(uint k = 0; k < var.dim; k++)
+        #pragma omp for
+        for(int c = 0; c < msh.N_cells; c++)
         {
-            f = 0;
-            for(auto const& wall : msh.cells[c].cell_walls)
+            for(uint k = 0; k < var.dim; k++)
             {
-                var.W(c,k) += -cfg.dt/msh.cells[c].V*(var.wall_flux(wall,k)*msh.cells[c].owner_idx[f]);
-                f++;
+                f = 0;
+                for(auto const& wall : msh.cells[c].cell_walls)
+                {
+                    var.W(c,k) += -cfg.dt/msh.cells[c].V*(var.wall_flux(wall,k)*msh.cells[c].owner_idx[f]);
+                    f++;
+                }
+            }
+        }
+
+        source_func(var.W,var,msh,cfg,par);
+    }
+}
+
+void compute_cell_res(array& res ,variables& var, mesh const& msh, config const& cfg, std::vector<parameters> const& par,
+                      void(*source_func)(array&,variables&,mesh const&,config const&,std::vector<parameters> const&))
+{
+    int f;
+    #pragma omp parallel private(f) shared(var,cfg,msh)
+    {
+        #pragma omp for
+        for(int c = 0; c < msh.N_cells; c++)
+        {
+            for(uint k = 0; k < var.dim; k++)
+            {
+                f = 0;
+                for(auto const& wall : msh.cells[c].cell_walls)
+                {
+                    res(c,k) += -1/msh.cells[c].V*(var.wall_flux(wall,k)*msh.cells[c].owner_idx[f]);
+                    f++;
+                }
+            }
+        }
+        source_func(res,var,msh,cfg,par);
+    }
+}
+
+void apply_cell_res(array& old_res, array& new_res, double old_coef, double new_coef, variables& var, mesh const& msh, config const& cfg, std::vector<parameters> const& par)
+{
+    int f;
+    #pragma omp parallel private(f) shared(var,cfg,msh)
+    {
+        #pragma omp for
+        for(int c = 0; c < msh.N_cells; c++)
+        {
+            for(uint k = 0; k < var.dim; k++)
+            {
+                var.W(c,k) += cfg.dt*old_coef*old_res(c,k) + cfg.dt*new_coef*new_res(c,k);
+                old_res(c,k) = 0;
+                new_res(c,k) = 0;
             }
         }
     }
+}
 
-    source_func(var,msh,cfg,par);
+void apply_cell_res(array& res, variables& var, mesh const& msh, config const& cfg, std::vector<parameters> const& par)
+{
+    int f;
+    #pragma omp parallel private(f) shared(var,cfg,msh)
+    {
+        #pragma omp for
+        for(int c = 0; c < msh.N_cells; c++)
+        {
+            for(uint k = 0; k < var.dim; k++)
+            {
+                var.W(c,k) += cfg.dt*res(c,k);
+                res(c,k) = 0;
+            }
+        }
+    }
 }
 
 void compute_cell_gradient(variables& var, mesh const& msh)
@@ -74,13 +140,13 @@ void compute_cell_gradient(variables& var, mesh const& msh)
     double V;
     #pragma omp parallel for private(o,n,V) shared(var,msh)
     for(int c = 0; c < msh.N_cells;c++)
-    {   
+    {
         V = msh.cells[c].V;
 
         for(auto const& w : msh.cells[c].cell_walls)
-        {   
+        {
             int idx = 0;
-            
+
             for(int k = 0; k < var.dim; k++)
             {
                 n = msh.walls[w].neigbour_cell_index;
@@ -148,7 +214,7 @@ void compute_wall_gradiend(int j, variables& var, mesh const& msh)
     double S,V_cell;
 
     std::vector<std::vector<double>> V(5,std::vector<double>(2,0));
-    std::vector<double> U(5,0.0);    
+    std::vector<double> U(5,0.0);
 
     int w = 0;
     #pragma omp parallel for private(V,U,Nx,Ny,nx,ny,xf,yf,S,V_cell) shared(msh,var)
@@ -195,7 +261,7 @@ void compute_wall_gradiend(int j, variables& var, mesh const& msh)
 
             var.wall_grad(w,j) += 1/V_cell*(nx*wall.n[0] + ny*wall.n[1])*S*(U[i+1] - U[i])/2;
         }
-        
+
         w++;
     }
 }
@@ -209,7 +275,7 @@ void compute_wall_T_gradiend(variables& var, mesh const& msh)
     double S,V_cell;
 
     std::vector<std::vector<double>> V(5,std::vector<double>(2,0));
-    std::vector<double> U(5,0.0);    
+    std::vector<double> U(5,0.0);
 
     int w = 0;
     for(auto const& wall : msh.walls)
@@ -255,7 +321,7 @@ void compute_wall_T_gradiend(variables& var, mesh const& msh)
 
             var.T_grad[w] += 1/V_cell*(nx*wall.n[0] + ny*wall.n[1])*S*(U[i+1] - U[i])/2;
         }
-        
+
         w++;
     }
 }

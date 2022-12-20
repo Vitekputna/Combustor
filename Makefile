@@ -14,7 +14,7 @@ boundary.o: src/boundary.cpp
 	g++ -O3 -std=c++17 -c -o bin/boundary.o src/boundary.cpp -fopenmp
 
 solver.o: src/solver.cpp
-	g++ -O3 -std=c++17 -c -o bin/solver.o src/solver.cpp
+	g++ -O3 -std=c++17 -c -o bin/solver.o src/solver.cpp -fopenmp
 
 vtk_export.o: src/vtk_export.cpp
 	g++ -O3 -std=c++17 -c -o bin/vtk_export.o src/vtk_export.cpp
