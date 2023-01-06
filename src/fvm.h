@@ -17,7 +17,7 @@ void reconstruct(int dim, int c, int w, double* Wr, double* W, double* grad, mes
     }
 }
 
-void compute_wall_flux(variables& var, mesh const& msh, std::vector<parameters> const& par, void(*flux)(int,int,
+void compute_wall_flux(variables& var, mesh const& msh, std::vector<parameters> const& par, void(*flux)(std::vector<uint>,int,int,
                                                                                            double*,
                                                                                            double*,
                                                                                            double*,
@@ -39,7 +39,8 @@ void compute_wall_flux(variables& var, mesh const& msh, std::vector<parameters> 
             reconstruct(var.dim,o,w,Wo,var.W(o),var.grad(o),msh);
             reconstruct(var.dim,n,w,Wn,var.W(n),var.grad(n),msh);
 
-            flux(var.vel_comp,var.n_comp,var.wall_flux(w),Wn,Wo,par,msh.walls[w]);
+            flux(std::vector<uint>{0,3,4,5},var.vel_comp,var.n_comp,var.wall_flux(w),Wn,Wo,par,msh.walls[w]);
+            HLL_flux(std::vector<uint>{1,2},var.vel_comp,var.n_comp,var.wall_flux(w),Wn,Wo,par,msh.walls[w]);
         }
     }
 }

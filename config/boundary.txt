@@ -39,9 +39,9 @@
 //mixing
 composition{0} = (0,0.5);
 composition{0} = (1,0.5);
-boundary{0} = supersonic_inlet(100000,300,2.5,0,0);
+boundary{0} = supersonic_inlet(100000,300,0.1,0,0);
 composition{0} = (0,0.5);
 composition{0} = (1,0.5);
-boundary{1} = supersonic_inlet(100000,300,2.5,0,0);
+boundary{1} = supersonic_inlet(100000,300,0.1,0,0);
 boundary{2} = wall;
 boundary{3} = supersonic_outlet;

@@ -7,7 +7,7 @@
 
 typedef unsigned int uint;
 
-void HLL_flux(int vel_comp, int n_comp, double* w, double* n, double* o, std::vector<parameters> const& par, face const& f)
+void HLL_flux(std::vector<uint> idx ,int vel_comp, int n_comp, double* w, double* n, double* o, std::vector<parameters> const& par, face const& f)
 {
     int dim = n_comp+vel_comp+1;
 
@@ -15,7 +15,7 @@ void HLL_flux(int vel_comp, int n_comp, double* w, double* n, double* o, std::ve
     double uo,vo;
     double po,pn;
     double un,vn;
-    double co,cn;
+    double co,cn; 
 
     double phi[dim], phi_o[dim], phi_n[dim];
 
@@ -60,7 +60,8 @@ void HLL_flux(int vel_comp, int n_comp, double* w, double* n, double* o, std::ve
     Xn[dim-1] = un*f.n[0]+vn*f.n[1];
     Xo[dim-1] = uo*f.n[0]+vo*f.n[1];
 
-    for(uint k = 0; k < dim; k++)
+    // for(uint k = 0; k < dim; k++)
+    for(auto const& k : idx)
     {
         phi_n[k] = (un*f.n[0]+vn*f.n[1])*n[k]+pn*Xn[k];
         phi_o[k] = (uo*f.n[0]+vo*f.n[1])*o[k]+po*Xo[k];
@@ -81,3 +82,41 @@ void HLL_flux(int vel_comp, int n_comp, double* w, double* n, double* o, std::ve
     }
 }
 
+void Upwind_flux(std::vector<uint> idx ,int vel_comp, int n_comp, double* w, double* n, double* o, std::vector<parameters> const& par, face const& f)
+{
+    int dim = n_comp+vel_comp+1;
+
+    double uo,vo;
+    double un,vn;
+    double uf,vf;
+
+    double phi_o[dim], phi_n[dim];
+
+    uo = o[n_comp]/o[0];
+    un = n[n_comp]/n[0];
+
+    vo = o[n_comp+1]/o[0];
+    vn = n[n_comp+1]/n[0];
+
+    uf = 0.5*(uo+un);
+    vf = 0.5*(vo+vn);
+
+    for(auto const& k : idx)
+    {
+        phi_n[k] = (un*f.n[0]+vn*f.n[1])*n[k];
+        phi_o[k] = (uo*f.n[0]+vo*f.n[1])*o[k];
+
+        if(uf*f.n[0]+vf*f.n[1] < 0)
+        {
+            w[k] = phi_n[k]*f.S;
+        }
+        else if (uf*f.n[0]+vf*f.n[1] > 0)
+        {
+            w[k] = phi_o[k]*f.S;
+        }
+        else
+        {
+            w[k] = 0;
+        }
+    }
+}

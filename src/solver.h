@@ -17,7 +17,7 @@ public:
     double time = 0;
     double last_time = 0;
 
-    void(*flux_func)(int,int,double*,double*,double*,std::vector<parameters> const&,face const&) = HLL_flux;
+    void(*flux_func)(std::vector<uint>,int,int,double*,double*,double*,std::vector<parameters> const&,face const&) = HLL_flux;
     void(*source_func)(array&,variables&,mesh const&,config const&,std::vector<parameters> const&) = ternary_chem;
     solver();
 
